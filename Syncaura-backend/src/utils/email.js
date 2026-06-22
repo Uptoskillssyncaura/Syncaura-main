@@ -1,23 +1,26 @@
 import nodemailer from 'nodemailer';
+import dotenv from "dotenv";
+
+dotenv.config({ path: "../.env" }); 
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT || 587),
+  host: "smtp.gmail.com",
+  port: 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
 });
 
-export const sendEmail = async (to, subject, html) =>{
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+export const sendEmail = async (to, subject, text) => {
+  return await transporter.sendMail({
+    from: process.env.SMTP_USER,
     to,
     subject,
-    html,
- });
-}
+    text,
+  });
+};
 
 export const sendPasswordOtpEmail = async ({ to, name, otp }) => {
   const html = `

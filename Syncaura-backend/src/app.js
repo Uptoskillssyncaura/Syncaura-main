@@ -59,7 +59,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/projects", projectRoutes);
 
-app.use("/api/messages", messageRoutes);
+
 
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/leave', leaveRoutes);

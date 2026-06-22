@@ -32,4 +32,4 @@ router.post('/change-password', auth, changePasswordValidator, changePassword);
 // Example role-based route
 router.get('/admin', auth, permit('admin'), adminOnly);
 
-export default router;
+export default router; 

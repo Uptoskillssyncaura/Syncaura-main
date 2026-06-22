@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js"
+    "start": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +26,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.11",
+    "nodemon": "^3.1.14",
     "pdfkit": "^0.18.0",
     "pg": "^8.21.0",
     "socket.io": "^4.8.3"
