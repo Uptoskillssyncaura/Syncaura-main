@@ -18,9 +18,6 @@ export default function MainLayout({ children, TopbarComponent, SideBar }) {
           {children}
        
       </div>
-     <div className="relative">
-       <SupportChatbot/>
-     </div>
     </div>
   );
 }

@@ -19,9 +19,14 @@ const pool = new Pool({
   ssl: false,
 });
 
-pool.connect()
+pool.query("SELECT NOW()")
   .then(() => console.log("✅ PostgreSQL Connected"))
   .catch((err) => console.error("❌ PostgreSQL Connection Error:", err));
+
+// Prevent the process from crashing on unexpected database connection drop/idle timeout
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle PostgreSQL client:', err.message);
+});
 
 export const initDB = async () => {
   try {

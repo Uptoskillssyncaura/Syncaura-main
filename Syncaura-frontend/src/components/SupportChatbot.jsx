@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import api from "../config/axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Send,
@@ -110,6 +111,23 @@ export default function SupportChatbot() {
         setLoading(false);
     };
 
+    const handleQuickAction = (title) => {
+        let query = "";
+        if (title === "Projects") {
+            query = "What projects are currently active, and what tasks do I have?";
+        } else if (title === "Meetings") {
+            query = "Do I have any upcoming meetings scheduled?";
+        } else if (title === "Support") {
+            query = "How do I file a complaint or contact support?";
+        } else if (title === "FAQ") {
+            query = "How do I mark my attendance and apply for leaves on Flowbit?";
+        }
+
+        if (query) {
+            sendMessage(query);
+        }
+    };
+
     const sendMessage = (voiceText) => {
         const text = voiceText ?? input;
         if (!text.trim()) return;
@@ -119,15 +137,28 @@ export default function SupportChatbot() {
             return;
         }
 
+        // Add user message to state
         setMessages((p) => [...p, { from: "user", text }]);
         setInput("");
         setLoading(true);
 
-        setTimeout(() => {
-            streamBotMessage(
-                "Sure! I can help you with projects, meetings, and support queries."
-            );
-        }, 400);
+        // Call backend API
+        api.post("/chatbot/query", { message: text, history: messages })
+            .then((res) => {
+                const reply = res.data?.reply || "I didn't receive a reply from the server.";
+                streamBotMessage(reply);
+            })
+            .catch((err) => {
+                console.error("Chatbot query error:", err);
+                setLoading(false);
+                setMessages((prev) => [
+                    ...prev,
+                    { 
+                        from: "bot", 
+                        text: err.response?.data?.reply || "Sorry, I am having trouble connecting to my brain. Please check your network connection or make sure the OpenAI API key is set in the backend environment." 
+                    }
+                ]);
+            });
     };
 
     const startVoice = async () => {
@@ -238,7 +269,8 @@ export default function SupportChatbot() {
                                 {quickActions.map((q) => (
                                     <div
                                         key={q.id}
-                                        className="border border-gray-200 dark:bg-[#1A222C] dark:border-[#000000] pb-4 rounded-xl p-2 text-xs flex items-center gap-2 shadow-[1px_4px_5px_0_rgba(0,0,0,0.1)]"
+                                        onClick={() => handleQuickAction(q.title)}
+                                        className="border border-gray-200 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#202832] dark:bg-[#1A222C] dark:border-[#000000] pb-4 rounded-xl p-2 text-xs flex items-center gap-2 shadow-[1px_4px_5px_0_rgba(0,0,0,0.1)] transition-all duration-200"
                                     >
                                         <q.icon className="text-[#000000] size-5 dark:text-gray-300" />
                                         <div>
