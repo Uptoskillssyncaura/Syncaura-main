@@ -92,8 +92,7 @@ export default function ProjectFilter({ onClose, onApply }) {
                 <button
                   key={item}
                   onClick={() => setPriority(item)}
-                  className={`px-4 py-1.5 rounded-full text-sm border
-            ${
+                  className={`btn-hover px-4 py-1.5 rounded-full text-sm border ${
               priority === item
                 ? "border-blue-500 text-blue-500 dark:border-[#73FBFD] dark:text-[#73FBFD]"
                 : "border-gray-300 text-gray-500"

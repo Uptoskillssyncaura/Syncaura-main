@@ -16,13 +16,11 @@ const Complaintheader = ({ search, setSearch, onApplyFilters }) => {
       {/* Filter Button */}
       <button
         onClick={() => setOpenFilter((prev) => !prev)}
-        className={`rounded-full flex items-center justify-center border px-4 py-2 text-sm gap-3 transition-colors
-          ${
+        className={`btn-hover rounded-full flex items-center justify-center border px-4 py-2 text-sm gap-3 transition-colors ${
             openFilter
               ? "border-[#2461E6] text-[#2461E6] dark:border-[#73FBFD] dark:text-[#73FBFD]"
               : "border-gray-300 text-black dark:border-[#777575] dark:text-[#8A8A8A]"
-          }
-        `}
+          } `}
       >
         <Funnel className="size-4" />
         <span>Filter</span>

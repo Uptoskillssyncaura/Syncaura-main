@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import i18n from "../../../i18n/i18n";
+import {
+  fetchUserProfile,
+  updateUserProfile,
+} from "../../../redux/features/authThunks";
 
 const languageNames = {
   en: "English",
@@ -15,6 +21,9 @@ const languageNames = {
 
 const Profile = () => {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const { user, profileLoading } = useSelector((state) => state.auth);
+  const [savingField, setSavingField] = useState(null);
 
   const [isEditing, setIsEditing] = useState({
     firstName: false,
@@ -25,16 +34,53 @@ const Profile = () => {
   });
 
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "JohnDoe@gmail.com",
-    phone: "0000000000",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
     language: (localStorage.getItem("app_language") || "en").substring(0, 2),
   });
 
   const [currentLanguageDisplay, setCurrentLanguageDisplay] = useState(
     (i18n.language || localStorage.getItem("app_language") || "en").substring(0, 2)
   );
+
+  const getProfileNameParts = (profile) => {
+    const fullName = profile?.name || "";
+    const [firstName = "", ...lastNameParts] = fullName.trim().split(" ");
+
+    return {
+      firstName: profile?.firstName || firstName,
+      lastName: profile?.lastName || lastNameParts.join(" "),
+    };
+  };
+
+  useEffect(() => {
+    if (!user) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const nameParts = getProfileNameParts(user);
+    const language = (
+      user.language ||
+      localStorage.getItem("app_language") ||
+      "en"
+    ).substring(0, 2);
+
+    setFormData((prev) => ({
+      ...prev,
+      firstName: nameParts.firstName,
+      lastName: nameParts.lastName,
+      email: user.email || "",
+      phone: user.phone || "",
+      language,
+    }));
+    setCurrentLanguageDisplay(language);
+  }, [user]);
 
   // Sync language across app
   useEffect(() => {
@@ -65,11 +111,31 @@ const Profile = () => {
   const handleChange = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-  const handleSave = (field) => {
-    if (field === "language") {
-      i18n.changeLanguage(formData.language);
+  const buildProfilePayload = () => ({
+    firstName: formData.firstName.trim(),
+    lastName: formData.lastName.trim(),
+    name: `${formData.firstName} ${formData.lastName}`.trim(),
+    email: formData.email.trim(),
+    phone: formData.phone.trim(),
+    language: formData.language,
+  });
+
+  const handleSave = async (field) => {
+    try {
+      setSavingField(field);
+      await dispatch(updateUserProfile(buildProfilePayload())).unwrap();
+
+      if (field === "language") {
+        i18n.changeLanguage(formData.language);
+      }
+
+      setIsEditing((prev) => ({ ...prev, [field]: false }));
+      toast.success(t("notif_profileUpdated") || "Profile updated successfully");
+    } catch (err) {
+      toast.error(err || "Failed to update profile");
+    } finally {
+      setSavingField(null);
     }
-    setIsEditing((prev) => ({ ...prev, [field]: false }));
   };
 
   const fieldRow = (field, type = "text") => (
@@ -89,15 +155,13 @@ const Profile = () => {
       />
 
       <button
+        disabled={savingField === field || profileLoading}
         onClick={() =>
           isEditing[field] ? handleSave(field) : handleEdit(field)
         }
-        className="w-[72px] px-0 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-normal flex items-center justify-center
-        hover:bg-blue-50 hover:text-[#2461E6] 
-        dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] 
-        dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm"
+        className="w-[72px] px-0 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-normal flex items-center justify-center hover:bg-blue-50 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm btn-hover"
       >
-        {isEditing[field] ? t("save") : t("edit")}
+        {savingField === field ? "..." : isEditing[field] ? t("save") : t("edit")}
       </button>
     </div>
   );
@@ -158,17 +222,19 @@ const Profile = () => {
             </div>
 
             <button
+              disabled={savingField === "language" || profileLoading}
               onClick={() =>
                 isEditing.language
                   ? handleSave("language")
                   : handleEdit("language")
               }
-              className="w-[72px] px-0 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-normal flex items-center justify-center
-              hover:bg-blue-50 hover:text-[#2461E6] 
-              dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] 
-              dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm"
+              className="w-[72px] px-0 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-normal flex items-center justify-center hover:bg-blue-50 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm btn-hover"
             >
-              {isEditing.language ? t("save") : t("edit")}
+              {savingField === "language"
+                ? "..."
+                : isEditing.language
+                  ? t("save")
+                  : t("edit")}
             </button>
           </div>
         </div>

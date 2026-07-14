@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import dotenv from "dotenv";
 
-dotenv.config({ path: "../.env" }); 
+// dotenv.config({ path: "../.env" }); 
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
@@ -28,7 +28,7 @@ export const sendPasswordOtpEmail = async ({ to, name, otp }) => {
     <p>Your OTP for password reset is:</p>
     <h2>${otp}</h2>
     <p>This OTP is valid for 5 minutes.</p>
-    <p>If you didn’t request this, please ignore this email.</p>
+    <p>If you didn't request this, please ignore this email.</p>
   `;
 
   await transporter.sendMail({

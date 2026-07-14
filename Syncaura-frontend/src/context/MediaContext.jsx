@@ -26,30 +26,28 @@ export const MediaProvider = ({ children }) => {
   };
 
   // 🎥 Start Camera + Mic
-  const startMedia = async () => {
-    const { hasMic, hasCamera } = await checkDevices();
+ 
+    const startMedia = async () => {
+      try {
+        const { hasMic, hasCamera } = await checkDevices();
 
-    if (!hasMic && !hasCamera) {
-      setIsMicOn(false);
-      setIsCameraOn(false);
-      throw new Error("no-devices");
-    }
+        if (!hasMic && !hasCamera) {
+          setIsMicOn(false);
+          setIsCameraOn(false);
+          throw new Error("no-devices");
+        }
 
-    try {
-      const stream = await getCameraAndMic();
-      setLocalStream(stream);
-    } catch (err) {
-      setIsMicOn(false);
-      setIsCameraOn(false);
-      throw new Error("permission-denied");
-    }
-  };
+        const stream = await getCameraAndMic();
+        setLocalStream(stream);
+      } catch (err) {
+        setIsMicOn(false);
+        setIsCameraOn(false);
+        throw err;
+      }
+    };
 
   // 🎤 Toggle Mic
   const toggleMic = () => {
-    console.log("Toggle Mic clicked");
-    console.log(localStream);
-
     if (!localStream) return;
 
     toggleAudioTrack(localStream, !isMicOn);
@@ -58,8 +56,6 @@ export const MediaProvider = ({ children }) => {
 
   // 📷 Toggle Camera
   const toggleCamera = () => {
-    console.log("Toggle Camera clicked");
-
     if (!localStream) return;
 
     toggleVideoTrack(localStream, !isCameraOn);
@@ -74,13 +70,19 @@ export const MediaProvider = ({ children }) => {
       setScreenStream(stream);
       setIsScreenSharing(true);
 
-      // When user clicks "Stop sharing" from browser popup
-      stream.getVideoTracks()[0].onended = () => {
-        stopScreenShare();
-      };
+      const track = stream.getVideoTracks()[0];
+
+      if (track) {
+        track.onended = () => {
+          stopScreenShare();
+        };
+      }
+      return true;
     } catch (err) {
       console.error("Screen share cancelled:", err);
       setIsScreenSharing(false);
+
+      return false;
     }
   };
 

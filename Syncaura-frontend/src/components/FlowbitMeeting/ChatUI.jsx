@@ -128,7 +128,7 @@ ${
           <button
             onClick={sendMessage}
             disabled={!input.trim()}
-            className={`transition duration-200 ${
+            className={`btn-hover transition duration-200 ${
               input.trim()
                 ? "text-blue-500 hover:scale-110"
                 : "text-gray-400 cursor-not-allowed"

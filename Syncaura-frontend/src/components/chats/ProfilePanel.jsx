@@ -40,7 +40,7 @@ export default function ProfilePanel({
             <div className="flex sm:hidden items-center gap-3 px-4 h-14 border-b shrink-0">
               <button
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 btn-hover"
               >
                 <ArrowLeft className="text-xl text-black dark:text-gray-300" />
               </button>

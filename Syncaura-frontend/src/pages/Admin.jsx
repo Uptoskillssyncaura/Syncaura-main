@@ -29,9 +29,9 @@ const Admin = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-5 py-[5px] border-none rounded-full text-[13px] transition-all whitespace-nowrap cursor-pointer ${
+                className={`btn-hover px-5 py-[5px] border-none rounded-full text-[13px] whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? "font-semibold text-blue-600 dark:text-[#73FBFD] "
+                    ? "font-semibold text-blue-600 dark:text-[#73FBFD]"
                     : "font-medium text-[#64748b] dark:text-slate-400 bg-transparent hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >

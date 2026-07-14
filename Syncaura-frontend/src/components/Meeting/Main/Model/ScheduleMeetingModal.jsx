@@ -100,7 +100,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
           {/* Close */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 sm:top-7 sm:right-7"
+            className="absolute top-4 right-4 sm:top-7 sm:right-7 btn-hover"
           >
             <X className="size-6 sm:size-8 text-black dark:text-gray-400" />
           </button>
@@ -111,7 +111,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
 
           <div className="w-full h-px bg-[#C7C5C5] dark:bg-[#616161]" />
 
-          <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+          <form onSubmit={handleSubmit(onSubmit, onError)} className="w-full">
             <div className="flex flex-col gap-5 mt-4">
 
               {/* Title */}
@@ -199,8 +199,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
                       key={p}
                       type="button"
                       onClick={() => setValue("platform", p)}
-                      className={`flex-1 min-w-[120px] h-11 rounded-full text-sm font-medium
-                        ${platform === p
+                      className={`btn-hover flex-1 min-w-[120px] h-11 rounded-full text-sm font-medium ${platform === p
                           ? "border-2 border-[#2461E6] text-[#2461E6] bg-white dark:border-[#73FBFD] dark:text-[#73FBFD]"
                           : "bg-white text-[#898888] dark:bg-[#2E2F2F] dark:text-[#898888]"
                         }`}
@@ -273,16 +272,14 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
             <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
               <button
                 onClick={onClose}
-                className="text-sm text-black dark:text-white"
+                className="text-sm text-black dark:text-white btn-hover"
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                className="w-full sm:w-40 h-10 rounded-full
-                bg-[#2461E6] dark:bg-[#73FBFD]
-                text-white dark:text-black text-sm font-semibold"
+                className="w-full sm:w-40 h-10 rounded-full bg-[#2461E6] dark:bg-[#73FBFD] text-white dark:text-black text-sm font-semibold btn-hover"
               >
                 Schedule Meeting
               </button>

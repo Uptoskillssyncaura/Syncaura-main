@@ -19,22 +19,28 @@ const ProjectCard = ({
   const priorityColor = {
     Critical: "bg-[#FEE2E2] text-[#C71212]",
     Ongoing: "bg-[#DBEAFE] text-[#0000A5]",
-    "On Hold": "bg-[#F3F4F6] text-[#000000]",
+    "On Hold": "bg-[#F3F4F6] text-[#69707E]",
     Completed: "bg-[#DCFCE7] text-[#004500]",
   };
   const bottomIconBgColor = {
-    Critical: "bg-[#FEF2F2] text-[#DE0000] dark:bg-[#212121]  ",
-    Ongoing: "bg-[#F3F4F6] text-[#69707E] dark:bg-[#212121] ",
-    "On Hold": "bg-[#F3F4F6] text-[#69707E] dark:bg-[#212121] ",
-    Completed: "bg-[#F3F4F6] text-[#009B28] dark:bg-[#212121] ",
+    Critical: "bg-[#FEE2E2] text-[#C71212] dark:bg-[#212121]",
+    Ongoing: "bg-[#DBEAFE] text-[#0000A5] dark:bg-[#212121]",
+    "On Hold": "bg-[#F3F4F6] text-[#69707E] dark:bg-[#212121]",
+    Completed: "bg-[#DCFCE7] text-[#004500] dark:bg-[#212121]",
   };
   const bottomIcon = {
-    "Critical": <Flag className="size-3.5 text-[#DE0000] fill-[#DE0000]" />,
-    "Completed": (
-      <CheckCircle2 className="size-5 text-[#F3F4F6] dark:text-[#212121] fill-[#099e09]" />
+    Critical: (
+      <Flag className="size-3.5 text-[#C71212] fill-[#C71212]" />
     ),
-    "On Hold": <Tally2 className="size-5 text-[#69707E] " />,
-    "Ongoing": <Calendar className="size-3.5 text-[#69707E] " />,
+    Ongoing: (
+      <Calendar className="size-3.5 text-[#0000A5]" />
+    ),
+    "On Hold": (
+      <Tally2 className="size-5 text-[#69707E]" />
+    ),
+    Completed: (
+      <CheckCircle2 className="size-5 text-[#004500]" />
+    ),
   };
 
   const visibleAvatars = avatars.slice(0, 2);
@@ -67,17 +73,15 @@ const ProjectCard = ({
 
           <div className="relative w-full h-2 bg-[#F3F4F6] rounded-2xl">
             <motion.div
-              className={`absolute top-0 left-0 h-2 ${
-                progress < 50
-                  ? "bg-[#EF4444]"
-                  : progress < 100
-                  ? "bg-[#3B82F6]"
-                  : "bg-[#22C55E]"
-              } rounded-l-2xl ${progress === 100 && "rounded-r-2xl"}`}
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            />
+             className={`absolute top-0 left-0 h-2 ${
+              priority === "Critical"
+                ? "bg-[#C71212]"
+                : priority === "Ongoing"
+                ? "bg-[#0000A5]"
+                : priority === "On Hold"
+                ? "bg-[#69707E]"
+                : "bg-[#004500]"
+            } rounded-l-2xl ${progress === 100 ? "rounded-r-2xl" : ""}`}/>
           </div>
         </div>
 

@@ -107,17 +107,7 @@ export default function LatestEvents() {
       {/* SHOW MORE */}
       <div className="px-5 -mt-2 xl:mt-0 xl:px-10">
         <button
-          className="
-          mt-6 w-full
-          bg-blue-500/10
-          text-blue-600
-          py-2
-          rounded-lg
-           text-xs xl:text-sm
-          font-medium
-          hover:bg-[#E2E5FF]
-          transition
-        "
+          className="mt-6 w-full bg-blue-500/10 text-blue-600 py-2 rounded-lg text-xs xl:text-sm font-medium hover:bg-[#E2E5FF] transition btn-hover"
         >
           Show More
         </button>

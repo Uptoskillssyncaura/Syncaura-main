@@ -42,7 +42,7 @@ const VersionHistoryDrawer = ({ open, onClose }) => {
               py-6 flex flex-col
             "
           >
-            <button className=" flex items-center justify-start px-5 md:hidden" >
+            <button className="flex items-center justify-start px-5 md:hidden btn-hover" >
               <X onClick={onClose}  className="text-black dark:text-gray-500 size-6" />
             </button>
     

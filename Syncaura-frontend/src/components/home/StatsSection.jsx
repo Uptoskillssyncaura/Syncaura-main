@@ -3,7 +3,7 @@ import React from 'react';
 const StatsSection = () => {
   return (
     <section className="w-full py-8 md:py-16" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
         {/* Header */}
         <div className="mb-8 md:mb-12">
           <p className="text-sm md:text-sm font-medium mb-2 md:mb-3" style={{ color: 'var(--text-secondary)' }}>
@@ -39,14 +39,14 @@ const StatsSection = () => {
 
         {/* Buttons */}
         <div className="flex items-center gap-4 mb-12 pt-2 md:mb-16">
-          <button className="px-6 py-3 border text-md font-medium hover:opacity-70 transition-opacity" style={{ 
+          <button className="px-6 py-3 border text-md font-medium hover:opacity-70 transition-opacity btn-hover" style={{ 
             borderColor: 'var(--border-color)',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-secondary)' 
           }}>
             Learn
           </button>
-          <button className="flex items-center gap-2 text-md font-medium hover:opacity-70 transition-opacity" style={{ 
+          <button className="flex items-center gap-2 text-md font-medium hover:opacity-70 transition-opacity btn-hover" style={{ 
             color: 'var(--text-secondary)' 
           }}>
             <span>Arrow</span>

@@ -2,8 +2,17 @@ import pool from '../config/db.js';
 
 export const completionRate = async (req, res) => {
   try {
-    const totalResult = await pool.query("SELECT COUNT(*) FROM tasks");
-    const completedResult = await pool.query("SELECT COUNT(*) FROM tasks WHERE status = 'DONE'");
+    const { projectId } = req.query;
+
+    let totalResult, completedResult;
+
+    if (projectId) {
+      totalResult = await pool.query("SELECT COUNT(*) FROM tasks WHERE project_id = $1", [projectId]);
+      completedResult = await pool.query("SELECT COUNT(*) FROM tasks WHERE status = 'DONE' AND project_id = $1", [projectId]);
+    } else {
+      totalResult = await pool.query("SELECT COUNT(*) FROM tasks");
+      completedResult = await pool.query("SELECT COUNT(*) FROM tasks WHERE status = 'DONE'");
+    }
 
     const total = parseInt(totalResult.rows[0].count);
     const completed = parseInt(completedResult.rows[0].count);
@@ -32,13 +41,13 @@ export const burndownData = async (req, res) => {
     if (!tasks.length) return res.json([]);
 
     const dates = [...new Set(tasks.map(t => new Date(t.created_at).toISOString().split('T')[0]))];
-    
+
     let totalTasks = tasks.length;
     const result = [];
 
     for (let date of dates) {
       const completedUpToDate = tasks.filter(
-        t => t.status === 'DONE' && new Date(t.created_at).toISOString().split('T')[0] <= date
+        t => t.status === 'DONE' && new Date(t.updated_at).toISOString().split('T')[0] <= date
       ).length;
 
       result.push({

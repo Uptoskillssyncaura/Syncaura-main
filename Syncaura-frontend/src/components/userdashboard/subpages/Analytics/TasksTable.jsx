@@ -128,10 +128,10 @@ export default function TasksTable() {
         <span>Showing 1–4 of 42 tasks</span>
 
         <div className="flex gap-2">
-          <button className="px-4 py-1.5 rounded-md border border-gray-300 dark:border-[#2D2F31] bg-white dark:bg-[#1c1d1f] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#252629] transition-colors">
+          <button className="px-4 py-1.5 rounded-md border border-gray-300 dark:border-[#2D2F31] bg-white dark:bg-[#1c1d1f] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#252629] transition-colors btn-hover">
             Previous
           </button>
-          <button className="px-4 py-1.5 rounded-md border border-gray-300 dark:border-[#2D2F31] bg-white dark:bg-[#1c1d1f] text-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#252629] transition-colors">
+          <button className="px-4 py-1.5 rounded-md border border-gray-300 dark:border-[#2D2F31] bg-white dark:bg-[#1c1d1f] text-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#252629] transition-colors btn-hover">
             Next
           </button>
         </div>

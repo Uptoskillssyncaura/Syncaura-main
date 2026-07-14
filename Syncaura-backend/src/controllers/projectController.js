@@ -45,6 +45,7 @@ export const getAllProjects = async (req, res) => {
 
 export const getProjectById = async (req, res) => {
   try {
+ feature/project-health-score
     const { id } = req.params;
 
     if (!isUUID(id)) {
@@ -53,6 +54,14 @@ export const getProjectById = async (req, res) => {
       });
     }
 
+
+
+    if (!isUUID(req.params.id)) {
+  return res.status(400).json({
+    message: "Invalid project ID"
+  });
+}
+ main
     const result = await pool.query(
       `SELECT *
       FROM projects
@@ -82,6 +91,7 @@ export const getProjectById = async (req, res) => {
  */
 export const updateProject = async (req, res) => {
   try {
+ feature/project-health-score
     const { id } = req.params;
 
 if (!isUUID(id)) {
@@ -89,6 +99,15 @@ if (!isUUID(id)) {
         message: "Invalid project ID"
     });
 }
+
+
+    if (!isUUID(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid project ID"
+      });
+    }
+
+ main
     const { name, description, status } = req.body;
     let updateFields = [];
     let values = [];
@@ -141,7 +160,20 @@ if (!isUUID(id)) {
  */
 export const deleteProject = async (req, res) => {
   try {
+ feature/project-health-score
     const { id } = req.params;
+
+
+    if (!isUUID(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid project ID"
+      });
+    }
+    const result = await pool.query(
+      "DELETE FROM projects WHERE id = $1 RETURNING *",
+      [req.params.id]
+    );
+ main
 
 if (!isUUID(id)) {
     return res.status(400).json({

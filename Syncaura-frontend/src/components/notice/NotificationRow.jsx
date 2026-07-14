@@ -73,12 +73,12 @@ export default function NotificationRow({title, about, date, bgColor, docColor})
       <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-white">
         <span className="whitespace-nowrap">{formatDateYYYYMMDD(date)}</span>
 
-        <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-[#1C3939] text-blue-600  dark:text-[#73FBFD] transition">
+        <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-[#1C3939] text-blue-600 dark:text-[#73FBFD] transition btn-hover">
           <Eye size={16} />
           <span className="hidden sm:inline ">View</span>
         </button>
 
-        <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition">
+        <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition btn-hover">
           <Download size={16} />
           <span className="hidden sm:inline">Download</span>
         </button>

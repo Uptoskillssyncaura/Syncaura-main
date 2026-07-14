@@ -110,14 +110,14 @@ const ChangePasswordModal = ({ onClose }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-2xl border border-gray-700 text-lg text-gray-700 hover:bg-gray-100 dark:bg-black dark:text-[#73FBFD] dark:border-[#73FBFD] dark:hover:bg-gray-800 transition"
+                className="flex-1 py-2.5 rounded-2xl border border-gray-700 text-lg text-gray-700 hover:bg-gray-100 dark:bg-black dark:text-[#73FBFD] dark:border-[#73FBFD] dark:hover:bg-gray-800 transition btn-hover"
               >
                 {t("discard")}
               </button>
 
               <button
                 type="submit"
-                className="flex-1 py-2.5 rounded-2xl bg-[#2461E6] text-lg text-white font-medium border border-[#2461E6] hover:bg-blue-100 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 transition shadow-sm"
+                className="flex-1 py-2.5 rounded-2xl bg-[#2461E6] text-lg text-white font-medium border border-[#2461E6] hover:bg-blue-100 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 transition shadow-sm btn-hover"
               >
                 {t("saveChanges")}
               </button>
@@ -146,7 +146,7 @@ const PasswordField = ({ label, value, setValue, show, toggle }) => (
       <button
         type="button"
         onClick={toggle}
-        className="absolute right-5 top-1/2 -translate-y-1/2 text-black dark:text-white"
+        className="absolute right-5 top-1/2 -translate-y-1/2 text-black dark:text-white btn-hover"
       >
         {show ? <Eye size={22} /> : <EyeOff size={22} />}
       </button>

@@ -10,7 +10,8 @@ const AnimatedInput = ({
   name,
   handleBlur,
   iconType = "mail", // "mail" | "user" | "lock" etc.
-  label
+  label,
+  validation
 }) => {
   // Choose icon based on type
   const renderIcon = () => {
@@ -22,6 +23,19 @@ const AnimatedInput = ({
       default:
         return null;
     }
+  };
+
+  // Fallback to default validation if none is provided
+  const rules = validation || {
+    required: `${label || name} is required`,
+    ...(type === "email"
+      ? {
+          pattern: {
+            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: "Please enter a valid email",
+          },
+        }
+      : {}),
   };
 
   return (
@@ -46,17 +60,7 @@ const AnimatedInput = ({
         <motion.input
           type={type}
           placeholder={placeholder}
-          {...register(name, {
-            required: `${label || name} is required`,
-            ...(type === "email"
-              ? {
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Please enter a valid email",
-                  },
-                }
-              : {}),
-          })}
+          {...register(name, rules)}
           onFocus={() => handleFocus(wrapperRef)}
           onBlur={() => handleBlur(wrapperRef)}
           initial={false}

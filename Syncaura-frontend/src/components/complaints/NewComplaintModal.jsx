@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 export default function NewComplaintModal({ onClose, addComplaint }) {
-  const { register, handleSubmit, setValue, watch, formState: { errors }, } = useForm();
+  const { register, handleSubmit, setValue, watch } = useForm();
   const [category, setCategory] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
@@ -12,17 +12,17 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
   const fileRef = useRef(null);
 
   const onSubmit = (data) => {
-    const id= `#${Date.now().toString().slice(0, 4)}`;
-    const subject=data.subject;
-    const category=data.category;
-    const date=new Date().toISOString();
-    const status='In progress';
-    addComplaint((prev)=>[{id, subject, category, date, status}, ...prev])
-    onClose()
+    const id = `#${Date.now().toString().slice(0, 4)}`;
+    const subject = data.subject;
+    const category = data.category;
+    const date = new Date().toISOString();
+    const status = "In progress";
+    addComplaint((prev) => [{ id, subject, category, date, status }, ...prev]);
+    onClose();
   };
   const onError = (formErrors) => {
-  console.log("Form Errors:", formErrors);
-};
+    console.log("Form Errors:", formErrors);
+  };
 
   const handleFileClick = () => {
     fileRef.current?.click();
@@ -72,12 +72,15 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
           {/* Close */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
+            className="absolute right-4 top-4 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white btn-hover"
           >
             <X size={18} />
           </button>
 
-          <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
+          <form
+            onSubmit={handleSubmit(onSubmit, onError)}
+            className="space-y-4"
+          >
             <h2 className="text-lg font-semibold text-black dark:text-white">
               New Complaint
             </h2>

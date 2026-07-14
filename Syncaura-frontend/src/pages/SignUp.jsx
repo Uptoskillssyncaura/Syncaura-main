@@ -1,370 +1,585 @@
-import { ChevronDown, Loader, Mail } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import SocialAuthButton from "../components/auth/SocialAuthButton";
-import { motion, AnimatePresence } from "framer-motion";
+import { Loader, Moon, Sun } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
 import PasswordField from "../components/auth/PasswordField";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AnimatedInput from "../components/auth/AnimatedInput";
 import { useSelector, useDispatch } from "react-redux";
 import { registerUser } from "../redux/features/authThunks";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { validationRules } from "../constant/validationRules";
+import { handleError, handleSuccess } from "../services/errorHandler";
 
 const SignUp = () => {
-  const {
-    control,
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      role: "User",
-    },
-  });
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
   const navigate = useNavigate();
-  const roles = ["User", "Admin", "Co-Admin"];
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const wrapperRef = useRef(null);
-  const userRef = useRef(null);
-  const passRef = useRef(null);
-  const conPassRef = useRef(null);
-  const socialProviders = [
-    {
-      id: "google",
-      icon: "/images/Auth/google.png",
-      alt: "Google login",
-      onClick: () => console.log("Google Login"),
-    },
-    {
-      id: "github",
-      icon: "/images/Auth/github.png",
-      alt: "GitHub login",
-      onClick: () => console.log("GitHub Login"),
-    },
-    {
-      id: "facebook",
-      icon: "/images/Auth/facebook.png",
-      alt: "Facebook login",
-      onClick: () => console.log("Facebook Login"),
-    },
-  ];
-
-  const { user, isAuthenticated, isLoading, error } = useSelector(
-    (state) => state.auth,
-  );
-
   const dispatch = useDispatch();
 
+  const { isLoading } = useSelector((state) => state.auth);
+
+  const [isDark, setIsDark] = useState(false);
+
+  const userRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const passRef = useRef(null);
+  const conPassRef = useRef(null);
+
+  const t = isDark
+    ? {
+        pageBg: "#000000",
+        leftBg: "#0d0d0d",
+
+        titleColor: "#00e5cc",
+        // labelColor: "#ffffff",
+        labelColor: "#00e5cc",
+
+        inputBg: "#1e1e1e",
+        inputBorder: "#2e2e2e",
+        inputText: "#cccccc",
+        inputPlaceholder: "#666666",
+
+        btnBg: "#00e5cc",
+        btnText: "#000000",
+
+        divColor: "#2e2e2e",
+        orColor: "#555555",
+
+        socialBg: "#1e1e1e",
+        socialBorder: "#2e2e2e",
+
+        loginMuted: "#888888",
+        loginLink: "#00e5cc",
+
+        toggleColor: "#ffffff",
+
+        curveStart: "#00e5cc",
+        curveEnd: "#00a896",
+
+        btnShadow: "0 8px 22px rgba(0,229,204,0.4)",
+      }
+    : {
+        pageBg: "#dce3ec",
+        leftBg: "#ffffff",
+
+        titleColor: "#2563eb",
+        labelColor: "#2563eb",
+
+        inputBg: "#f0f4fb",
+        inputBorder: "#dce3ef",
+        inputText: "#374151",
+        inputPlaceholder: "#9ca3af",
+
+        btnBg: "#2563eb",
+        btnText: "#ffffff",
+
+        divColor: "#d1d5db",
+        orColor: "#9ca3af",
+
+        socialBg: "#ffffff",
+        socialBorder: "#e5e7eb",
+
+        loginMuted: "#6b7280",
+        loginLink: "#2563eb",
+
+     toggleColor: "#000000",
+
+        curveStart: "#3b82f6",
+        curveEnd: "#1d4ed8",
+
+        btnShadow: "0 8px 22px rgba(37,99,235,0.4)",
+      };
+
+  useEffect(() => {
+    [userRef, wrapperRef, passRef, conPassRef].forEach((ref) => {
+      if (!ref?.current) return;
+
+      ref.current.style.backgroundColor = t.inputBg;
+      ref.current.style.borderColor = t.inputBorder;
+      ref.current.style.borderRadius = "0px";
+
+      const input = ref.current.querySelector("input");
+
+      if (input) {
+        input.style.backgroundColor = t.inputBg;
+        input.style.color = t.inputText;
+        input.style.borderRadius = "0px";
+      }
+    });
+  }, [isDark]);
+
   const handleFocus = (ref) => {
-    ref.current?.classList.add(
-      "border-[#01509C]",
-      "ring-2",
-      "ring-[#01509C]/30",
-    );
+    if (!ref?.current) return;
+
+    const c = isDark ? "#00e5cc" : "#0f2b67";
+
+    ref.current.style.borderColor = c;
+    ref.current.style.boxShadow = `0 0 0 2px ${c}33`;
   };
+
   const handleBlur = (ref) => {
-    ref.current?.classList.remove(
-      "border-[#01509C]",
-      "ring-2",
-      "ring-[#01509C]/30",
-    );
+    if (!ref?.current) return;
+
+    ref.current.style.borderColor = t.inputBorder;
+    ref.current.style.boxShadow = "";
   };
+
   const onSubmit = async (data) => {
     try {
+      // 🚀 SIGNUP API (Aiswarya): Dispatch signup payload to registerUser
       const res = await dispatch(registerUser(data)).unwrap();
 
-      toast.success("Account created successfully");
+      // 🎉 TOASTS (Vedant): Show success notification
+      handleSuccess("Account created successfully!");
 
       switch (res?.role || data?.role) {
         case "Admin":
           navigate("/admin");
           break;
+
         case "Co-Admin":
           navigate("/co-admin");
           break;
+
         default:
           navigate("/user-dashboard");
       }
     } catch (err) {
-      toast.error(err || "Registration failed");
+      // ❌ ERROR HANDLING (Vedant): Process backend signup errors
+      handleError(err || "Registration failed");
     }
   };
 
-  const onError = (errors) => {
-    const firstError = Object.values(errors)[0];
-
-    if (firstError?.message) {
-      toast.error(firstError.message);
-    } else {
-      toast.error("Please fix the form errors");
-    }
-
-    console.log(errors);
+  const onError = (errs) => {
+    // ❌ ERROR HANDLING (Vedant): Show first validation error message
+    const first = Object.values(errs)[0];
+    handleError(first?.message || "Please fix the form errors");
   };
+
+  const socialProviders = [
+    {
+      id: "google",
+      icon: "/images/Auth/google.png",
+      alt: "Google",
+    },
+
+    {
+      id: "github",
+      icon: "/images/Auth/github.png",
+      alt: "GitHub",
+    },
+
+    {
+      id: "facebook",
+      icon: "/images/Auth/facebook.png",
+      alt: "Facebook",
+    },
+  ];
+
+  // Light mode → Sun icon (you're in light, click to go dark)
+  // Dark mode  → Moon icon (you're in dark, click to go light)
+  const ThemeIcon = isDark ? Moon : Sun;
 
   return (
     <div
-      className="bg-[radial-gradient(ellipse_60%_70%_at_center,#4a9df0_0%,#01509C_65%,#013b73_100%)]
- w-full min-h-screen flex items-center justify-center overflow-hidden  "
+      style={{ backgroundColor: t.pageBg }}
+      className="w-full min-h-screen flex items-center justify-center px-6 py-8 transition-colors duration-500"
     >
-      <motion.div
-        className="relative flex items-center justify-center w-[90%] md:w-[80%] lg:w-3/4 page-2xl:w-1/2"
-        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 25,
-          duration: 1,
-        }}
+      <style>{`
+        .su-form input {
+          background-color: ${t.inputBg} !important;
+          color: ${t.inputText} !important;
+          border-color: ${t.inputBorder} !important;
+          border-radius: 0px !important;
+        }
+
+        .su-form input::placeholder {
+          color: ${t.inputPlaceholder} !important;
+          opacity: 1;
+        }
+
+        .su-form .input-wrapper,
+        .su-form [class*="wrapper"],
+        .su-form [class*="field-wrap"] {
+          background-color: ${t.inputBg} !important;
+          border-color: ${t.inputBorder} !important;
+          border-radius: 0px !important;
+        }
+
+        .su-form label,
+        .su-form [class*="label"],
+        .su-form [class*="field-label"] {
+          color: ${t.labelColor} !important;
+        }
+
+        .su-form button[type="submit"] {
+          border-radius: 0px !important;
+        }
+
+        .su-form .social-btn {
+          border-radius: 0px !important;
+        }
+      `}</style>
+
+      <div
+        className="relative w-full"
+        style={{ maxWidth: 980 }}
       >
-        <div
-          className="absolute -bottom-5 -right-6 md:-bottom-11 md:-right-11 z-20 size-20 md:size-25 rounded-full bg-linear-to-bl 
- from-[#868686] to-[#ECECEC]"
-        />
-        <div
-          className="absolute -top-5 -left-6 md:-top-11 md:-left-11 z-20 size-20 md:size-25 rounded-full bg-linear-to-bl 
- from-[#0050FF] to-[#0040CC]"
-        />
-        <div className="rounded-4xl lg:rounded-r-none  relative z-100  w-full px-7 py-33.5 bg-[#ECECEC] hidden lg:flex flex-col items-center justify-center">
-          <div className="bg-[#A6A6A621] border border-[#7B9CE242] h-95 w-2/3 rounded-4xl" />
-          <div className="absolute z-60 -right-27 xl:top-15 2xl:top-1  2xl:-right-28 page-2xl:top-12 top-15 ">
-            <img
-              src="/images/Auth/signup.png"
-              alt=""
-              className="object-fill scale-65"
-            />
-          </div>
-        </div>
-        <div className="rounded-4xl lg:rounded-l-none z-80 py-5 px-10 xl:px-20 pr-5 xl:pr-15  w-full bg-[#2461E6] flex flex-col items-center justify-center">
-          <h1 className="text-[#FFFFFF] text-2xl font-bold">Create Account</h1>
-          <form
-            onSubmit={handleSubmit(onSubmit, onError)}
-            className="space-y-2 w-full mt-1"
+        <motion.div
+          className="relative flex flex-col lg:flex-row shadow-2xl overflow-hidden"
+          style={{
+            minHeight:620,
+            background: `linear-gradient(160deg, ${t.curveStart} 0%, ${t.curveEnd} 100%)`,
+          }}
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 280,
+            damping: 24,
+          }}
+        >
+
+          {/* ══ CURVE SHAPE ══ */}
+          <svg
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              zIndex: 20,
+              pointerEvents: "none",
+            }}
+            viewBox="0 0 860 600"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <div className="relative flex flex-col items-start justify-center gap-1.5 ">
-              <label className="text-[#FFFFFF] text-base font-medium">
-                Full Name
-              </label>
-              <div className="flex flex-col items-start justify-center w-full gap-1 ">
+            <defs>
+              <linearGradient
+                id="shapeGrad"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop
+                  offset="0%"
+                  stopColor={t.curveStart}
+                />
+
+                <stop
+                  offset="90%"
+                  stopColor={t.curveEnd}
+                />
+              </linearGradient>
+
+              <clipPath id="cardBounds">
+                <rect
+                  width="860"
+                  height="600"
+                />
+              </clipPath>
+            </defs>
+
+            <g clipPath="url(#cardBounds)">
+
+              {/* WHITE AREA */}
+              <rect
+                x="0"
+                y="0"
+                width="980"
+                height="600"
+                fill={t.leftBg}
+                style={{ transition: "fill 0.5s" }}
+              />
+
+              {/* BIG BLUE CURVE */}
+              {/* Desktop */}
+<circle
+  className="hidden lg:block"
+  cx="950"
+  cy="-70"
+  r="670"
+  fill="url(#shapeGrad)"
+/>
+
+{/* Mobile */}
+<circle
+  className="block lg:hidden"
+  cx="1103"
+  cy="-50"
+  r="345"
+  fill="url(#shapeGrad)"
+/>
+
+              {/* SMALL BOTTOM CIRCLE */}
+              <circle
+                cx="-20"
+                cy="620"
+                r="90"
+                fill="url(#shapeGrad)"
+              />
+
+            </g>
+          </svg>
+
+          {/* LEFT SIDE */}
+          <div
+  className="
+    w-full
+    lg:w-[40%]
+    px-6
+    sm:px-8
+    lg:px-14
+    py-10
+    flex
+    flex-col
+    justify-center
+  "
+  style={{
+    zIndex: 30,
+  }}
+>
+
+            <h1
+              style={{ color: t.titleColor }}
+              className="text-3xl font-bold mb-4 text-center"
+            >
+              Create Account
+            </h1>
+
+            <form
+              onSubmit={handleSubmit(onSubmit, onError)}
+              className="su-form space-y-2"
+            >
+
+              {/* NAME */}
+              <div className="flex flex-col gap-1">
+                <label
+                  style={{ color: t.labelColor }}
+                  className="text-sm font-semibold"
+                >
+                  Full Name
+                </label>
+
                 <AnimatedInput
                   type="text"
-                  name={"name"}
+                  name="name"
                   placeholder="John Doe"
                   iconType="user"
                   register={register}
                   wrapperRef={userRef}
-                  label={"Full Name"}
                   handleFocus={handleFocus}
                   handleBlur={handleBlur}
+                  validation={validationRules.name}
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                )}
               </div>
-            </div>
-            <div className="relative flex flex-col items-start justify-center gap-1.5 ">
-              <label className="text-[#FFFFFF] text-base font-medium">
-                Email Address
-              </label>
-              <div className="flex flex-col items-start justify-center w-full gap-1 ">
+
+              {/* EMAIL */}
+              <div className="flex flex-col gap-1">
+                <label
+                  style={{ color: t.labelColor }}
+                  className="text-sm font-semibold"
+                >
+                  Email Address
+                </label>
+
                 <AnimatedInput
                   type="email"
-                  name={"email"}
-                  placeholder="Email"
+                  name="email"
+                  placeholder="name@company.com"
                   iconType="mail"
-                  label={"Email"}
                   register={register}
                   wrapperRef={wrapperRef}
                   handleFocus={handleFocus}
                   handleBlur={handleBlur}
+                  validation={validationRules.email}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                )}
               </div>
-            </div>
-            <div className="relative flex flex-col items-start justify-center w-full gap-1.5 ">
-              <label className="text-[#FFFFFF] text-base font-medium">
-                Password
-              </label>
-              <div className="flex flex-col items-start justify-center w-full gap-1 ">
+
+              {/* PASSWORD */}
+              <div className="flex flex-col gap-1">
+                <label
+                  style={{ color: t.labelColor }}
+                  className="text-sm font-semibold"
+                >
+                  Password
+                </label>
+
                 <PasswordField
                   name="password"
-                  placeholder="Password"
+                  placeholder="Create a password"
                   register={register}
+                  passRef={passRef}
                   handleFocus={handleFocus}
                   handleBlur={handleBlur}
-                  passRef={passRef}
-                  validation={{
-                    required: "Password is required",
-                    pattern: {
-                      value:
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/,
-                      message:
-                        "Min 6 chars, 1 uppercase, 1 lowercase, 1 number & 1 special character required",
-                    },
-                  }}
+                  validation={validationRules.password}
                 />
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+                )}
               </div>
-            </div>
 
-            <div className="relative flex flex-col items-start justify-center w-full gap-1.5 ">
-              <label className="text-[#FFFFFF] text-base font-medium">
-                Confirm Password
-              </label>
-              <div className="flex flex-col items-start justify-center w-full gap-1 ">
+              {/* CONFIRM PASSWORD */}
+              <div className="flex flex-col gap-1">
+                <label
+                  style={{ color: t.labelColor }}
+                  className="text-sm font-semibold"
+                >
+                  Confirm Password
+                </label>
+
                 <PasswordField
                   name="confirmPassword"
-                  placeholder="Confirm Password"
+                  placeholder="Confirm password"
                   register={register}
+                  passRef={conPassRef}
                   handleFocus={handleFocus}
                   handleBlur={handleBlur}
-                  passRef={conPassRef}
-                  validation={{
-                    required: "Confirm Password is required",
-                    validate: (value) =>
-                      value === watch("password") || "Passwords do not match",
-                  }}
+                  validation={validationRules.confirmPassword(watch("password"))}
                 />
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
+                )}
               </div>
-            </div>
 
-            <div className="relative flex flex-col items-start justify-center w-full gap-1.5 ">
-              <label className="text-[#FFFFFF] text-base font-medium">
-                Role
-              </label>
-              <div className="w-full">
-                <Controller
-                  name="role"
-                  control={control}
-                  rules={{ required: "Role is required" }}
-                  render={({ field }) => (
-                    <div ref={dropdownRef} className="relative">
-                      {/* FIELD */}
-                      <motion.div
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        onClick={() => setOpen((prev) => !prev)}
-                        className="flex cursor-pointer items-center justify-between
-                         rounded-md border border-blue-600
-                         bg-white px-4 py-2 text-sm w-full"
-                      >
-                        {/*  selected value shown */}
-                        <span className="text-black">{field.value}</span>
-
-                        <motion.span
-                          animate={{ rotate: open ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-xs text-black"
-                        >
-                          <ChevronDown />
-                        </motion.span>
-                      </motion.div>
-
-                      {/* DROPDOWN */}
-                      <AnimatePresence>
-                        {open && (
-                          <motion.ul
-                            initial={{ opacity: 0, y: -8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute z-10 mt-1 w-full overflow-hidden
-                             rounded-md border bg-white shadow-lg"
-                          >
-                            {roles.map((role) => (
-                              <li
-                                key={role}
-                                onClick={() => {
-                                  field.onChange(role);
-                                  setOpen(false);
-                                }}
-                                className="cursor-pointer text-black px-4 py-2 text-sm
-                                 hover:bg-blue-50"
-                              >
-                                {role}
-                              </li>
-                            ))}
-                          </motion.ul>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  )}
-                />
-              </div>
-            </div>
-            <motion.div
-              whileHover={{
-                scale: 1.02,
-                boxShadow: "0px 12px 25px rgba(0,0,0,0.25)",
-              }}
-              whileTap={{
-                scale: 0.95,
-                boxShadow: "0px 6px 15px rgba(0,0,0,0.2)",
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 20,
-              }}
-              className="relative flex items-start justify-center w-full mt-5 rounded-md bg-[#E3E3E3] py-2 px-3"
-            >
+              {/* BUTTON */}
               <motion.button
                 type="submit"
                 disabled={isLoading}
-                whileHover={{ y: -1 }}
-                whileTap={{ y: 1 }}
-                transition={{ type: "spring", stiffness: 400 }}
-                className="text-[#000000] font-bold text-lg"
+                whileHover={{
+                  scale: 1.02,
+                  boxShadow: t.btnShadow,
+                }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  backgroundColor: t.btnBg,
+                  color: t.btnText,
+                  borderRadius: "0px",
+                }}
+                className="w-full mt-3 py-3 font-bold text-sm flex items-center justify-center"
               >
                 {isLoading ? (
-                  <Loader className="size-5 text-[#000000] animate-spin" />
+                  <Loader className="size-4 animate-spin" />
                 ) : (
-                  " Create Account"
+                  "Create Account"
                 )}
               </motion.button>
-            </motion.div>
-            <div className="flex relative items-center justify-center w-full top-2 ">
-              <span className="h-0.5 bg-[#FFFFFF]  w-full" />
-              <h1 className="absolute -top-2.5  bg-[#2461E6] px-2 text-white text-sm font-bold flex-1/3">
-                OR
-              </h1>
-            </div>
-            <div className="flex items-center justify-center w-full gap-4 mt-8 ">
-              {socialProviders.map((provider) => (
-                <SocialAuthButton
-                  key={provider.id}
-                  icon={provider.icon}
-                  alt={provider.alt}
-                  onClick={provider.onClick}
+
+              {/* OR */}
+              <div className="flex items-center gap-3 py-1">
+                <span
+                  style={{ backgroundColor: t.divColor }}
+                  className="flex-1 h-px"
                 />
-              ))}
-            </div>
-            <div className="flex items-center justify-center w-full gap-1 ">
-              <span className="text-[#FFFFFF] text-base font-semibold">
-                Already have an account?{" "}
-              </span>
-              <Link
-                to={"/sign-in"}
-                className="flex items-center justify-center"
-              >
-                <span className="text-white hover:underline text-xl font-semibold">
-                  {" "}
-                  Login
+
+                <span
+                  style={{ color: t.orColor }}
+                  className="text-xs font-semibold"
+                >
+                  OR
                 </span>
-              </Link>
-            </div>
-          </form>
-        </div>
-      </motion.div>
+
+                <span
+                  style={{ backgroundColor: t.divColor }}
+                  className="flex-1 h-px"
+                />
+              </div>
+
+              {/* SOCIAL */}
+              <div className="flex items-center justify-center gap-3">
+                {socialProviders.map((p) => (
+                  <motion.button
+                    key={p.id}
+                    type="button"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.92 }}
+                    style={{
+                      backgroundColor: t.socialBg,
+                      borderColor: t.socialBorder,
+                      borderRadius: "0px",
+                    }}
+                    className="w-11 h-11 border flex items-center justify-center social-btn"
+                  >
+                    <img
+                      src={p.icon}
+                      alt={p.alt}
+                      className="w-5 h-5 object-contain"
+                    />
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* LOGIN */}
+              <div className="flex items-center justify-center gap-1 pt-2">
+                <span
+                  style={{ color: t.loginMuted }}
+                  className="text-sm"
+                >
+                  Already have an account?
+                </span>
+
+                <Link to="/sign-in">
+                  <span
+                    style={{ color: t.loginLink }}
+                    className="text-sm font-bold hover:underline"
+                  >
+                    Login
+                  </span>
+                </Link>
+              </div>
+
+            </form>
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div
+            style={{ zIndex: 25 }}
+                  className="hidden lg:flex flex-1 relative overflow-hidden"
+          >
+
+            {/* TOGGLE */}
+            <motion.button
+              onClick={() => setIsDark((d) => !d)}
+              whileHover={{
+                scale: 1.15,
+                rotate: 15,
+              }}
+              whileTap={{ scale: 0.9 }}
+              style={{ color: t.toggleColor }}
+              className="absolute top-5 right-5 z-50"
+            >
+              <ThemeIcon
+                size={22}
+                strokeWidth={2}
+                 fill={isDark ? "currentColor" : "none"}
+              />
+            </motion.button>
+
+            {/* IMAGE */}
+            <img
+              src="/images/Auth/loginHuman.png"
+              alt="Sign up illustration"
+              draggable={false}
+              className="absolute bottom-0 right-0 object-contain select-none"
+              style={{
+                width: "85%",
+                maxWidth: "500px",
+                zIndex: 40,
+              }}
+            />
+
+          </div>
+
+        </motion.div>
+      </div>
     </div>
   );
 };

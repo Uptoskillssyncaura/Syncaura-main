@@ -1,6 +1,7 @@
 import { Video, Camera, Monitor, ArrowRight } from "lucide-react";
 import { TbBrandGoogleDrive, TbBrandTeams } from "react-icons/tb";
 import { useSelector } from "react-redux";
+import { memo } from "react";
 
 function getMeetingStatus(startTime, endTime) {
   const now = new Date();
@@ -79,7 +80,7 @@ function formatMeetingTime(startTime, endTime) {
   return `${format(start)} - ${format(end)}`;
 }
 
-export default function MeetingCard({
+const MeetingCard = memo(function MeetingCard({
   platform,
   title,
   startTime,
@@ -221,21 +222,12 @@ export default function MeetingCard({
             {/* Button below icons */}
             <button
               disabled={isCompleted}
-              className={`
-                px-3 py-1.5
-                rounded-full
-                flex items-center justify-center
-                text-xs font-semibold
-                shadow-[0_4px_10px_0_rgba(0,0,0,0.25)]
-                transition
-                min-w-[100px]
-                ${isCompleted
+              className={`btn-hover px-3 py-1.5 rounded-full flex items-center justify-center text-xs font-semibold shadow-[0_4px_10px_0_rgba(0,0,0,0.25)] transition min-w-[100px] ${isCompleted
                   ? "bg-red-500 dark:bg-[#1E293B] dark:text-[#94A3B8] text-yellow-300 cursor-not-allowed"
                   : isUpcoming
                     ? "bg-[#D9D9D9] dark:bg-[#5e5c5c] dark:text-[#73FBFD] text-gray-700 cursor-pointer"
                     : "bg-blue-600 hover:bg-blue-700 dark:bg-[#73FBFD] dark:text-[#2E2F2F] text-white"
-                }
-              `}
+                } `}
             >
               {isCompleted
                 ? "Completed"
@@ -250,137 +242,148 @@ export default function MeetingCard({
         </div>
       </div>
 
-      {/* Desktop card (hidden on mobile) - COMPLETELY UNCHANGED */}
-      <div className="
-        hidden sm:block
-        w-[270px]
-        xl:w-[280px]
-        rounded-[20%_20%]
-        bg-white dark:bg-[#2E2F2F]
-        shadow-[0_4px_10px_0_rgba(0,0,0,0.25)]
-        px-5 md:px-4 xl:px-7 
-        py-8 md:py-6 sm:py-7 2xl:py-8
-        space-y-3
-        transition
-      ">
-        {/* Status + Platform - UNCHANGED (Status on LEFT, Platform on RIGHT) */}
-        <div className="flex items-center justify-between">
-          <span
-            className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full
-              ${status.textColor} ${status.bgColor}`}
-          >
-            <span className={`size-2 rounded-full ${status.dotColor}`} />
-            {status.label}
-          </span>
+     {/* Desktop Card */}
+{/* Desktop Card */}
+<div
+  className="
+    hidden sm:flex
+    flex-col
+    justify-between
+    w-[300px]
+    h-[290px]
+    bg-white
+    dark:bg-[#2F2F2F]
+    rounded-[28px]
+    border border-[#ECECEC]
+    dark:border-[#3B3B3B]
+    shadow-[0_4px_12px_rgba(0,0,0,0.08)]
+dark:shadow-[0_0_25px_rgba(115,251,253,0.18)]
+    p-4
+    transition-all duration-200
+  "
+>
+  {/* Top */}
+  <div className="flex items-center justify-between">
+    <span
+      className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full ${status.textColor} ${status.bgColor}`}
+    >
+      <span className={`size-2 rounded-full ${status.dotColor}`} />
+      {status.label}
+    </span>
 
-          <div className="flex items-center gap-1 text-sm text-black dark:text-[#F5F5F5]">
-            {platform === "Zoom" ? (
-              <Video className="size-5" />
-            ) : platform === "Google Meet" ? (
-              <TbBrandGoogleDrive className="size-5" />
-            ) : (
-              <TbBrandTeams className="size-5" />
-            )}
-            {platform === "Google Meet" ? "Meet" : platform}
-          </div>
-        </div>
+    <div className="flex items-center gap-1 text-xs text-[#4b5563] dark:text-white">
+      {platform === "Zoom" ? (
+        <Video className="size-4" />
+      ) : platform === "Google Meet" ? (
+        <TbBrandGoogleDrive className="size-4" />
+      ) : (
+        <TbBrandTeams className="size-4" />
+      )}
+      <span>{platform === "Google Meet" ? "Meet" : platform}</span>
+    </div>
+  </div>
 
-        <div className="w-full flex flex-col gap-1 h-23">
-          <h3 className="
-            font-semibold
-            text-xl 2xl:text-2xl
-            leading-snug
-            text-gray-900 dark:text-[#F5F5F5]
-            line-clamp-2
-          ">
-            {title}
-          </h3>
+  {/* Title */}
+  <div className="mt-4 min-h-[80px]">
+    <h3 className="text-[15px] font-semibold text-[#111827] dark:text-white line-clamp-2">
+      {title}
+    </h3>
 
-          {/* Time */}
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-[#F5F5F5]">
-            <span className="size-5 flex items-center justify-center">
-              <img
-                src={
-                  isDark
-                    ? "/images/Meeting/dark/clock.png"
-                    : "/images/Meeting/clock.png"
-                }
-                alt="clock"
-              />
-            </span>
-            <p>{formatMeetingTime(startTime, endTime)}</p>
-          </div>
-        </div>
+    <div className="flex items-center gap-2 mt-3">
+      <img
+        src={
+          isDark
+            ? "/images/Meeting/dark/clock.png"
+            : "/images/Meeting/clock.png"
+        }
+        alt="clock"
+        className="size-4"
+      />
 
-        {/* Avatars */}
-        <div className="flex items-center -space-x-6 gap-2">
-          <div className="flex -space-x-3">
-            {Array.from({ length: visibleAvatars }).map((_, i) => (
-              <img
-                key={i}
-                src="https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg"
-                className="size-8 2xl:size-9 rounded-full border-2 border-white"
-              />
-            ))}
-          </div>
+      <p className="text-sm text-[#6b7280] dark:text-[#d1d5db]">
+        {formatMeetingTime(startTime, endTime)}
+      </p>
+    </div>
+  </div>
 
-          {extraCount > 0 && (
-            <span className="size-8 text-sm font-semibold flex items-center justify-center text-black bg-[#E0DDDD] rounded-full border border-white">
-              +{extraCount}
-            </span>
-          )}
-        </div>
+  {/* Avatars */}
+  <div className="flex items-center mt-4">
+    <div className="flex -space-x-2">
+      {Array.from({ length: visibleAvatars }).map((_, i) => (
+        <img
+          key={i}
+          src={`https://i.pravatar.cc/40?img=${i + 1}`}
+          className="w-7 h-7 rounded-full border-2 border-white object-cover"
+          alt="avatar"
+        />
+      ))}
+    </div>
 
-        <div className="h-px w-full bg-[#E0DDDD] dark:bg-black" />
-
-        {/* Actions */}
-        <div className="flex items-center gap-6 justify-center pt-2">
-          <button
-            disabled={isCompleted}
-            className={`
-              px-8 py-2
-              rounded-full
-              flex items-center justify-center
-              text-sm font-semibold 
-              shadow-[0_4px_10px_0_rgba(0,0,0,0.25)]
-              transition
-              ${isCompleted
-                ? "bg-red-500 dark:bg-[#1E293B] dark:text-[#94A3B8] text-yellow-300 cursor-not-allowed"
-                : isUpcoming
-                  ? "bg-[#D9D9D9] dark:bg-[#5e5c5c] dark:text-[#73FBFD] text-gray-700 cursor-pointer"
-                  : "bg-blue-600 hover:bg-blue-700 dark:bg-[#73FBFD] dark:text-[#2E2F2F] text-white"
-              }
-            `}
-          >
-            {isCompleted
-              ? "Completed"
-              : isUpcoming
-                ? <div className="flex items-center justify-center gap-5">
-                  <ArrowRight className="size-5 dark:text-[#73FBFD]" /> <span>Details</span>
-                </div>
-                : "Join Now"}
-          </button>
-
-          <div className="flex items-center gap-3">
-            <img
-              src={
-                isDark
-                  ? "/images/Meeting/dark/user.png"
-                  : "/images/Meeting/user.png"
-              }
-              className={isDark ? "h-6 w-8" : "size-6"}
-            />
-            {isDoc && <img
-              src={
-                isDark
-                  ? "/images/Meeting/dark/document.png"
-                  : "/images/Meeting/document.png"
-              }
-              className="size-6"
-            />}
-          </div>
-        </div>
+    {extraCount > 0 && (
+      <div className="w-7 h-7 rounded-full bg-[#E5E7EB] flex items-center justify-center text-[10px] font-semibold ml-1">
+        +{extraCount}
       </div>
+    )}
+  </div>
+
+  {/* Divider */}
+  <div className="border-t border-[#ececec] dark:border-[#3a3a3a] my-3" />
+
+  {/* Bottom */}
+  <div className="flex items-center justify-between">
+    <button
+      disabled={isCompleted}
+      className={`btn-hover min-w-[105px] h-[34px] rounded-full flex items-center justify-center gap-2 text-xs font-medium transition ${
+          isCompleted
+            ? "bg-[#d1d5db] text-[#6b7280]"
+            : isUpcoming
+            ? "bg-[#E5E7EB] dark:bg-[#3A3A3A] text-[#4B5563] dark:text-[#73FBFD]"
+            : isDark
+            ? "bg-[#73FBFD] text-[#1E1E1E] hover:bg-[#5feff2]"
+            : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+        } `}
+    >
+      {isCompleted ? (
+        "Completed"
+      ) : isUpcoming ? (
+        <>
+          <ArrowRight className="size-4 text-[#4B5563] dark:text-[#73FBFD]" />
+          <span className="text-[#4B5563] dark:text-[#73FBFD]">
+            Details
+          </span>
+        </>
+      ) : (
+        "Join Now"
+      )}
+    </button>
+
+    <div className="flex items-center gap-3">
+      <img
+        src={
+          isDark
+            ? "/images/Meeting/dark/user.png"
+            : "/images/Meeting/user.png"
+        }
+        className="size-5"
+        alt="user"
+      />
+
+      {isDoc && (
+        <img
+          src={
+            isDark
+              ? "/images/Meeting/dark/document.png"
+              : "/images/Meeting/document.png"
+          }
+          className="size-5"
+          alt="document"
+        />
+      )}
+    </div>
+  </div>
+</div>
     </>
   );
-}
+});
+
+export default MeetingCard;

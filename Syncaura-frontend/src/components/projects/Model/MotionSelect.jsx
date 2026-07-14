@@ -24,7 +24,7 @@ const MotionSelect = ({ options, startVal, value, onChange }) => {
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
-                className="w-full flex items-center justify-between bg-white dark:bg-[#2E2F2F] py-2 px-5 rounded-2xl text-sm font-semibold text-[#898888]"
+                className="w-full flex items-center justify-between bg-white dark:bg-[#2E2F2F] py-2 px-5 rounded-2xl text-sm font-semibold text-[#898888] btn-hover"
             >
                 {value || startVal}
                 <ChevronDown

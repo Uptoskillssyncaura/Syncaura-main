@@ -17,7 +17,7 @@ import {
 
 const router = express.Router();
 
-// All routes require authentication
+// All routes require authentication2
 router.use(auth);
 
 /**

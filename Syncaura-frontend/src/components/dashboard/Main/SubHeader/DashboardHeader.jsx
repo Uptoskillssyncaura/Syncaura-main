@@ -18,7 +18,7 @@ export default function DashboardHeader({active, setActive}) {
           <button
           onClick={()=>setActive(tab)}
             key={tab}
-            className={`text-xs xl:text-sm  transition font-semibold ${
+            className={`btn-hover text-xs xl:text-sm transition font-semibold ${
               tab === active
                 ? "text-[#8833FF] font-bold"
                 : "text-gray-400 hover:text-[#c39bfa]"
@@ -30,7 +30,7 @@ export default function DashboardHeader({active, setActive}) {
       </div>
 
       {/* RIGHT — Button */}
-      <button className="flex gap-1 xl:gap-3 text-gray-400 fill-gray-500 items-center">
+      <button className="flex gap-1 xl:gap-3 text-gray-400 fill-gray-500 items-center btn-hover">
         <div><FiPlusCircle className="text-white dark:text-[#1A1B1E] fill-[#C3CAD9] dark:fill-[#C3CAD9] size-4 xl:size-6"/></div>
         <p style={{fontFamily: "Poppins"}} className="text-gray-500 dark:text-[#7D8FB3] text-[9px] xl:text-xs font-bold">Add New Project</p>
       </button>

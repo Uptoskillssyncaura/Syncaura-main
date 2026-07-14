@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 
-const SocialAuthButton = ({ icon, alt, onClick }) => {
-  return (
+const SocialAuthButton = ({ icon, alt, onClick, loading = false }) => {  return (
     <motion.button
       onClick={onClick}
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -18,13 +17,17 @@ const SocialAuthButton = ({ icon, alt, onClick }) => {
       }}
       className="flex items-center justify-center py-2 px-7 bg-white border border-[#BCBEC0] rounded-md"
     >
-      <motion.img
-        src={icon}
-        alt={alt}
-        className="size-5"
-        whileHover={{ rotate: 6 }}
-        transition={{ type: "spring", stiffness: 200 }}
-      />
+      {loading ? (
+  <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+) : (
+  <motion.img
+    src={icon}
+    alt={alt}
+    className="size-5"
+    whileHover={{ rotate: 6 }}
+    transition={{ type: "spring", stiffness: 200 }}
+  />
+)}
     </motion.button>
   );
 };

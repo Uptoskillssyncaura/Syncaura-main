@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Ellipsis, Search } from "lucide-react";
 import ToggleSwitch from "./ToggleSwitch";
 import { FaBell } from "react-icons/fa";
@@ -23,7 +24,7 @@ const DotGrid = () => (
   </svg>
 );
 
-const Header = ({ currTab, show, setShow }) => {
+const Header = memo(({ currTab, show, setShow }) => {
   return (
     <div className="header-layout">
       <div className="flex gap-3 xl:gap-9 items-center col-span-3">
@@ -71,6 +72,6 @@ const Header = ({ currTab, show, setShow }) => {
       </div>
     </div>
   );
-};
+});
 
 export default Header;

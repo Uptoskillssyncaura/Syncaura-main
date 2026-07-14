@@ -1,3 +1,4 @@
+
 import { createSlice } from "@reduxjs/toolkit";
 import {
   fetchNotifications,
@@ -5,117 +6,73 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   deleteNotification,
-  clearAllNotifications,
+  clearAllNotifications
 } from "../features/notificationThunks";
 
 const initialState = {
   notifications: [],
   unreadCount: 0,
-  isLoading: false,
+  loading: false,
   error: null,
+  pagination: null,
 };
 
 const notificationSlice = createSlice({
-  name: "notification",
+  name: "notifications",
   initialState,
-  reducers: {
-    clearNotifications(state) {
-      state.notifications = [];
-      state.unreadCount = 0;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch all notifications
+      // Fetch notifications
       .addCase(fetchNotifications.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.loading = true;
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.notifications = action.payload;
+        state.loading = false;
+        state.notifications = action.payload.data;
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
-        state.isLoading = false;
+        state.loading = false;
         state.error = action.payload;
       })
 
-      // Fetch unread count
-      .addCase(fetchUnreadCount.pending, (state) => {
-        state.isLoading = true;
-      })
+      // Unread count
       .addCase(fetchUnreadCount.fulfilled, (state, action) => {
-        state.isLoading = false;
         state.unreadCount = action.payload;
-      })
-      .addCase(fetchUnreadCount.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
       })
 
       // Mark one as read
-      .addCase(markNotificationRead.pending, (state) => {
-        state.isLoading = true;
-      })
       .addCase(markNotificationRead.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.notifications = state.notifications.map((n) =>
-          n._id === action.meta.arg ? { ...n, isRead: true } : n
+        const index = state.notifications.findIndex(
+          (n) => n._id === action.payload._id
         );
-        state.unreadCount = Math.max(0, state.unreadCount - 1);
-      })
-      .addCase(markNotificationRead.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
+        if (index !== -1) {
+          state.notifications[index].isRead = true;
+          state.unreadCount = Math.max(0, state.unreadCount - 1);
+        }
       })
 
       // Mark all as read
-      .addCase(markAllNotificationsRead.pending, (state) => {
-        state.isLoading = true;
-      })
       .addCase(markAllNotificationsRead.fulfilled, (state) => {
-        state.isLoading = false;
-        state.notifications = state.notifications.map((n) => ({
-          ...n,
-          isRead: true,
-        }));
+        state.notifications.forEach((n) => (n.isRead = true));
         state.unreadCount = 0;
       })
-      .addCase(markAllNotificationsRead.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
 
-      // Delete one notification
-      .addCase(deleteNotification.pending, (state) => {
-        state.isLoading = true;
-      })
+      // Delete notification
       .addCase(deleteNotification.fulfilled, (state, action) => {
-        state.isLoading = false;
         state.notifications = state.notifications.filter(
-          (n) => n._id !== action.meta.arg
+          (n) => n._id !== action.payload
         );
       })
-      .addCase(deleteNotification.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
 
-      // Clear all notifications
-      .addCase(clearAllNotifications.pending, (state) => {
-        state.isLoading = true;
-      })
+   
       .addCase(clearAllNotifications.fulfilled, (state) => {
-        state.isLoading = false;
         state.notifications = [];
         state.unreadCount = 0;
-      })
-      .addCase(clearAllNotifications.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
       });
   },
 });
 
-export const { clearNotifications } = notificationSlice.actions;
 export default notificationSlice.reducer;
+      

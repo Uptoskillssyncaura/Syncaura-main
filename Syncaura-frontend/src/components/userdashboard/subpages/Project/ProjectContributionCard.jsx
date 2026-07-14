@@ -16,7 +16,7 @@ export default function ProjectContributionCard() {
     >
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-bold">My Individual Contribution</h2>
-        <button className="text-xs text-cyan-600 dark:text-[#00D2FF] font-bold tracking-tight hover:underline transition-colors">
+        <button className="text-xs text-cyan-600 dark:text-[#00D2FF] font-bold tracking-tight hover:underline transition-colors btn-hover">
           View Detailed Log
         </button>
       </div>

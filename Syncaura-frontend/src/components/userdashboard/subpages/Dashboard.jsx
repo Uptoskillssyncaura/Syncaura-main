@@ -178,7 +178,7 @@ const Dashboard = () => {
               >
                 <button 
                   onClick={() => setActiveAlerts(activeAlerts.filter(a => a.id !== alert.id))}
-                  className="absolute -top-2 -right-2 bg-white dark:bg-gray-800 shadow-md border dark:border-gray-700 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -right-2 bg-white dark:bg-gray-800 shadow-md border dark:border-gray-700 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity btn-hover"
                 >
                   <X className="size-3 text-gray-500" />
                 </button>
@@ -193,7 +193,7 @@ const Dashboard = () => {
             ))}
           </AnimatePresence>
           {activeAlerts.length === 0 && (
-            <button onClick={() => setActiveAlerts([{id:1, title: "API Documentation", type: "blue", link: "Resume Work →"}, {id:2, title: "User Dashboard UI", type: "red", link: "Nudge Designer"}])} className="text-sm text-blue-500 underline">Reset Alerts</button>
+            <button onClick={() => setActiveAlerts([{id:1, title: "API Documentation", type: "blue", link: "Resume Work →"}, {id:2, title: "User Dashboard UI", type: "red", link: "Nudge Designer"}])} className="text-sm text-blue-500 underline btn-hover">Reset Alerts</button>
           )}
         </div>
       </div>

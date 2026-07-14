@@ -68,7 +68,7 @@ export default function ActiveEngagementTable() {
           <div className="flex items-center gap-2 relative">
             <button
               onClick={() => setShowFilter((v) => !v)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-300 text-black dark:bg-[#242628] dark:border-[#3e4042] dark:text-white rounded-md text-sm hover:bg-slate-200 dark:hover:bg-[#2d2f31]"
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-300 text-black dark:bg-[#242628] dark:border-[#3e4042] dark:text-white rounded-md text-sm hover:bg-slate-200 dark:hover:bg-[#2d2f31] btn-hover"
             >
               <Filter size={14} /> Filter
             </button>
@@ -83,7 +83,7 @@ export default function ActiveEngagementTable() {
                   <button
                     key={item}
                     onClick={() => { setFilter(item); setPage(1); setShowFilter(false); }}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-[#2d2f31] ${
+                    className={`btn-hover w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-[#2d2f31] ${
                       filter === item ? "font-bold" : "text-gray-400 dark:text-gray-400"
                     }`}
                   >
@@ -95,7 +95,7 @@ export default function ActiveEngagementTable() {
 
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-300 text-black dark:bg-[#242628] dark:border-[#3e4042] dark:text-white rounded-md text-sm hover:bg-slate-200 dark:hover:bg-[#2d2f31]"
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-300 text-black dark:bg-[#242628] dark:border-[#3e4042] dark:text-white rounded-md text-sm hover:bg-slate-200 dark:hover:bg-[#2d2f31] btn-hover"
             >
               <Download size={14} /> Export
             </button>
@@ -181,14 +181,14 @@ export default function ActiveEngagementTable() {
 
           <div className="flex gap-2 text-slate-600 dark:text-[#94a3b8]">
             <button 
-              className="hover:text-black dark:hover:text-white disabled:opacity-30" 
+              className="hover:text-black dark:hover:text-white disabled:opacity-30 btn-hover" 
               onClick={() => setPage(page - 1)} 
               disabled={page === 1}
             >
               Prev
             </button>
             <button 
-              className="hover:text-black dark:hover:text-white disabled:opacity-30"
+              className="hover:text-black dark:hover:text-white disabled:opacity-30 btn-hover"
               onClick={() => setPage(page + 1)} 
               disabled={page === totalPages}
             >

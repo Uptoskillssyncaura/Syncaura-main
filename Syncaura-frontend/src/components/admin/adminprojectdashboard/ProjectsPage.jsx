@@ -232,7 +232,7 @@ export default function ProjectsPage() {
             <p className="text-2xl font-bold text-black dark:text-white tracking-normal leading-none">Resource Allocation</p>
             <div className="flex bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-lg p-0.5">
               {['By Team', 'By Project'].map(t => (
-                <button key={t} onClick={() => setAlloc(t)} className={`px-[10px] py-[3px] text-[10.5px] font-medium rounded-[6px] transition-all ${alloc === t ? 'bg-white dark:bg-zinc-800 text-gray-800 dark:text-white shadow-sm' : 'text-gray-400'}`}>
+                <button key={t} onClick={() => setAlloc(t)} className={`btn-hover px-[10px] py-[3px] text-[10.5px] font-medium rounded-[6px] ${alloc === t ? 'bg-white dark:bg-zinc-800 text-gray-800 dark:text-white shadow-sm' : 'text-gray-400'}`}>
                   {t}
                 </button>
               ))}
@@ -268,7 +268,7 @@ export default function ProjectsPage() {
                 <span className="absolute left-2 flex pointer-events-none"><IcoSearch /></span>
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter projects..." className="pl-[26px] pr-[10px] py-[5px] border border-gray-200 dark:border-zinc-800 rounded-[6px] text-[11px] font-normal text-gray-700 dark:text-zinc-300 bg-white dark:bg-[#0c192e] w-[155px] outline-none" />
               </div>
-              <button className="px-3 py-[5px] border border-gray-200 dark:border-zinc-800 rounded-[6px] text-[11px] font-medium bg-white dark:bg-zinc-900 text-gray-500 dark:text-zinc-500">Filters</button>
+              <button className="px-3 py-[5px] border border-gray-200 dark:border-zinc-800 rounded-[6px] text-[11px] font-medium bg-white dark:bg-zinc-900 text-gray-500 dark:text-zinc-500 btn-hover">Filters</button>
             </div>
           </div>
           <table className="w-full border-collapse  ">
@@ -290,7 +290,7 @@ export default function ProjectsPage() {
           </table>
           <div className="px-[14px] py-[9px] text-[10px] font-normal text-gray-500 dark:text-zinc-500 flex items-center bg-white dark:bg-[#1c1d1d] justify-between border-t border-gray-600 ">
             <span>Showing 1-5 of 42 projects</span>
-            <div className="flex gap-[5px]"><button className="px-[14px] py-[2px] border border-zinc-100 dark:border-zinc-800 rounded-[4px] bg-white dark:bg-zinc-900 text-black dark:text-zinc-400">Prev</button><button className="px-[14px] py-[2px] border border-zinc-200 dark:border-zinc-800 rounded-[4px] bg-white dark:bg-zinc-900 text-black dark:text-zinc-400">Next</button></div>
+            <div className="flex gap-[5px]"><button className="px-[14px] py-[2px] border border-zinc-100 dark:border-zinc-800 rounded-[4px] bg-white dark:bg-zinc-900 text-black dark:text-zinc-400 btn-hover">Prev</button><button className="px-[14px] py-[2px] border border-zinc-200 dark:border-zinc-800 rounded-[4px] bg-white dark:bg-zinc-900 text-black dark:text-zinc-400 btn-hover">Next</button></div>
           </div>
         </div>
 

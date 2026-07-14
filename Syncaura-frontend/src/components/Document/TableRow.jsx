@@ -42,7 +42,7 @@ const TableRow = ({ name, type, version, date, status, docColor }) => {
         </div>
 
         <div className="flex-1/13 w-full flex justify-end">
-          <button className="text-[#2461E6] hover:underline font-medium">
+          <button className="text-[#2461E6] hover:underline font-medium btn-hover">
             Edit
           </button>
         </div>
@@ -87,7 +87,7 @@ const TableRow = ({ name, type, version, date, status, docColor }) => {
           </div>
 
           <div className="flex justify-end pt-2">
-            <button className="text-sm font-medium text-[#2461E6] hover:underline">
+            <button className="text-sm font-medium text-[#2461E6] hover:underline btn-hover">
               Edit
             </button>
           </div>

@@ -36,10 +36,7 @@ const Tabs = ({ tabs, active, setActive }) => {
           <button
             key={tab}
             onClick={() => setActive(index)}
-            className={`
-              relative py-2 text-[10px] xl:text-xs 2xl:text-sm font-semibold transition-colors duration-300
-              ${active === index ? "text-[#FF6633]" : "text-[#7D8FB3]"}
-            `}
+            className={`btn-hover relative py-2 text-[10px] xl:text-xs 2xl:text-sm font-semibold transition-colors duration-300 ${active === index ? "text-[#FF6633]" : "text-[#7D8FB3]"} `}
           >
             {tab}
           </button>

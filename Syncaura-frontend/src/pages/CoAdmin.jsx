@@ -24,7 +24,7 @@ export default function CoAdmin() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-5 py-[5px] border-none rounded-full text-[13px] transition-all whitespace-nowrap cursor-pointer ${isActive
+                className={`btn-hover px-5 py-[5px] border-none rounded-full text-[13px] whitespace-nowrap cursor-pointer ${isActive
                   ? "font-semibold text-blue-600 dark:text-[#73FBFD] bg-[#f0f4ff] dark:bg-slate-800"
                   : "font-medium text-[#64748b] dark:text-slate-400 bg-transparent hover:text-slate-900 dark:hover:text-slate-200"
                   }`}

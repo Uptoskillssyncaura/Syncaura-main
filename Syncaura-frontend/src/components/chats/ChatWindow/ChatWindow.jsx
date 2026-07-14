@@ -16,14 +16,14 @@ export default function ChatWindow({ chat, onBack, setOpen, viewMode = "chat" })
           <ChatHeader chat={chat} setOpen={setOpen} onBack={onBack} />
 
           {/* Chat body */}
-          <div className="relative flex-1 overflow-hidden">
+          <div className="relative flex-1 overflow-hidden min-h-0">
             {/* Background */}
             <div className="absolute w-full inset-0 z-0 pointer-events-none">
               <GeometricBackground />
             </div>
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col h-full">
+            <div className="relative z-10 flex flex-col h-full min-h-0">
               <ChatMessages viewMode={viewMode} currentChat={chat} />
               {viewMode === "chat" && <ChatInput />}
             </div>

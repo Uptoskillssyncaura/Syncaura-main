@@ -7,12 +7,37 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import AttendanceCard from "../components/AttendanceLeave/AttendanceCard";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import AttendanceList from "../components/AttendanceLeave/AttendanceList";
 import { motion, AnimatePresence } from "framer-motion";
 import { leaveHistory } from "../constant/constant";
 import LeaveModel from "../components/AttendanceLeave/LeaveModel";
 import AttendanceLeaveFilter from "../components/AttendanceLeave/AttendanceLeaveFilter";
+
+const attendanceData = [
+  {
+    title: "Present Days",
+    value: 13,
+    borderColor: "border-[#29CC39]",
+    icon: <CircleCheckBig className="size-3.5 text-[#29CC39]" />,
+  },
+  {
+    title: "Absent Days",
+    value: 2,
+    borderColor: "border-[#FF0000]",
+    icon: (
+      <div className="border border-[#FF0000] size-3.5">
+        <XCircleIcon className="size-full text-[#FF0000]" />
+      </div>
+    ),
+  },
+  {
+    title: "Leave Taken",
+    value: 4,
+    borderColor: "border-[#FF9500]",
+    icon: <Calendar className="size-3.5 text-[#FF9500]" />,
+  },
+];
 
 const AttendanceLeave = () => {
   const [selectedId, setSelectedId] = useState(0);
@@ -27,31 +52,6 @@ const AttendanceLeave = () => {
   const [debouncedValue, setDebouncedValue] = useState("");
   const [showFilter, setShowFilter] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(null);
-
-  const attendanceData = [
-    {
-      title: "Present Days",
-      value: 13,
-      borderColor: "border-[#29CC39]",
-      icon: <CircleCheckBig className="size-3.5 text-[#29CC39]" />,
-    },
-    {
-      title: "Absent Days",
-      value: 2,
-      borderColor: "border-[#FF0000]",
-      icon: (
-        <div className="border border-[#FF0000] size-3.5">
-          <XCircleIcon className="size-full text-[#FF0000]" />
-        </div>
-      ),
-    },
-    {
-      title: "Leave Taken",
-      value: 4,
-      borderColor: "border-[#FF9500]",
-      icon: <Calendar className="size-3.5 text-[#FF9500]" />,
-    },
-  ];
 
   useEffect(() => {
     const timer = setTimeout(
@@ -116,9 +116,9 @@ const AttendanceLeave = () => {
     };
   }, [showPopup]);
 
-  const handleApplyFilters = (newFilters) => {
+  const handleApplyFilters = useCallback((newFilters) => {
     setAppliedFilters(newFilters);
-  };
+  }, []);
 
   return (
     <div className="relative w-full min-h-[calc(92vh)] flex flex-col bg-[#FFFFFF] dark:bg-[#000000]">
@@ -129,10 +129,7 @@ const AttendanceLeave = () => {
         <div className="flex w-full flex-3/5 md:flex-2/5 2xl:flex-1/5 items-center justify-center gap-2 ">
           <button
             onClick={() => setShowFilter((prev) => !prev)}
-            className={`px-4 py-2 bg-white dark:bg-[#000000]
-                    flex items-center gap-2
-                    border rounded-4xl ${showFilter ? "border-[#2461E6]  dark:border-[#73FBFD] " : " border-[#989696] dark:border-[#989696]"}
-                    `}
+            className={`btn-hover px-4 py-2 bg-white dark:bg-[#000000] flex items-center gap-2 border rounded-4xl ${showFilter ? "border-[#2461E6] dark:border-[#73FBFD]" : "border-[#989696] dark:border-[#989696]"} `}
           >
             <Funnel
               className={`size-5 ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"} `}
@@ -170,39 +167,37 @@ const AttendanceLeave = () => {
           </div>
         </div>
       </div>
-
       <motion.div
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex items-center px-5 py-3 gap-x-5 2xl:gap-x-15 gap-y-5 mt-2 flex-wrap justify-center"
-      >
+  initial={{ opacity: 0, x: -40 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.4, ease: "easeOut" }}
+  className="flex items-center gap-6 px-4 py-3 mt-2 ml-4 max-w-[980px]"
+>
         {attendanceData.map((item, index) => (
           <AttendanceCard key={index} {...item} />
         ))}
-        <div className="relative inline-block">
+        <div className="relative inline-block ml-20">
           {/* TOP CARD */}
           <motion.div
-            onClick={() => setShowPopup((prev) => !prev)}
-            ref={triggerRef}
-            whileTap={{ scale: 0.97 }}
-            className="cursor-pointer flex flex-col items-center justify-center w-72 2xl:w-52 gap-3 shadow-[0_0_10px_0_#EDEDED] px-5 py-4 bg-[#FFFFFF] dark:bg-[#2E2F2F] dark:shadow-[0_0_10px_0_#171717] rounded-2xl"
-          >
-            <h1 className="text-[#FF0000] font-normal text-xl">
-              Mark the Presence
-            </h1>
+  onClick={() => setShowPopup((prev) => !prev)}
+  ref={triggerRef}
+  whileTap={{ scale: 0.97 }}
+  className="cursor-pointer w-[220px] h-[65px] px-4 rounded-2xl shadow-[0_0_10px_1px_#EDEDED] dark:shadow-[0_0_10px_1px_#171717] bg-[#FFFFFF] dark:bg-[#2E2F2F] flex flex-col justify-center"
+>
+  <h1 className="text-[#FF0000] font-medium text-lg">
+    Mark the Presence
+  </h1>
 
-            <div className="flex items-center justify-between w-full">
-              {["In :- ", "Out : - "].map((item, idx) => (
-                <p
-                  key={idx}
-                  className="text-[#000000] dark:text-[#F8F8F8] text-sm"
-                >
-                  {item}
-                </p>
-              ))}
-            </div>
-          </motion.div>
+  <div className="flex items-center justify-between mt-1">
+    <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
+      In: -
+    </p>
+
+    <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
+      Out: -
+    </p>
+  </div>
+</motion.div>
 
           {/* POPUP */}
           <AnimatePresence>
@@ -340,7 +335,7 @@ const AttendanceLeave = () => {
 
       <button
         onClick={() => setOpenModel(true)}
-        className="fixed cursor-pointer bottom-8 right-8  rounded-2xl font-semibold px-7 py-3 z-30 bg-[#2457C5] text-[#EDEDED] dark:bg-[#73FBFD] dark:text-[#000000] text-base lg:text-xl"
+        className="fixed cursor-pointer bottom-8 right-8 rounded-2xl font-semibold px-7 py-3 z-30 bg-[#2457C5] text-[#EDEDED] dark:bg-[#73FBFD] dark:text-[#000000] text-base lg:text-xl btn-hover"
       >
         <p>Apply Leave</p>
       </button>

@@ -68,7 +68,7 @@ export default function NoticeFilter({ onClose, onApply }) {
               <button
                 onClick={() => setStatus(item)}
                 key={item}
-                className={`px-4 py-1.5 rounded-full text-sm border ${
+                className={`btn-hover px-4 py-1.5 rounded-full text-sm border ${
                   status === item
                     ? "border-blue-500 text-blue-500 dark:border-[#73FBFD] dark:text-[#73FBFD]"
                     : "border-gray-300 text-gray-500"

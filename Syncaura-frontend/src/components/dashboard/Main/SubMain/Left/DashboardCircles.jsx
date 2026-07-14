@@ -1,15 +1,13 @@
 import CircularProgress from "./CircularProgress";
-import useScreenSize from "./hook/useScreenSize";
+import useMediaQuery from "./hook/useMediaQuery";
 
 const DashboardCircles = () => {
-  const width = useScreenSize();
-
-  const is2xl = width >= 1280;
+  const is2xl = useMediaQuery("(min-width: 1280px)");
 
   return (
     <CircularProgress
       value={80}
-      radius={!is2xl ? 100 : 120}
+      radius={is2xl ? 120 : 100}
       strokeWidth={3}
       color="#3361FF"
       startAngle={150}
@@ -17,7 +15,7 @@ const DashboardCircles = () => {
     >
       <CircularProgress
         value={60}
-        radius={!is2xl ? 70 : 85}
+        radius={is2xl ? 85 : 70}
         strokeWidth={2}
         color="#FF6633"
         startAngle={40}
@@ -26,7 +24,7 @@ const DashboardCircles = () => {
       >
         <CircularProgress
           value={40}
-          radius={!is2xl ? 32 : 40}
+          radius={is2xl ? 40 : 32}
           strokeWidth={1.5}
           color="#2EC938"
           startAngle={50}

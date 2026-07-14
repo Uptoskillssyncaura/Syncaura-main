@@ -3,6 +3,7 @@ import http from 'http';
 import app from './src/app.js';
 import { Server } from "socket.io";
 import socketHandler from "./src/config/socket.js";
+import "./src/scheduler/reminderScheduler.js";
 const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);

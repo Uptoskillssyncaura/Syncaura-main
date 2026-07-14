@@ -217,7 +217,7 @@ export default function SupportChatbot() {
                             </div>
                             <div className="flex items-center gap-5 ">
                                 <Minus className="text-white size-6" />
-                                <button onClick={() => setOpen(false)} >
+                                <button className="btn-hover" onClick={() => setOpen(false)} >
                                     <X className="text-white size-6" />
                                 </button>
                             </div>
@@ -294,7 +294,7 @@ export default function SupportChatbot() {
 
                         <div className="px-4 w-full flex flex-col py-4 gap-1 dark:bg-[#111418] border dark:border-[#000000] ">
                             <div className="border-t p-2 flex gap-2 items-center bg-[#F9FAFB] dark:bg-[#1A222C] border rounded-xl border-[#E2E4E9] dark:border-[#000000] py-2 px-1">
-                                <button onClick={startVoice} className="text-blue-500">
+                                <button onClick={startVoice} className="text-blue-500 btn-hover">
                                     <Mic size={18} />
                                 </button>
                                 <input
@@ -306,7 +306,7 @@ export default function SupportChatbot() {
                                 />
                                 <button
                                     onClick={() => (loading ? terminateBot() : sendMessage())}
-                                    className="bg-blue-500 text-white p-2 rounded-full"
+                                    className="bg-blue-500 text-white p-2 rounded-full btn-hover"
                                 >
                                     {loading ? <Pause size={16} /> : <Send size={16} />}
                                 </button>

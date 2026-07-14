@@ -25,42 +25,70 @@ const ToolsGrid = () => {
   ];
 
   return (
-    <section id="pricing" className="w-full pt-10 md:pt-12 pb-8 md:pb-16" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        {/* Header - Centered */}
+    <section
+      id="pricing"
+      className="w-full pt-10 md:pt-12 pb-8 md:pb-16"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16">
+
+        {/* Header */}
         <div className="text-center mb-8 md:mb-16">
-          <p className="text-xs md:text-sm font-medium mb-2 md:mb-3" style={{ color: 'var(--text-secondary)' }}>
+
+          <p
+            className="text-xs sm:text-sm font-medium mb-2 md:mb-3"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             Tools
           </p>
-          <h2 className="text-[34px] md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4" style={{ color: 'var(--text-primary)' }}>
+
+          <h2
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 md:mb-4"
+            style={{ color: 'var(--text-primary)' }}
+          >
             Everything you need to work
           </h2>
-          <p className="text-xl md:text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Each feature built to save time and eliminate friction from your daily
-            workflow.
+
+          <p
+            className="text-sm sm:text-base leading-relaxed"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Each feature built to save time and eliminate friction from your daily workflow.
           </p>
+
         </div>
 
-        {/* Cards - Single column on mobile, grid on larger screens */}
+        {/* Cards */}
         <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6">
+
           {tools.map((tool, index) => (
             <div
               key={index}
               className="p-5 md:p-6 rounded-2xl border hover:shadow-xl transition-all duration-300 md:hover:-translate-y-1"
-              style={{ 
+              style={{
                 backgroundColor: 'var(--card-bg)',
-                borderColor: 'var(--border-color)' 
+                borderColor: 'var(--border-color)'
               }}
             >
-              <h3 className="text-[17px] md:text-lg font-semibold mb-3 leading-snug" style={{ color: 'var(--text-primary)' }}>
+              <h3
+                className="text-base sm:text-lg font-semibold mb-3 leading-snug"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {tool.title}
               </h3>
-              <p className="text-[14px] md:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 {tool.description}
               </p>
+
             </div>
           ))}
+
         </div>
+
       </div>
     </section>
   );

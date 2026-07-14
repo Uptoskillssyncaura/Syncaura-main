@@ -1,5 +1,5 @@
-import { ChevronDown, Ellipsis, Flag, ListFilter, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronDown, ListFilter, Plus } from "lucide-react";
+import { useState } from "react";
 import Tab from "../components/projects/Tab";
 import ProjectCard from "../components/projects/ProjectCard";
 import { PROJECTS } from "../constant/constant";
@@ -47,12 +47,12 @@ const Projects = () => {
           <h1 className="font-bold text-3xl text-[#000000] dark:text-[#F8F8F8]">
             Projects
           </h1>
-          <div onClick={() => setShowModel(true)} className="px-4 cursor-pointer py-2.5 bg-[#2457C5] dark:bg-[#73FBFD] rounded-3xl flex items-center justify-center gap-2 ">
+          <button onClick={() => setShowModel(true)} className="px-4 cursor-pointer py-2.5 bg-[#2457C5] dark:bg-[#73FBFD] rounded-3xl flex items-center justify-center gap-2 ">
             <Plus className="text-xl text-[#FFFFFF] dark:text-[#000000] " />
             <h2 className="text-[#FFFFFF] dark:text-[#000000] text-base font-semibold">
               New Project
             </h2>
-          </div>
+          </button>
         </div>
         <div className="flex  flex-col gap-4 px-4 py-3 w-full 
                 md:flex-row md:items-center md:justify-between">
@@ -86,10 +86,7 @@ const Projects = () => {
               <ChevronDown className="size-5 text-[#082A44] dark:text-[#B2B2B2]" />
             </div>
 
-            <button onClick={()=>setShowFilter((prev)=> !prev)} className={`px-4 py-2  
-                    flex items-center gap-2
-                    border rounded-xl ${showFilter? "border-[#2461E6]  dark:border-[#73FBFD] bg-blue-100 dark:bg-gray-950": "border-[#EAECEF] bg-white dark:border-[#575757] dark:bg-[#575757]"}
-                    `}>
+            <button onClick={()=>setShowFilter((prev)=> !prev)} className={`btn-hover px-4 py-2 flex items-center gap-2 border rounded-xl ${showFilter? "border-[#2461E6] dark:border-[#73FBFD] bg-blue-100 dark:bg-gray-950": "border-[#EAECEF] bg-white dark:border-[#575757] dark:bg-[#575757]"} `}>
               <ListFilter className={`size-5  ${showFilter?"text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"} `} />
               <h1 className={`text-sm  ${showFilter?"text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"}  font-semibold`}>
                 Filter
@@ -121,20 +118,28 @@ const Projects = () => {
       <div className="bg-[#FFFFFF] dark:bg-[#000000] mt-5 transition-colors duration-500">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
-            key={currTab}
-            custom={direction}
-            initial={{ x: direction === 1 ? 300 : -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: direction === 1 ? -300 : 300, opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="px-5 py-3 flex flex-wrap items-center justify-center gap-x-14 gap-y-8"
-          >
-          <div className="px-5 py-3  flex flex-wrap  items-center justify-center gap-x-14 gap-y-8 ">
-            {filteredProjects.map(({ title, department, priority, progress, dueDate, avatars }, idx) => (
-              <ProjectCard key={idx} title={title} department={department} priority={priority} progress={progress} dueDate={dueDate} avatars={avatars} />
-            ))}
-          </div>
-          </motion.div>
+      key={currTab}
+      custom={direction}
+      initial={{ x: direction === 1 ? 300 : -300, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: direction === 1 ? -300 : 300, opacity: 0 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+      className="px-5 py-3 flex flex-wrap items-center justify-center gap-x-14 gap-y-8"
+    >
+      {filteredProjects.map(
+        ({ title, department, priority, progress, dueDate, avatars }, idx) => (
+          <ProjectCard
+            key={idx}
+            title={title}
+            department={department}
+            priority={priority}
+            progress={progress}
+            dueDate={dueDate}
+            avatars={avatars}
+          />
+        )
+      )}
+    </motion.div>
         </AnimatePresence>
         
       </div>

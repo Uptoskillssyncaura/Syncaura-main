@@ -58,7 +58,7 @@ export default function SidebarPanel({ show }) {
     "Facebook Application",
   ];
   return (
-    <div className="w-full space-y-1">
+    <div className="w-full min-w-0 space-y-3 sm:space-y-4">
       <div
         className={`
     bg-white dark:bg-[#000000]
@@ -71,13 +71,13 @@ export default function SidebarPanel({ show }) {
           }
   `}
       >
-        <div className="bg-purple-600 rounded-xl px-5 py-2  flex items-center justify-between">
+        <div className="bg-purple-600 rounded-xl px-4 py-3 sm:px-5 sm:py-2 flex items-center justify-between gap-3">
           <div className="flex items-center gap-4 xl:gap-2">
             <AiFillHome className="text-purple-400 text-sm xl:text-lg" />
-            <h3 className="text-white  font-semibold text-xs xl:text-base">My projects</h3>
+            <h3 className="text-white font-semibold text-xs sm:text-sm xl:text-base">My projects</h3>
           </div>
 
-          <div className="text-xs bg-white/30 text-white  flex size-7 px-4 xl:px-5 py-1 items-center justify-center mr-10  rounded-[50%/50%] font-semibold">
+          <div className="text-xs bg-white/30 text-white flex size-7 shrink-0 items-center justify-center rounded-[50%/50%] font-semibold">
             9
           </div>
         </div>
@@ -94,8 +94,8 @@ export default function SidebarPanel({ show }) {
         </div>
       </div>
 
-      <div className=" dark:bg-[#000000] transition-colors duration-550 shadow-[0_5px_5px_1px_rgba(0,0,0,0.25)] rounded-2xl p-5 space-y-6">
-        <div className="flex bg-white dark:bg-[#1A1B1E] flex-col px-3 xl:px-5 py-4 rounded-xl shadow-[0_3px_3px_1px_rgba(0,0,0,0.28),0_-1px_0px_0px_rgba(0,0,0,0.15)]">
+      <div className="dark:bg-[#000000] transition-colors duration-550 shadow-[0_5px_5px_1px_rgba(0,0,0,0.25)] rounded-2xl p-4 sm:p-5 space-y-4 sm:space-y-6">
+        <div className="flex bg-white dark:bg-[#1A1B1E] flex-col px-3 sm:px-4 xl:px-5 py-4 rounded-xl shadow-[0_3px_3px_1px_rgba(0,0,0,0.28),0_-1px_0px_0px_rgba(0,0,0,0.15)]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-500">
               Projects on Deadlines
@@ -113,13 +113,13 @@ export default function SidebarPanel({ show }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {statsOvelCard.map(({ label, value, color }, index) => (
             <StatsItems key={index} label={label} value={value} color={color} />
           ))}
         </div>
 
-        <div className="flex flex-col bg-white dark:bg-[#000000] transition-colors duration-550  py-3 shadow-[0_3px_2px_1px_rgba(0,0,0,0.10),0_-1px_0px_0px_rgba(0,0,0,0.005)] rounded-2xl px-0  xl:px-3">
+        <div className="flex flex-col bg-white dark:bg-[#000000] transition-colors duration-550 py-3 shadow-[0_3px_2px_1px_rgba(0,0,0,0.10),0_-1px_0px_0px_rgba(0,0,0,0.005)] rounded-2xl px-0 xl:px-3">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-400">
               Recent Projects

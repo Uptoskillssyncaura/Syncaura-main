@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { TrendingUp } from "lucide-react";
 
 const names = ["Sarah", "Mike", "Jess", "David"];
 
@@ -63,7 +64,7 @@ export default function DashboardSection() {
   // Count-up numbers
   const totalTasks = useCountUp(142);
   const completed = useCountUp(89);
-  const inProgress = useCountUp(42);
+  const inProgress = useCountUp(89);
   const blocked = useCountUp(11);
 
   const alerts = [
@@ -120,15 +121,15 @@ export default function DashboardSection() {
 
   const bottleneckRows = [
     { id: "backlog", label: "Backlog", tasks: "42 Tasks", time: "1.2 days", timeColor: "text-blue-500 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30", leftBorder: "", indent: "w-[0%]", width: "w-full", stuck: false },
-    { id: "dev", label: "Development", tasks: "28 Tasks", time: "3.5 days", timeColor: "text-emerald-500 dark:text-emerald-400", bg: "bg-blue-100 dark:bg-blue-900/30", leftBorder: "border-l-[3px] border-emerald-400", indent: "w-[10%]", width: "w-[80%]", stuck: false },
-    { id: "devstuck", label: "Development", tasks: "15 Stuck", time: "5.2 days", timeColor: "text-red-500 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/30", leftBorder: "border-l-[3px] border-red-400", indent: "w-[20%]", width: "w-[60%]", stuck: true },
+    { id: "dev", label: "Development", tasks: "28 Tasks", time: "3.5 days", timeColor: "text-emerald-500 dark:text-emerald-400", bg: "bg-blue-100 dark:bg-blue-900/30", leftBorder: "border-l-[3px] border-emerald-400", indent: "w-[5%] sm:w-[10%]", width: "w-[90%] sm:w-[80%]", stuck: false },
+    { id: "devstuck", label: "Development", tasks: "15 Stuck", time: "5.2 days", timeColor: "text-red-500 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/30", leftBorder: "border-l-[3px] border-red-400", indent: "w-[10%] sm:w-[20%]", width: "w-[85%] sm:w-[60%]", stuck: true },
     { id: "done", label: "Done", tasks: "89 Tasks", time: null, timeColor: "", bg: "bg-blue-100 dark:bg-blue-900/30", leftBorder: "", indent: "w-[30%]", width: "w-[40%]", stuck: false },
   ];
 
   const progressRows = [
     { name: "Sarah Jenkins", pct: 100, bar: "bg-red-500", label: "100%(Over)", labelCls: "text-red-500", delay: 0 },
     { name: "Mike Ross", pct: 85, bar: "bg-emerald-500", label: "85%(Optimal)", labelCls: "text-emerald-500", delay: 100 },
-    { name: "Jessica Chang", pct: 52, bar: "bg-blue-500", label: "52%(High)", labelCls: "text-blue-500", delay: 200 },
+    { name: "Jessica Chang", pct: 92, bar: "bg-blue-500", label: "92%(High)", labelCls: "text-blue-500", delay: 200 },
     { name: "David Kim", pct: 60, bar: "bg-blue-400", label: "60%(Available)", labelCls: "text-slate-500 dark:text-slate-400", delay: 300 },
   ];
 
@@ -181,7 +182,9 @@ export default function DashboardSection() {
           </div>
           <div className="flex gap-3 items-end">
             <p className="text-3xl font-extrabold text-slate-800 dark:text-white leading-none">{totalTasks}</p>
-            <p className="text-xs font-bold text-emerald-500 mb-0.5">↑ 5%</p>
+            <p className="text-xs font-bold text-emerald-500 mb-0.5 flex items-center gap-1">
+              <TrendingUp size={12}/> 5%
+            </p>
           </div>
         </div>
 
@@ -199,7 +202,9 @@ export default function DashboardSection() {
           </div>
           <div className="flex gap-3 items-end">
             <p className="text-3xl font-extrabold text-slate-800 dark:text-white leading-none">{completed}</p>
-            <p className="text-xs font-bold text-emerald-500 mb-0.5">↑ 12%</p>
+            <p className="text-xs font-bold text-emerald-500 mb-0.5 flex items-center gap-1">
+                <TrendingUp size={12} /> 12%
+            </p>
           </div>
         </div>
 
@@ -219,7 +224,7 @@ export default function DashboardSection() {
           </div>
           <div className="flex gap-3 items-end">
             <p className="text-3xl font-extrabold text-slate-800 dark:text-white leading-none">{inProgress}</p>
-            <p className="text-xs font-bold text-blue-500 mb-0.5">↑ 3%</p>
+            <p className="text-xs font-bold text-blue-500 mb-0.5">→3%</p>
           </div>
         </div>
 
@@ -238,7 +243,9 @@ export default function DashboardSection() {
           </div>
           <div className="flex gap-3 items-end">
             <p className="text-3xl font-extrabold text-slate-800 dark:text-white leading-none">{blocked}</p>
-            <p className="text-xs font-bold text-red-500 mb-0.5">↑ 2%</p>
+            <p className="text-xs font-bold text-red-500 mb-0.5 flex items-center gap-1">
+                <TrendingUp size={12} /> 2%
+            </p>
           </div>
         </div>
 
@@ -287,16 +294,16 @@ export default function DashboardSection() {
         <p className="font-bold text-slate-500 dark:text-slate-400 mb-4">Sprint Health (Planned vs Actual)</p>
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
           <div className="relative shrink-0 w-[160px] h-[160px] md:w-[200px] md:h-[200px]">
-            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+            <svg viewBox="0 0 36 36" className="w-full h-full" style={{ transform: "rotate(-165deg)" }}>
               <circle cx="18" cy="18" r="13" fill="none" stroke="#e9e7e7" strokeWidth="4.5" />
-              <circle cx="18" cy="18" r="13" fill="none" stroke="#3b82f6" strokeWidth="4.5"
-                strokeDasharray="66.9 100" strokeDashoffset="0" />
               <circle cx="18" cy="18" r="13" fill="none" stroke="#22c55e" strokeWidth="4.5"
-                strokeDasharray="45 100" strokeDashoffset="0" />
+                strokeDasharray="55 82" strokeDashoffset="5" />
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#3b82f6" strokeWidth="4.5"
+                strokeDasharray="19 82" strokeDashoffset="-49" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-bold text-slate-600 dark:text-slate-300">90%</span>
-              <span className="text-[9px] text-slate-400 text-center leading-tight">Adherence</span>
+              <span className="text-3xl font-bold text-slate-600 dark:text-slate-300">90%</span>
+              <span className="text-[11px] text-slate-400 text-center leading-tight">Adherence</span>
             </div>
           </div>
           <div className="flex flex-wrap justify-center gap-4 md:gap-10">
@@ -323,7 +330,7 @@ export default function DashboardSection() {
           <span className="font-bold text-slate-500 dark:text-slate-400">Project Progress Overview</span>
           <button
             onClick={() => setViewDetailsOpen(v => !v)}
-            className="text-xs text-blue-500 cursor-pointer border-0 bg-transparent hover:text-blue-700 transition-colors font-medium btn-press"
+            className="text-xs text-blue-500 cursor-pointer border-0 bg-transparent hover:text-blue-700 transition-colors font-medium btn-press btn-hover"
           >
             {viewDetailsOpen ? "Hide Details ▲" : "View Details ▼"}
           </button>
@@ -373,8 +380,7 @@ export default function DashboardSection() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-3 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer border-0 btn-press
-                  ${activeTab === tab
+                className={`btn-hover px-3 py-1 text-[11px] font-semibold rounded-md cursor-pointer border-0 btn-press ${activeTab === tab
                     ? "bg-white dark:bg-[#1c1c1e] text-slate-800 dark:text-white shadow-sm"
                     : "bg-transparent text-slate-400 hover:text-slate-600 dark:text-slate-300"
                   }`}
@@ -386,18 +392,18 @@ export default function DashboardSection() {
         </div>
         <div className="w-full">
           <div className="mt-6 sm:mt-10 pt-8 pb-0">
-            <svg width="100%" viewBox="0 0 900 230" preserveAspectRatio="xMidYMid meet" className="w-full h-auto">
-              {[0, 97, 195].map((y, i) => (
+               <svg width="100%" viewBox="-30 0 960 230" preserveAspectRatio="xMidYMid meet" className="w-full h-auto">              {[0, 97, 195].map((y, i) => (
                 <line key={`h-${i}`} x1={0} y1={y} x2={900} y2={y}
                   stroke="#c8d9e6" strokeWidth={1.4} strokeDasharray="7 6" />
               ))}
               {names.map((name, i) => {
                 const x = (i / (names.length - 1)) * 900;
                 return (
-                  <text key={`label-${i}`} x={x} y={220} textAnchor="middle"
-                    fontSize={13} fill="#94a3b8" fontWeight={500} fontFamily="sans-serif">
-                    {name}
-                  </text>
+                <text key={`label-${i}`} x={x} y={220}
+                  textAnchor={i === 0 ? "start" : i === names.length - 1 ? "end" : "middle"}
+                  fontSize={13} fill="#94a3b8" fontWeight={500} fontFamily="sans-serif">
+                  {name}
+                </text>
                 );
               })}
             </svg>
@@ -420,14 +426,14 @@ export default function DashboardSection() {
             <div key={row.id} className="flex w-full">
               <div className={`${row.indent} shrink-0`} />
               <div
-                className={`${row.width} h-9 ${row.bg} rounded-lg flex items-center justify-between px-4 ${row.leftBorder}
+                className={`${row.width} h-9 ${row.bg} rounded-lg flex items-center justify-between px-2 sm:px-4 ${row.leftBorder}
                   cursor-pointer transition-all duration-200 hover:brightness-95 hover:shadow-sm
                   ${expandedBottleneck === row.id ? "ring-2 ring-blue-300" : ""}
                   ${row.stuck ? "anim-pulse" : ""}`}
                 style={{ paddingLeft: row.leftBorder ? "12px" : "16px" }}
                 onClick={() => setExpandedBottleneck(expandedBottleneck === row.id ? null : row.id)}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-10">
                   {row.stuck && (
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                       <path d="M12 3L22 21H2L12 3Z" stroke="#ef4444" strokeWidth="2" strokeLinejoin="round" />
@@ -510,7 +516,7 @@ export default function DashboardSection() {
           {/* View All Button */}
           <div className="flex-shrink-0 flex items-stretch">
             <button
-              className="bg-[#94a3b8] hover:bg-slate-500 text-white rounded-xl text-[12px] font-bold cursor-pointer border-0 w-full md:w-[65px] flex md:flex-col items-center justify-center gap-2 md:gap-1 transition-all btn-press py-3 md:py-0"
+              className="bg-[#94a3b8] hover:bg-slate-500 text-white rounded-xl text-[12px] font-bold cursor-pointer border-0 w-full md:w-[65px] flex md:flex-col items-center justify-center gap-2 md:gap-1 btn-press py-3 md:py-0 btn-hover"
             >
               <span className="leading-none text-center">View<br className="hidden md:block"/>All</span>
               <span className="text-sm md:text-sm font-black">12</span>

@@ -64,7 +64,7 @@ const Footer = () => {
                 />
                 <button 
                   onClick={handleFooterSubmit}
-                  className="w-full md:w-auto h-[44px] px-6 border text-sm font-medium rounded-lg transition hover:opacity-90" 
+                  className="w-full md:w-auto h-[44px] px-6 border text-sm font-medium rounded-lg transition hover:opacity-90 btn-hover" 
                   style={{ 
                     borderColor: 'var(--accent-color)',
                     backgroundColor: 'var(--accent-color)',

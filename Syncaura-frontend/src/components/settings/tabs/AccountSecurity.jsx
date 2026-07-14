@@ -37,10 +37,7 @@ const AccountSecurity = () => {
 
         <button
           onClick={() => setShowPasswordModal(true)}
-          className="px-8 py-2 rounded-full bg-white text-[#2461E6] border border-[#2461E6] text-sm font-semibold 
-          hover:bg-blue-50 hover:text-[#2461E6]
-          dark:bg-black dark:text-[#73FBFD] dark:border-[#73FBFD]
-          dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors"
+          className="px-8 py-2 rounded-full bg-white text-[#2461E6] border border-[#2461E6] text-sm font-semibold hover:bg-blue-50 hover:text-[#2461E6] dark:bg-black dark:text-[#73FBFD] dark:border-[#73FBFD] dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors btn-hover"
         >
           {t("manage")}
         </button>
@@ -64,8 +61,7 @@ const AccountSecurity = () => {
           <div className="flex items-center gap-10">
             <button
               onClick={() => setTwoStep(prev => !prev)}
-              className={`relative w-14 h-7 rounded-full transition-all duration-300
-                ${twoStep ? "bg-[#2461E6] dark:bg-[#73FBFD]" : "bg-gray-300 dark:bg-gray-700"}`}
+              className={`btn-hover relative w-14 h-7 rounded-full duration-300 ${twoStep ? "bg-[#2461E6] dark:bg-[#73FBFD]" : "bg-gray-300 dark:bg-gray-700"}`}
             >
               <div
                 className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300
@@ -80,10 +76,7 @@ const AccountSecurity = () => {
 
           <button
             onClick={() => setShowModal(true)}
-            className="px-5 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-semibold flex items-center gap-2 
-            hover:bg-blue-50 hover:text-[#2461E6] 
-            dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] 
-            dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm"
+            className="px-5 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-semibold flex items-center gap-2 hover:bg-blue-50 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm btn-hover"
           >
             {t("edit")}
           </button>

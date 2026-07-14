@@ -44,8 +44,7 @@ export default function FileRow() {
           Final
         </span>
 
-        <button className="text-blue-600 dark:text-blue-400 
-          hover:underline text-sm font-medium">
+        <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium btn-hover">
           Edit
         </button>
       </div>

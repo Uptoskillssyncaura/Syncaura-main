@@ -10,12 +10,12 @@ export default function MainLayout({ children, TopbarComponent, SideBar }) {
     <div data-theme={isDark? "dark": "light"} className="flex h-screen overflow-hidden bg-[#f6f7fb] dark:bg-black">
       {SideBar && <SideBar open={sidebarOpen} setOpen={setSidebarOpen} />}
 
-      <div className="flex flex-col flex-1 overflow-y-auto">
+      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
         {/* Render the Topbar passed from parent */}
         {TopbarComponent && <TopbarComponent setOpen={setSidebarOpen} />}
 
        
-          {children}
+          <div className="min-w-0 flex-1">{children}</div>
        
       </div>
      <div className="relative">

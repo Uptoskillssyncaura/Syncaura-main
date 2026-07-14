@@ -56,12 +56,12 @@ export default function ChatMessages({ viewMode = "chat", currentChat }) {
   if (viewMode === "starred") {
     return (
       <div className="relative flex-1 overflow-hidden h-full">
-        <div className="relative flex-1 overflow-y-auto p-4 z-20">
+        <div className="relative flex-1 overflow-y-auto p-3 md:p-4 z-20">
           {displayMessages.length > 0 ? (
             displayMessages.map((message) => (
               <div
                 key={message.id}
-                className="mb-4 bg-[#ECECEC] dark:bg-[#3A3A3A] rounded-2xl p-4"
+                className="mb-4 bg-[#ECECEC] dark:bg-[#3A3A3A] rounded-2xl p-3 md:p-4"
               >
                 {/* Header with sender info */}
                 <div className="flex items-center gap-2 mb-2">
@@ -98,9 +98,9 @@ export default function ChatMessages({ viewMode = "chat", currentChat }) {
   // Regular chat view
   return (
     <div className="relative flex-1 overflow-hidden h-full">
-      <div className="relative flex-1 overflow-y-auto p-4 z-20">
+      <div className="relative flex-1 overflow-y-auto p-3 md:p-4 z-20">
         <div className="flex justify-center mb-4">
-          <span className="text-sm font-semibold bg-[#C5D7FF] text-[#1C1C1C] dark:text-[#E0E0E0] dark:bg-[#408485] px-3 py-1 rounded-full">
+          <span className="text-xs md:text-sm font-semibold bg-[#C5D7FF] text-[#1C1C1C] dark:text-[#E0E0E0] dark:bg-[#408485] px-3 py-1 rounded-full">
             Today
           </span>
         </div>
@@ -113,9 +113,9 @@ export default function ChatMessages({ viewMode = "chat", currentChat }) {
               {/* Star button - shows on hover */}
               <button
                 onClick={() => toggleStar(message.id)}
-                className={`absolute ${
+                className={`btn-hover absolute ${
                   message.isOwn ? "left-2" : "right-2"
-                } top-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700`}
+                } top-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700`}
               >
                 <Star
                   size={16}
@@ -130,7 +130,7 @@ export default function ChatMessages({ viewMode = "chat", currentChat }) {
           ))
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
-            <p>No messages</p>
+            <p className="text-center text-sm">No messages</p>
           </div>
         )}
       </div>

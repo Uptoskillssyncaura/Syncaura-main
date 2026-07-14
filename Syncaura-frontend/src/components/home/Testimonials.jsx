@@ -10,49 +10,51 @@ const Testimonials = () => {
 
   return (
     <>
-      <style jsx>{`
+      <style>{`
         @keyframes scroll-testimonials {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-280px * 4 - 1.5rem * 4));
+            transform: translateX(calc(-260px * 4 - 1.5rem * 4));
           }
         }
+
         .animate-scroll-testimonials {
           animation: scroll-testimonials 20s linear infinite;
         }
+
         .animate-scroll-testimonials:hover {
           animation-play-state: paused;
         }
-        @media (min-width: 768px) {
-          @keyframes scroll-testimonials {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(calc(-260px * 4 - 1.5rem * 4));
-            }
-          }
-        }
       `}</style>
 
-      <section className="w-full py-8 md:py-10" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-20">
+      <section
+        className="w-full py-8 md:py-12"
+        style={{ backgroundColor: 'var(--bg-primary)' }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16">
+
           <div className="overflow-hidden relative">
+
             <div className="flex gap-4 md:gap-6 animate-scroll-testimonials">
+
               {[...testimonials, ...testimonials].map((item, index) => (
                 <div
                   key={index}
-                  className="w-[280px] md:w-[260px] min-h-[170px] md:min-h-[160px]
+                  className="w-[240px] sm:w-[260px] md:w-[260px]
+                             min-h-[170px]
                              flex flex-col justify-between
                              p-4 rounded-xl shadow-sm flex-shrink-0 border"
-                  style={{ 
+                  style={{
                     backgroundColor: 'var(--card-bg)',
-                    borderColor: 'var(--border-color)' 
+                    borderColor: 'var(--border-color)'
                   }}
                 >
-                  <p className="text-[13px] md:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  <p
+                    className="text-xs sm:text-sm leading-relaxed"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     {item.quote}
                   </p>
 
@@ -63,15 +65,32 @@ const Testimonials = () => {
                     >
                       {item.initial}
                     </div>
+
                     <div>
-                      <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{item.name}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{item.role}</p>
+                      <p
+                        className="text-sm font-medium"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {item.name}
+                      </p>
+
+                      <p
+                        className="text-xs"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
+                        {item.role}
+                      </p>
                     </div>
+
                   </div>
+
                 </div>
               ))}
+
             </div>
+
           </div>
+
         </div>
       </section>
     </>

@@ -525,8 +525,7 @@ else if (width >= 1024) {
           {/* MIC */}
           <button
             onClick={toggleMic}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition
-      ${!isMicOn ? "bg-red-500 text-white" : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"}`}
+            className={`btn-hover w-11 h-11 rounded-full flex items-center justify-center transition ${!isMicOn ? "bg-red-500 text-white" : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"}`}
           >
             {isMicOn ? <Mic size={20} /> : <MicOff size={20} />}
           </button>
@@ -534,8 +533,7 @@ else if (width >= 1024) {
           {/* CAMERA */}
           <button
             onClick={toggleCamera}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition
-      ${!isCameraOn ? "bg-red-500 text-white" : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"}`}
+            className={`btn-hover w-11 h-11 rounded-full flex items-center justify-center transition ${!isCameraOn ? "bg-red-500 text-white" : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"}`}
           >
             {isCameraOn ? <Video size={20} /> : <VideoOff size={20} />}
           </button>
@@ -545,8 +543,7 @@ else if (width >= 1024) {
             onClick={() =>
               isScreenSharing ? stopScreenShare() : startScreenShare()
             }
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition
-      ${isScreenSharing ? "bg-red-500 text-white" : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"}`}
+            className={`btn-hover w-11 h-11 rounded-full flex items-center justify-center transition ${isScreenSharing ? "bg-red-500 text-white" : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"}`}
           >
             <Monitor size={20} />
           </button>
@@ -585,7 +582,7 @@ else if (width >= 1024) {
                       sendEmojiReaction(emoji);
                       setShowEmojiPicker(false);
                     }}
-                    className="text-2xl hover:scale-125 transition"
+                    className="text-2xl hover:scale-125 transition btn-hover"
                   >
                     {emoji}
                   </button>
@@ -597,13 +594,13 @@ else if (width >= 1024) {
           {/* EMOJI */}
           <button
             onClick={() => setShowEmojiPicker((prev) => !prev)}
-            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center btn-hover"
           >
             <Smile size={20} />
           </button>
 
           {/* CC */}
-          <button className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-semibold">
+          <button className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-semibold btn-hover">
             CC
           </button>
 
@@ -614,8 +611,7 @@ else if (width >= 1024) {
                 prev.includes(1) ? prev.filter((id) => id !== 1) : [...prev, 1],
               )
             }
-            className={`w-11 h-11 rounded-full flex items-center justify-center
-      ${
+            className={`btn-hover w-11 h-11 rounded-full flex items-center justify-center ${
         raisedHands.includes(1)
           ? "bg-red-500 text-white"
           : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"
@@ -627,7 +623,7 @@ else if (width >= 1024) {
           {/* INFO */}
           <button
             onClick={() => setActivePanel("details")}
-            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center btn-hover"
           >
             <svg
               width="20"
@@ -642,12 +638,12 @@ else if (width >= 1024) {
           </button>
 
           {/* MORE */}
-          <button className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+          <button className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center btn-hover">
             <MoreVertical size={20} />
           </button>
 
           {/* END CALL */}
-          <button className="px-6 h-11 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center">
+          <button className="px-6 h-11 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center btn-hover">
             <PhoneOff size={20} />
           </button>
         </div>
@@ -656,14 +652,14 @@ else if (width >= 1024) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActivePanel("people")}
-            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center btn-hover"
           >
             <Users size={20} />
           </button>
 
           <button
             onClick={() => setActivePanel("chat")}
-            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+            className="w-11 h-11 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center btn-hover"
           >
             <MessageSquare size={20} />
           </button>
@@ -688,7 +684,7 @@ else if (width >= 1024) {
                     ? "People"
                     : "Meeting Details"}
               </h3>
-              <button onClick={() => setActivePanel(null)}>
+              <button className="btn-hover" onClick={() => setActivePanel(null)}>
                 <X />
               </button>
             </div>

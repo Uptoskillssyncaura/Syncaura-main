@@ -32,7 +32,7 @@ const TwoFactorModal = ({ onClose }) => {
           {/* Close */}
           <button
             onClick={onClose}
-            className="absolute right-5 top-5 text-gray-500 hover:text-black dark:hover:text-white"
+            className="absolute right-5 top-5 text-gray-500 hover:text-black dark:hover:text-white btn-hover"
           >
             <X size={26} />
           </button>
@@ -84,8 +84,7 @@ const TwoFactorModal = ({ onClose }) => {
                     Enable 2FA
                   </h3>
 
-                  <button className="px-5 py-1.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-500
-                   dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:border-[#73FBFD] whitespace-nowrap transition">
+                  <button className="px-5 py-1.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-500 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:border-[#73FBFD] whitespace-nowrap transition btn-hover">
                     View guide
                   </button>
 

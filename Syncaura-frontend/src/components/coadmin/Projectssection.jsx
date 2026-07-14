@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { Smile, Meh, Frown } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -16,18 +17,18 @@ const workloadMembers = [
 
 // Extended projects list for pagination (12 total)
 const ALL_PROJECTS = [
-  { name: "Alpha Initiative", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 75, progressColor: "#22c55e", team: ["#8b5cf6", "#0ea5e9"] },
-  { name: "Beta Launch", status: "Delayed", statusColor: "text-amber-600 dark:text-amber-400", statusBg: "bg-amber-100 dark:bg-amber-900/30", health: "😐", progress: 45, progressColor: "#f59e0b", team: ["#ef4444"] },
-  { name: "Project Gamma", status: "At Risk", statusColor: "text-red-600 dark:text-red-400", statusBg: "bg-red-100 dark:bg-red-900/30", health: "😟", progress: 21, progressColor: "#ef4444", team: ["#3b82f6", "#10b981"] },
+  { name: "Alpha Initiative", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 75, progressColor: "#22c55e", team: ["#8b5cf6", "#0ea5e9","#10b981"] },
+  { name: "Beta Launch", status: "Delayed", statusColor: "text-amber-600 dark:text-amber-400", statusBg: "bg-amber-100 dark:bg-amber-900/30", health: "😐", progress: 40, progressColor: "#f59e0b", team: ["#ef4444"] },
+ { name: "Project Gamma", status: "At Risk", statusColor: "text-red-600 dark:text-red-400", statusBg: "bg-red-100 dark:bg-red-900/30", health: "😟", progress: 25, progressColor: "#ef4444", team: ["#3b82f6", "#10b981"] },
   { name: "Delta Pipeline", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 62, progressColor: "#22c55e", team: ["#8b5cf6"] },
   { name: "Epsilon UI", status: "Completed", statusColor: "text-blue-600 dark:text-blue-400", statusBg: "bg-blue-100 dark:bg-blue-900/30", health: "😊", progress: 100, progressColor: "#0ea5e9", team: ["#0ea5e9", "#8b5cf6"] },
   { name: "Zeta Backend", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😐", progress: 55, progressColor: "#22c55e", team: ["#ef4444", "#10b981"] },
-  { name: "Eta Analytics", status: "Delayed", statusColor: "text-amber-600 dark:text-amber-400", statusBg: "bg-amber-100 dark:bg-amber-900/30", health: "😐", progress: 33, progressColor: "#f59e0b", team: ["#3b82f6"] },
+ { name: "Eta Analytics", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 33, progressColor: "#22c55e", team: ["#3b82f6"] },
   { name: "Theta DevOps", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 88, progressColor: "#22c55e", team: ["#8b5cf6", "#0ea5e9", "#10b981"] },
-  { name: "Iota Mobile", status: "At Risk", statusColor: "text-red-600 dark:text-red-400", statusBg: "bg-red-100 dark:bg-red-900/30", health: "😟", progress: 18, progressColor: "#ef4444", team: ["#ef4444"] },
+ { name: "Iota Mobile", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 18, progressColor: "#22c55e", team: ["#ef4444"] },
   { name: "Kappa Infra", status: "Completed", statusColor: "text-blue-600 dark:text-blue-400", statusBg: "bg-blue-100 dark:bg-blue-900/30", health: "😊", progress: 100, progressColor: "#0ea5e9", team: ["#3b82f6", "#8b5cf6"] },
   { name: "Lambda Security", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 70, progressColor: "#22c55e", team: ["#10b981"] },
-  { name: "Mu Testing", status: "Delayed", statusColor: "text-amber-600 dark:text-amber-400", statusBg: "bg-amber-100 dark:bg-amber-900/30", health: "😐", progress: 40, progressColor: "#f59e0b", team: ["#0ea5e9", "#ef4444"] },
+  { name: "Mu Testing", status: "In Progress", statusColor: "text-green-600 dark:text-green-400", statusBg: "bg-green-100 dark:bg-green-900/30", health: "😊", progress: 40, progressColor: "#22c55e", team: ["#0ea5e9", "#ef4444"] },
 ];
 
 const PAGE_SIZE = 3;
@@ -38,9 +39,9 @@ const TIMELINE_DATA = {
     headers: ["Oct", "Nov", "Dec", "Jan"],
     cols: 4,
     projects: [
-      { name: "Alpha Initiative", start: 0, span: 2.5, bgClass: "bg-green-200 dark:bg-green-900/50", textClass: "text-green-800 dark:text-green-200" },
-      { name: "Beta Launch", start: 1, span: 2, bgClass: "bg-blue-200 dark:bg-blue-900/50", textClass: "text-blue-800 dark:text-blue-200" },
-      { name: "Gamma Testing", start: 2, span: 1.5, bgClass: "bg-amber-200 dark:bg-amber-900/50", textClass: "text-amber-800 dark:text-amber-200" },
+      { name: "Alpha Initiative", start: 0, span: 2.3, bgClass: "bg-green-200 dark:bg-green-900/50", textClass: "text-green-800 dark:text-green-200" },
+      { name: "Beta Launch", start: 0.8, span: 1.5, bgClass: "bg-blue-200 dark:bg-blue-900/50", textClass: "text-blue-800 dark:text-blue-200" },
+      { name: "Gamma Testing", start: 2, span: 1.1, bgClass: "bg-amber-200 dark:bg-amber-900/50", textClass: "text-amber-800 dark:text-amber-200" },
     ],
   },
   Quarter: {
@@ -65,8 +66,8 @@ const ALL_ALERTS = [
 
 const cardStyles = {
   red: "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30",
-  amber: "bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30",
-  blue: "bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30",
+  amber: "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30",
+  blue: "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30",
 };
 
 const iconWrapperStyles = {
@@ -158,7 +159,7 @@ function ActionMenu({ projectName, onClose }) {
         <button
           key={a.label}
           onClick={() => { alert(`${a.label.split(" ")[1]}: ${projectName}`); onClose(); }}
-          className="w-full text-left px-4 py-2 text-[13px] hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors border-0 bg-transparent cursor-pointer"
+          className="w-full text-left px-4 py-2 text-[13px] hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors border-0 bg-transparent cursor-pointer btn-hover"
           style={{ color: a.color }}
         >
           {a.label}
@@ -297,26 +298,27 @@ export default function ProjectsSection() {
           {/* ✅ "View Details" scrolls to the All Projects table */}
           <button
             onClick={() => tableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-            className="text-xs text-blue-500 cursor-pointer font-medium bg-transparent border-0 hover:underline"
+            className="text-xs text-blue-500 cursor-pointer font-medium bg-transparent border-0 hover:underline btn-hover"
           >
             View Details ↓
           </button>
         </div>
         {[
-          { name: "Website Redesign", pct: 75, color: "#22c55e" },
-          { name: "Mobile App Launch", pct: 40, color: "#3b82f6" },
-          { name: "API Integration", pct: 40, color: "#93c5fd" },
-        ].map((p) => (
-          <div key={p.name} className="mb-3.5 sm:mr-10 sm:ml-10">
-            <div className="flex justify-between mb-1.5">
-              <span className="text-[13px] text-slate-500 dark:text-slate-400">{p.name}</span>
-              <span className="text-[13px] font-semibold text-slate-500 dark:text-slate-400">{p.pct}%</span>
-            </div>
-            <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: `${p.pct}%`, background: p.color }} />
-            </div>
-          </div>
-        ))}
+  { name: "Website Redesign", pct: 75, color: "#22c55e", lightColor: "#86efac" },
+  { name: "Mobile App Launch", pct: 40, color: "#3b82f6", lightColor: "#93c5fd" },
+  { name: "Mobile App Launch", pct: 40, color: "#3b82f6", lightColor: "#93c5fd" },
+].map((p) => (
+  <div key={p.name + p.color} className="mb-3.5 sm:mr-10 sm:ml-10">
+    <div className="flex justify-between mb-1.5">
+      <span className="text-[13px] text-slate-500 dark:text-slate-400">{p.name}</span>
+      <span className="text-[13px] font-semibold text-slate-500 dark:text-slate-400">{p.pct}%</span>
+    </div>
+    <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
+      <div className="h-full rounded-l-full" style={{ width: `${p.pct * 0.6}%`, background: p.color }} />
+      <div className="h-full" style={{ width: `${p.pct * 0.4}%`, background: p.lightColor }} />
+    </div>
+  </div>
+))}
       </div>
 
       {/* ── Health Status ── */}
@@ -375,8 +377,7 @@ export default function ProjectsSection() {
               <button
                 key={v}
                 onClick={() => setTimelineView(v)}
-                className={`px-4 py-1.5 text-xs font-semibold border-0 cursor-pointer transition-all
-                  ${timelineView === v
+                className={`btn-hover px-4 py-1.5 text-xs font-semibold border-0 cursor-pointer ${timelineView === v
                     ? "bg-slate-800 text-white"
                     : "bg-white dark:bg-[#1c1c1e] text-slate-400 hover:text-slate-600 dark:text-slate-300"}`}
               >
@@ -425,7 +426,7 @@ export default function ProjectsSection() {
       >
         <div className="flex justify-between items-center mb-3">
           <span className="text-[15px] font-bold text-slate-700 dark:text-slate-200">All Projects</span>
-          <button className="bg-transparent border-0 cursor-pointer text-slate-400 text-xl leading-none tracking-widest">···</button>
+          <button className="bg-transparent border-0 cursor-pointer text-slate-400 text-xl leading-none tracking-widest btn-hover">···</button>
         </div>
 
         {/* Desktop Table View */}
@@ -455,7 +456,11 @@ export default function ProjectsSection() {
                       {p.status}
                     </span>
                   </td>
-                  <td className="px-2 py-3 text-xl">{p.health}</td>
+                  <td className="px-2 py-3">
+                    {p.health === "😊" && <Smile size={22} className="text-green-500" />}
+                    {p.health === "😐" && <Meh size={22} className="text-amber-400" />}
+                    {p.health === "😟" && <Frown size={22} className="text-red-500" />}
+                  </td>
                   <td className="px-2 py-3">
                     <div className="flex items-center gap-2">
                       <div className="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -472,7 +477,7 @@ export default function ProjectsSection() {
                   <td className="px-2 py-3" style={{ position: "relative" }}>
                     <button
                       onClick={() => setOpenMenuIdx(openMenuIdx === i ? null : i)}
-                      className="bg-transparent border-0 cursor-pointer text-slate-400 text-lg leading-none hover:text-slate-600 dark:text-slate-300 transition-colors"
+                      className="bg-transparent border-0 cursor-pointer text-slate-400 text-lg leading-none hover:text-slate-600 dark:text-slate-300 transition-colors btn-hover"
                     >
                       ⋮
                     </button>
@@ -501,10 +506,12 @@ export default function ProjectsSection() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{p.health}</span>
+                  {p.health === "😊" && <Smile size={22} className="text-green-500" />}
+                  {p.health === "😐" && <Meh size={22} className="text-amber-400" />}
+                  {p.health === "😟" && <Frown size={22} className="text-red-500" />}
                   <button
                     onClick={() => setOpenMenuIdx(openMenuIdx === i ? null : i)}
-                    className="bg-transparent border-0 cursor-pointer text-slate-400 text-lg p-1"
+                    className="bg-transparent border-0 cursor-pointer text-slate-400 text-lg p-1 btn-hover"
                   >⋮</button>
                 </div>
               </div>
@@ -544,7 +551,7 @@ export default function ProjectsSection() {
             <button
               disabled={currentPage === 1}
               onClick={() => { setCurrentPage((p) => p - 1); setOpenMenuIdx(null); }}
-              className="px-3.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1c1c1e] text-[12px] text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1c1c1e] text-[12px] text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-hover"
             >
               Prev
             </button>
@@ -553,8 +560,7 @@ export default function ProjectsSection() {
               <button
                 key={idx}
                 onClick={() => { setCurrentPage(idx + 1); setOpenMenuIdx(null); }}
-                className={`w-7 h-7 rounded-md text-[12px] font-semibold border transition-colors cursor-pointer
-                  ${currentPage === idx + 1
+                className={`btn-hover w-7 h-7 rounded-md text-[12px] font-semibold border transition-colors cursor-pointer ${currentPage === idx + 1
                     ? "bg-slate-800 text-white border-slate-800"
                     : "bg-white dark:bg-[#1c1c1e] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)]"}`}
               >
@@ -564,7 +570,7 @@ export default function ProjectsSection() {
             <button
               disabled={currentPage === totalPages}
               onClick={() => { setCurrentPage((p) => p + 1); setOpenMenuIdx(null); }}
-              className="px-3.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1c1c1e] text-[12px] text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1c1c1e] text-[12px] text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed btn-hover"
             >
               Next
             </button>
@@ -577,7 +583,7 @@ export default function ProjectsSection() {
         <div className="flex justify-between items-center mb-3">
           <span className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Issues & Alerts</span>
           <span className="text-[10px] bg-red-500 text-white rounded-full px-2.5 py-0.5 font-bold">
-            {alerts.length} New
+            5 New
           </span>
         </div>
 
@@ -602,7 +608,7 @@ export default function ProjectsSection() {
                 {/* ✅ Dismiss button */}
                 <button
                   onClick={() => dismissAlert(alert.id)}
-                  className="text-slate-300 hover:text-slate-500 dark:text-slate-400 text-lg leading-none bg-transparent border-0 cursor-pointer flex-shrink-0 mt-0.5 transition-colors"
+                  className="text-slate-300 hover:text-slate-500 dark:text-slate-400 text-lg leading-none bg-transparent border-0 cursor-pointer flex-shrink-0 mt-0.5 transition-colors btn-hover"
                   title="Dismiss"
                 >
                   ×
@@ -615,7 +621,7 @@ export default function ProjectsSection() {
               <div className="flex items-center">
                 <button
                   onClick={handleViewAllAlerts}
-                  className="bg-slate-600 hover:bg-slate-700 text-white text-[12px] font-semibold h-[80px] px-5 transition-colors whitespace-nowrap cursor-pointer border-0"
+                  className="bg-slate-600 hover:bg-slate-700 text-white text-[12px] font-semibold h-[80px] px-5 transition-colors whitespace-nowrap cursor-pointer border-0 btn-hover"
                 >
                   View all<br />notifications
                 </button>

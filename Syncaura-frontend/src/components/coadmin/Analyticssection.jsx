@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { PieChart, Pie, Cell } from "recharts";
-
+import { TrendingUp, Clock } from "lucide-react";
 // ─── Sprint Velocity data ──────────────────────────────────────────────────────
 const velocityData = [
   { day: "Day 1", planned: 4, completed: 2 },
@@ -161,11 +161,11 @@ export default function AnalyticsSection() {
         {/* header */}
         <div className="flex items-center justify-between mb-5">
           <span className="text-[16px] font-bold text-slate-800 dark:text-white">Issues &amp; Alerts</span>
-          <button className="bg-transparent border-0 cursor-pointer text-slate-400 text-xl leading-none tracking-widest">···</button>
+          <button className="bg-transparent border-0 cursor-pointer text-slate-400 text-xl leading-none tracking-widest btn-hover">···</button>
         </div>
 
         {/* segmented bar — rounded overall, no gap between segments */}
-        <div className="rounded-xl overflow-hidden flex mb-5" style={{ height: 60 }}>
+        <div className="rounded-xl overflow-hidden flex mb-5" style={{ height: 80 }}>
           {/* To Do — 30% — light grey */}
           <div
             className="flex items-center justify-center bg-slate-200 dark:bg-slate-700"
@@ -197,7 +197,7 @@ export default function AnalyticsSection() {
         </div>
 
         {/* legend row */}
-        <div className="flex flex-wrap items-start gap-4 sm:gap-10">
+        <div className="flex flex-wrap items-start gap-8 sm:gap-36 ml-30">
           {[
             { dot: "#94a3b8", count: "15", label: "To Do(30%)" },
             { dot: "#3b82f6", count: "20", label: "In Progress(40%)" },
@@ -210,7 +210,7 @@ export default function AnalyticsSection() {
                 style={{ background: item.dot }}
               />
               <div>
-                <p className="text-[16px] font-extrabold text-slate-700 dark:text-slate-200 leading-tight">{item.count}</p>
+                <p className="text-[20px] font-extrabold text-slate-700 dark:text-slate-200 leading-tight ">{item.count}</p>
                 <p className="text-[11px] text-slate-400 leading-tight">{item.label}</p>
               </div>
             </div>
@@ -309,7 +309,7 @@ export default function AnalyticsSection() {
       <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm px-5 py-4">
         <div className="flex items-center justify-between mb-5">
           <span className="text-[16px] font-bold text-slate-800 dark:text-white">Team Workload Distribution</span>
-          <button className="text-[13px] text-blue-500 font-semibold bg-transparent border-0 cursor-pointer hover:underline">
+          <button className="text-[13px] text-blue-500 font-semibold bg-transparent border-0 cursor-pointer hover:underline btn-hover">
             View All Members
           </button>
         </div>
@@ -403,7 +403,7 @@ export default function AnalyticsSection() {
         <div className="flex flex-wrap gap-3">
           {/* Alert 1 — API Integration Blocked */}
           {!dismissed.includes(1) && (
-            <div className="flex-1 min-w-[280px] border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 flex items-start gap-3">
+            <div className="flex-1 min-w-[280px] border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 flex items-start gap-3 bg-slate-50">
               {/* red no-entry icon */}
               <div className="shrink-0 mt-0.5">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -418,14 +418,14 @@ export default function AnalyticsSection() {
               </div>
               <button
                 onClick={() => dismiss(1)}
-                className="text-slate-300 hover:text-slate-500 dark:text-slate-400 bg-transparent border-0 cursor-pointer text-base shrink-0"
+                className="text-slate-300 hover:text-slate-500 dark:text-slate-400 bg-transparent border-0 cursor-pointer text-base shrink-0 btn-hover"
               >×</button>
             </div>
           )}
 
           {/* Alert 2 — QA Bottleneck */}
           {!dismissed.includes(2) && (
-            <div className="flex-1 min-w-[280px] border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 flex items-start gap-3">
+            <div className="flex-1 min-w-[280px] border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 flex items-start gap-3 bg-slate-50">
               {/* amber warning triangle */}
               <div className="shrink-0 mt-0.5">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -440,14 +440,14 @@ export default function AnalyticsSection() {
               </div>
               <button
                 onClick={() => dismiss(2)}
-                className="text-slate-300 hover:text-slate-500 dark:text-slate-400 bg-transparent border-0 cursor-pointer text-base shrink-0"
+                className="text-slate-300 hover:text-slate-500 dark:text-slate-400 bg-transparent border-0 cursor-pointer text-base shrink-0 btn-hover"
               >×</button>
             </div>
           )}
 
           {/* Alert 3 — Resource Unavailable */}
           {!dismissed.includes(3) && (
-            <div className="flex-1 min-w-[280px] border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 flex items-start gap-3">
+            <div className="flex-1 min-w-[280px] border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 flex items-start gap-3 bg-slate-50">
               {/* grey person-off icon */}
               <div className="shrink-0 mt-0.5">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -463,14 +463,14 @@ export default function AnalyticsSection() {
               </div>
               <button
                 onClick={() => dismiss(3)}
-                className="text-slate-300 hover:text-slate-500 dark:text-slate-400 bg-transparent border-0 cursor-pointer text-base shrink-0"
+                className="text-slate-300 hover:text-slate-500 dark:text-slate-400 bg-transparent border-0 cursor-pointer text-base shrink-0 btn-hover"
               >×</button>
             </div>
           )}
 
           {/* View all notifications — grey button */}
           <button
-            className="flex-1 min-w-[130px] rounded-xl border-0 cursor-pointer font-semibold text-white text-[13px] leading-snug px-6 py-4 transition-colors"
+            className="flex-1 min-w-[130px] rounded-xl border-0 cursor-pointer font-semibold text-white text-[13px] leading-snug px-6 py-4 transition-colors btn-hover"
             style={{ background: "#94a3b8" }}
             onMouseEnter={(e) => (e.currentTarget.style.background = "#64748b")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "#94a3b8")}
@@ -526,7 +526,7 @@ export default function AnalyticsSection() {
                 />
                 <div>
                   <p className="text-[12px] text-slate-400 leading-none">{d.label}</p>
-                  <p className="text-[18px] sm:text-[20px] font-bold text-slate-600 dark:text-slate-300 leading-tight">{d.value}</p>
+                  <p className="text-[16px] sm:text-[18px] font-normal text-slate-400 dark:text-slate-500 leading-tight">{d.value}</p>
                 </div>
               </div>
             ))}
@@ -555,7 +555,7 @@ export default function AnalyticsSection() {
               label: "Dev",
               text: "28 Tasks",
               fillPct: 65,
-              indent: 0,
+              indent: 40,
               fillColor: "bg-blue-500",
               trackColor: "bg-slate-100 dark:bg-slate-800",
               textColor: "text-white",
@@ -564,7 +564,7 @@ export default function AnalyticsSection() {
               label: "QA",
               text: "12 Stuck",
               fillPct: 70,
-              indent: 0,
+              indent: 120,
               fillColor: "bg-[#e9d8a6] dark:bg-amber-700",
               trackColor: "bg-slate-100 dark:bg-slate-800",
               textColor: "text-[#78350f] dark:text-amber-100",
@@ -572,8 +572,8 @@ export default function AnalyticsSection() {
             {
               label: "Done",
               text: "18 Released",
-              fillPct: 60,
-              indent: 0,
+              fillPct: 70,
+              indent: 160,
               fillColor: "bg-green-200 dark:bg-green-900/60",
               trackColor: "bg-slate-100 dark:bg-slate-800",
               textColor: "text-green-800 dark:text-green-200",
@@ -585,7 +585,7 @@ export default function AnalyticsSection() {
               </span>
               {/* full-width track */}
               <div
-                className={`flex-1 h-9 rounded-lg overflow-hidden ${row.trackColor}`}
+                className={`flex-1 h-9 rounded-lg overflow-hidden ${row.trackColor}`} style={{ marginLeft: `${row.indent}px` }}
               >
                 {/* filled portion */}
                 <div
@@ -636,7 +636,7 @@ export default function AnalyticsSection() {
 
         {/* Generate Sprint Report — full-width outlined button */}
         <button
-          className="w-full flex items-center justify-center gap-2 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-[#1c1c1e] text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-[#1c1c1e] text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:bg-[rgba(46,47,47,0.5)] transition-colors cursor-pointer btn-hover"
         >
           {/* download icon */}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">

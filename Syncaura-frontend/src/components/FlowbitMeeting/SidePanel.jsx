@@ -48,7 +48,7 @@ const SidePanel = ({
                 ? "People"
                 : "Meeting Details"}
           </h3>
-          <button onClick={() => setActivePanel(null)}>
+          <button className="btn-hover" onClick={() => setActivePanel(null)}>
             <X
               className={`${isDarkTheme ? "text-white" : "text-black"} text-lg`}
             />
