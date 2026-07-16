@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Clock, Eye } from "lucide-react";
+import { CircleAlert, CircleCheck, Clock,  } from "lucide-react";
 import { motion } from "framer-motion";
 
 const AttendanceList = ({ LeaveData, currId, setCurrId }) => {
@@ -89,9 +89,6 @@ const AttendanceList = ({ LeaveData, currId, setCurrId }) => {
                 <p className=" text-xs font-medium">{status}</p>
               </div>
             </div>
-            <div className=" text-base  font-medium flex items-center justify-center flex-1/9">
-              <Eye className="size-5 text-[#000000] dark:text-[#F8F8F8] " />
-            </div>
           </motion.div>
         ))}
       </motion.div>
@@ -149,14 +146,6 @@ const AttendanceList = ({ LeaveData, currId, setCurrId }) => {
                 >
                   {statusIcon[status]}
                   <p className="text-sm font-semibold ">{status}</p>
-                </div>
-              </div>
-              <div className="flex flex-row xs:flex-col justify-between w-full xs:w-auto xs:justify-center items-start gap-y-1 ">
-                <h1 className="text-[#000000] dark:text-[#FFFFFF] text-base font-semibold flex-2/5">
-                  Action
-                </h1>
-                <div className="text-[#000000] dark:text-[#FFFFFF] text-sm font-semibold flex-3/5">
-                  <Eye className="size-5 text-[#000000] dark:text-[#F8F8F8] " />
                 </div>
               </div>
             </div>

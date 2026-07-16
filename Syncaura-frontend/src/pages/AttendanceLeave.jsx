@@ -316,9 +316,6 @@ const AttendanceLeave = () => {
           <h1 className="uppercase text-base font-medium dark:text-[#FFFFFF] text-[#000000] flex-1/9 w-full text-center">
             Status
           </h1>
-          <h1 className="uppercase text-base font-medium dark:text-[#FFFFFF] text-[#000000] flex-1/9 w-full text-center">
-            Actions
-          </h1>
         </div>
 
         <AttendanceList
