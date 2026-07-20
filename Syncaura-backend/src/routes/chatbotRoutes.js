@@ -118,14 +118,6 @@ router.post('/query', async (req, res) => {
       }
     }
 
-    // 2. Prepare OpenAI prompt
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ 
-        reply: "OpenAI API Key is not configured on the server. Please add `OPENAI_API_KEY` to the server's `.env` file." 
-      });
-    }
-
     let systemPrompt = '';
     if (user) {
       systemPrompt = `You are "Flowbit AI Support Chatbot", the friendly and professional AI assistant for the "Flowbit" website (a comprehensive company productivity suite, formerly known as Syncaura).
@@ -200,46 +192,116 @@ Rules:
 `;
     }
 
-    // Format chat history for OpenAI
-    const apiMessages = [
-      { role: "system", content: systemPrompt }
-    ];
+    let reply = '';
+    let usedModel = '';
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const openAIKey = process.env.OPENAI_API_KEY;
 
-    if (history && Array.isArray(history)) {
-      const contextHistory = history.slice(-6);
-      contextHistory.forEach(msg => {
-        apiMessages.push({
-          role: msg.from === 'user' ? 'user' : 'assistant',
-          content: msg.text
+    if (geminiKey) {
+      try {
+        console.log("Attempting to query Gemini API...");
+        const contents = [];
+        if (history && Array.isArray(history)) {
+          const contextHistory = history.slice(-6);
+          contextHistory.forEach(msg => {
+            contents.push({
+              role: msg.from === 'user' ? 'user' : 'model',
+              parts: [{ text: msg.text }]
+            });
+          });
+        }
+        contents.push({
+          role: 'user',
+          parts: [{ text: message }]
         });
+
+        const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+        const geminiRes = await axios.post(
+          `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiKey}`,
+          {
+            contents,
+            systemInstruction: {
+              parts: [{ text: systemPrompt }]
+            },
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 500
+            }
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (geminiRes.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+          reply = geminiRes.data.candidates[0].content.parts[0].text;
+          usedModel = 'Gemini';
+          console.log("Gemini API call succeeded!");
+        } else {
+          throw new Error("Invalid response structure from Gemini API");
+        }
+      } catch (geminiErr) {
+        console.error("Gemini API call failed:", geminiErr.response?.data || geminiErr.message);
+        if (openAIKey) {
+          console.log("Falling back to OpenAI API...");
+        } else {
+          throw geminiErr;
+        }
+      }
+    }
+
+    // If Gemini wasn't used/failed, and OpenAI is available
+    if (!reply && openAIKey) {
+      const apiMessages = [
+        { role: "system", content: systemPrompt }
+      ];
+
+      if (history && Array.isArray(history)) {
+        const contextHistory = history.slice(-6);
+        contextHistory.forEach(msg => {
+          apiMessages.push({
+            role: msg.from === 'user' ? 'user' : 'assistant',
+            content: msg.text
+          });
+        });
+      }
+
+      apiMessages.push({ role: "user", content: message });
+
+      const openAIRes = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-4o-mini',
+          messages: apiMessages,
+          temperature: 0.7,
+          max_tokens: 500
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openAIKey}`
+          }
+        }
+      );
+
+      reply = openAIRes.data.choices[0].message.content;
+      usedModel = 'OpenAI';
+      console.log("OpenAI API call succeeded!");
+    }
+
+    if (!reply) {
+      return res.status(500).json({
+        reply: "No AI API keys are configured or active on the server. Please check your .env settings."
       });
     }
 
-    apiMessages.push({ role: "user", content: message });
-
-    // Call OpenAI API via Axios
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4o-mini',
-        messages: apiMessages,
-        temperature: 0.7,
-        max_tokens: 500
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        }
-      }
-    );
-
-    const reply = response.data.choices[0].message.content;
-    return res.json({ reply });
+    return res.json({ reply, model: usedModel });
 
   } catch (error) {
     console.error("Chatbot Error:", error.response?.data || error.message);
-    const errorMessage = error.response?.data?.error?.message || "Sorry, I encountered an error communicating with OpenAI. Please check that the API key is valid.";
+    const errorMessage = error.response?.data?.error?.message || "Sorry, I encountered an error communicating with the AI service. Please check configured API keys.";
     return res.status(500).json({ 
       reply: errorMessage
     });

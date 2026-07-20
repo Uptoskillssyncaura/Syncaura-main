@@ -29,6 +29,61 @@ const bubbleVariants = {
     visible: { opacity: 1, y: 0, scale: 1 },
 };
 
+const renderMessageContent = (text) => {
+    if (!text) return "";
+    
+    // Simple secure parsing for standard markdown elements
+    // Escape HTML to prevent injection
+    let html = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    
+    // Bold: **text** -> <strong>text</strong>
+    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    
+    // Italic: *text* -> <em>text</em>
+    html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    
+    // Inline code: `code` -> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded font-mono text-xs text-[#E83E8C] dark:text-[#f472b6]">$1</code>
+    html = html.replace(/`(.*?)`/g, '<code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded font-mono text-xs text-[#E83E8C] dark:text-[#f472b6]">$1</code>');
+    
+    // Bullet lists: Lines starting with "- " or "* "
+    const lines = html.split("\n");
+    let inList = false;
+    const processedLines = lines.map((line) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+            const listContent = trimmed.substring(2);
+            let prefix = "";
+            if (!inList) {
+                inList = true;
+                prefix = '<ul class="list-disc ml-5 space-y-1 my-1">';
+            }
+            return `${prefix}<li>${listContent}</li>`;
+        } else {
+            let prefix = "";
+            if (inList) {
+                inList = false;
+                prefix = '</ul>';
+            }
+            return prefix + line;
+        }
+    });
+    if (inList) {
+        processedLines.push('</ul>');
+    }
+    
+    html = processedLines.join("<br />");
+    
+    // Remove extra breaks after list close/open tags to avoid too much spacing
+    html = html.replace(/<\/ul><br \/>/g, "</ul>");
+    html = html.replace(/<\/li><br \/>/g, "</li>");
+    html = html.replace(/<ul class="list-disc ml-5 space-y-1 my-1"><br \/>/g, '<ul class="list-disc ml-5 space-y-1 my-1">');
+    
+    return <div dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
 export default function SupportChatbot() {
     const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -305,7 +360,7 @@ export default function SupportChatbot() {
                                                 : "bg-[#F3F4F6] dark:bg-[#283039] dark:text-[#D0D4DB] text-gray-800 rounded-tl-none"
                                                 }`}
                                         >
-                                            {m.text}
+                                            {renderMessageContent(m.text)}
                                         </div>
 
                                         {m.from === "user" && (
@@ -333,7 +388,7 @@ export default function SupportChatbot() {
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                                    className="flex-1 text-sm outline-none placeholder:text-[#9CA3AF] text-[#9CA3AF]"
+                                    className="flex-1 text-sm bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
                                     placeholder="Type or speak..."
                                 />
                                 <button
