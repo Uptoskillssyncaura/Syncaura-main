@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
-export default function NewComplaintModal({ onClose, addComplaint }) {
+export default function NewComplaintModal({ onClose, addComplaint, isSubmitting }) {
   const { register, handleSubmit, setValue, watch } = useForm();
   const [category, setCategory] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -12,13 +12,11 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
   const fileRef = useRef(null);
 
   const onSubmit = (data) => {
-    const id = `#${Date.now().toString().slice(0, 4)}`;
-    const subject = data.subject;
-    const category = data.category;
-    const date = new Date().toISOString();
-    const status = "In progress";
-    addComplaint((prev) => [{ id, subject, category, date, status }, ...prev]);
-    onClose();
+    addComplaint({
+      title: data.title,
+      category: data.category,
+      description: data.description,
+    });
   };
   const onError = (formErrors) => {
     console.log("Form Errors:", formErrors);
@@ -93,12 +91,10 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
 
               <div className="relative mt-1">
                 <select
-                  {...register("category", { required: true })}
-                  value={category}
-                  onChange={(e) => {
-                    setCategory(e.target.value);
-                    setValue("category", e.target.value);
-                  }}
+                  {...register("category", {
+                    required: true,
+                    onChange: (e) => setCategory(e.target.value),
+                  })}
                   className={`
                     w-full appearance-none rounded-full px-4 py-3 text-sm outline-none
                     transition-all duration-300
@@ -132,7 +128,7 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
                 Subject
               </label>
               <input
-                {...register("subject", { required: true })}
+                {...register("title", { required: true })}
                 placeholder="Brief title of the issue"
                 className="
                   mt-1 w-full rounded-full px-4 py-2 text-sm outline-none
@@ -223,9 +219,10 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
+              whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
               type="submit"
+              disabled={isSubmitting}
               className="
                 mt-5 mx-auto
                 dark:bg-[#73FBFD] px-5 py-2 dark:text-black
@@ -234,9 +231,10 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
                 text-[13px] font-medium text-white
                 transition-colors
                 flex items-center justify-center
+                disabled:opacity-60 disabled:cursor-not-allowed
               "
             >
-              Submit Complaint
+              {isSubmitting ? "Submitting..." : "Submit Complaint"}
             </motion.button>
           </form>
         </motion.div>

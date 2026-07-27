@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CircleAlert, CircleCheck, Clock, Plus } from "lucide-react";
+import { toast } from "react-toastify";
 import NewComplaintModal from "../components/complaints/NewComplaintModal";
 
 import ComplaintsList from "../components/complaints/ComplaintsList/ComplaintsList";
@@ -14,6 +15,7 @@ export default function Complaints() {
 
   const [activeId, setActiveId] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchComplaints, setSearchComplaints] = useState("");
   const [debounceSearch, setDebounceSearch] = useState("");
   
@@ -81,8 +83,17 @@ export default function Complaints() {
     setAppliedFilters(newFilters);
   };
 
-  const handleAddComplaint = (formData) => {
-    dispatch(createComplaint(formData));
+  const handleAddComplaint = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      await dispatch(createComplaint(formData)).unwrap();
+      toast.success("Complaint filed successfully!");
+      setShowModal(false);
+    } catch (err) {
+      toast.error(err || "Failed to file complaint. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -125,6 +136,7 @@ export default function Complaints() {
             <NewComplaintModal
               addComplaint={handleAddComplaint}
               onClose={() => setShowModal(false)}
+              isSubmitting={isSubmitting}
             />
           )}
         </div>
