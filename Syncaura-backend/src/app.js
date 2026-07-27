@@ -27,6 +27,7 @@ import calendarTestRoute from "./routes/calendarTest.route.js";
 import googleAuthRoutes from "./routes/googleAuth.route.js";
 import githubRoutes from "./routes/github.routes.js";
 import { initSlackBot } from "./services/slackBot.js";
+import chatbotRoutes from "./routes/chatbotRoutes.js";
 
 // dotenv.config();
 
@@ -72,6 +73,7 @@ app.use("/api", calendarTestRoute);
 app.use("/auth", googleAuthRoutes);
 
 app.use("/api/github", githubRoutes);
+app.use("/api/chatbot", chatbotRoutes);
 
 app.get("/", (req, res) => {
   res.json({

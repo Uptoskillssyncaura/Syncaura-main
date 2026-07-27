@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import api from "../config/axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Send,
@@ -26,6 +27,61 @@ const quickActions = [
 const bubbleVariants = {
     hidden: { opacity: 0, y: 10, scale: 0.96 },
     visible: { opacity: 1, y: 0, scale: 1 },
+};
+
+const renderMessageContent = (text) => {
+    if (!text) return "";
+    
+    // Simple secure parsing for standard markdown elements
+    // Escape HTML to prevent injection
+    let html = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    
+    // Bold: **text** -> <strong>text</strong>
+    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    
+    // Italic: *text* -> <em>text</em>
+    html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    
+    // Inline code: `code` -> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded font-mono text-xs text-[#E83E8C] dark:text-[#f472b6]">$1</code>
+    html = html.replace(/`(.*?)`/g, '<code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded font-mono text-xs text-[#E83E8C] dark:text-[#f472b6]">$1</code>');
+    
+    // Bullet lists: Lines starting with "- " or "* "
+    const lines = html.split("\n");
+    let inList = false;
+    const processedLines = lines.map((line) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+            const listContent = trimmed.substring(2);
+            let prefix = "";
+            if (!inList) {
+                inList = true;
+                prefix = '<ul class="list-disc ml-5 space-y-1 my-1">';
+            }
+            return `${prefix}<li>${listContent}</li>`;
+        } else {
+            let prefix = "";
+            if (inList) {
+                inList = false;
+                prefix = '</ul>';
+            }
+            return prefix + line;
+        }
+    });
+    if (inList) {
+        processedLines.push('</ul>');
+    }
+    
+    html = processedLines.join("<br />");
+    
+    // Remove extra breaks after list close/open tags to avoid too much spacing
+    html = html.replace(/<\/ul><br \/>/g, "</ul>");
+    html = html.replace(/<\/li><br \/>/g, "</li>");
+    html = html.replace(/<ul class="list-disc ml-5 space-y-1 my-1"><br \/>/g, '<ul class="list-disc ml-5 space-y-1 my-1">');
+    
+    return <div dangerouslySetInnerHTML={{ __html: html }} />;
 };
 
 export default function SupportChatbot() {
@@ -110,6 +166,23 @@ export default function SupportChatbot() {
         setLoading(false);
     };
 
+    const handleQuickAction = (title) => {
+        let query = "";
+        if (title === "Projects") {
+            query = "What projects are currently active, and what tasks do I have?";
+        } else if (title === "Meetings") {
+            query = "Do I have any upcoming meetings scheduled?";
+        } else if (title === "Support") {
+            query = "How do I file a complaint or contact support?";
+        } else if (title === "FAQ") {
+            query = "How do I mark my attendance and apply for leaves on Flowbit?";
+        }
+
+        if (query) {
+            sendMessage(query);
+        }
+    };
+
     const sendMessage = (voiceText) => {
         const text = voiceText ?? input;
         if (!text.trim()) return;
@@ -119,15 +192,28 @@ export default function SupportChatbot() {
             return;
         }
 
+        // Add user message to state
         setMessages((p) => [...p, { from: "user", text }]);
         setInput("");
         setLoading(true);
 
-        setTimeout(() => {
-            streamBotMessage(
-                "Sure! I can help you with projects, meetings, and support queries."
-            );
-        }, 400);
+        // Call backend API
+        api.post("/chatbot/query", { message: text, history: messages })
+            .then((res) => {
+                const reply = res.data?.reply || "I didn't receive a reply from the server.";
+                streamBotMessage(reply);
+            })
+            .catch((err) => {
+                console.error("Chatbot query error:", err);
+                setLoading(false);
+                setMessages((prev) => [
+                    ...prev,
+                    { 
+                        from: "bot", 
+                        text: err.response?.data?.reply || "Sorry, I am having trouble connecting to my brain. Please check your network connection or make sure the OpenAI API key is set in the backend environment." 
+                    }
+                ]);
+            });
     };
 
     const startVoice = async () => {
@@ -238,7 +324,8 @@ export default function SupportChatbot() {
                                 {quickActions.map((q) => (
                                     <div
                                         key={q.id}
-                                        className="border border-gray-200 dark:bg-[#1A222C] dark:border-[#000000] pb-4 rounded-xl p-2 text-xs flex items-center gap-2 shadow-[1px_4px_5px_0_rgba(0,0,0,0.1)]"
+                                        onClick={() => handleQuickAction(q.title)}
+                                        className="border border-gray-200 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#202832] dark:bg-[#1A222C] dark:border-[#000000] pb-4 rounded-xl p-2 text-xs flex items-center gap-2 shadow-[1px_4px_5px_0_rgba(0,0,0,0.1)] transition-all duration-200"
                                     >
                                         <q.icon className="text-[#000000] size-5 dark:text-gray-300" />
                                         <div>
@@ -273,7 +360,7 @@ export default function SupportChatbot() {
                                                 : "bg-[#F3F4F6] dark:bg-[#283039] dark:text-[#D0D4DB] text-gray-800 rounded-tl-none"
                                                 }`}
                                         >
-                                            {m.text}
+                                            {renderMessageContent(m.text)}
                                         </div>
 
                                         {m.from === "user" && (
@@ -301,7 +388,7 @@ export default function SupportChatbot() {
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                                    className="flex-1 text-sm outline-none placeholder:text-[#9CA3AF] text-[#9CA3AF]"
+                                    className="flex-1 text-sm bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
                                     placeholder="Type or speak..."
                                 />
                                 <button

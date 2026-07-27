@@ -21,6 +21,7 @@ import Notice from "./pages/Notice";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
 import Home from "./pages/Home";
+import SupportChatbot from "./components/SupportChatbot";
 
 import { ToastContainer, Bounce } from "react-toastify";
 import { refreshAccessToken } from "./redux/features/authThunks";
@@ -70,6 +71,7 @@ export default function App() {
       />
 
       <BrowserRouter>
+        <SupportChatbot />
         <Routes>
           <Route element={<ProtectRoute publicOnly />}>
             <Route path="/" element={<Home />} />
