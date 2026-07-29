@@ -305,7 +305,9 @@ export default function SupportChatbot() {
 
                             </div>
                             <div className="flex items-center gap-5 ">
-                                <Minus className="text-white size-6" />
+                                <button className="btn-hover" onClick={() => setOpen(false)} >
+                                    <Minus className="text-white size-6" />
+                                </button>
                                 <button className="btn-hover" onClick={() => setOpen(false)} >
                                     <X className="text-white size-6" />
                                 </button>
@@ -391,7 +393,7 @@ export default function SupportChatbot() {
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                                    className="flex-1 text-sm outline-none placeholder:text-[#9CA3AF] text-[#9CA3AF]"
+                                    className="flex-1 text-sm outline-none placeholder:text-[#9CA3AF] text-gray-800 dark:text-gray-200 bg-transparent"
                                     placeholder="Type or speak..."
                                 />
                                 <button

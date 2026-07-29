@@ -16,14 +16,14 @@ export default function ComplaintSlider({ dummyComplaints, idx, onClose }) {
   const [direction, setDirection] = useState(0);
   const statusStyle = (status) => {
     if (status === "open") return "bg-[#FFC2C2] text-[#C71212]";
-    if (status === "in progress") return "bg-[#FEF2C2] text-[#C05328]";
+    if (status === "in-progress") return "bg-[#FEF2C2] text-[#C05328]";
     return "bg-[#D1FAE5] text-[#29CC39]";
   };
 
   const statusIcon = (status) => {
     if (status === "open")
       return <CircleAlert className="size-3.5 text-[#C71212] fill-[#FFC2C2]" />;
-    if (status === "in progress")
+    if (status === "in-progress")
       return <Clock className="size-3.5 text-[#C05328]   " />;
     return <CircleCheck className="size-3.5 text-[#29CC39] fill-[#D1FAE5]  " />;
   };
@@ -81,7 +81,7 @@ export default function ComplaintSlider({ dummyComplaints, idx, onClose }) {
                   </p>
                   <div
                     className={`flex items-center gap-2 justify-center py-1 rounded-2xl px-4 ${statusStyle(
-                      data.status.toLowerCase(),
+                  data.status.toLowerCase(),
                     )}`}
                   >
                     {statusIcon(data.status.toLowerCase())}
@@ -93,14 +93,14 @@ export default function ComplaintSlider({ dummyComplaints, idx, onClose }) {
                     {t("complaintSlider_date", "Date :")}
                   </p>
                   <p className="text-base text-[#000000] font-medium dark:text-white ">
-                    {data.date}
+                    {new Date(data.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                   </p>
                 </div>
               </div>
             </div>
             <div className="flex flex-col items-start justify-center mb-5 ">
               <h1 className="text-xl sm:text-3xl text-black dark:text-white font-semibold">
-                {data.subject}
+                {data.title}
               </h1>
               <div className="flex px-5 md:px-20 py-3 ">
                 <p className="text-black dark:text-gray-500 text-sm sm:text-lg font-normal">
@@ -114,18 +114,23 @@ export default function ComplaintSlider({ dummyComplaints, idx, onClose }) {
                 {t("complaintSlider_attachments", "Attachments")}
               </h3>
               <div className="flex flex-wrap items-center justify-center w-full gap-3">
-                {data.attachments?.map((file, i) => (
+                {data.attachments?.map((attachment, i) => {
+                  const url = typeof attachment === "string" ? attachment : attachment.file_url || attachment.url;
+                  const name = typeof attachment === "string" ? attachment.split("/").pop() : attachment.name || attachment.file_name || attachment.file_url?.split("/").pop();
+
+                  return (
                   <motion.button
                     key={i}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.92 }}
                     transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    onClick={() => window.open(file.url, "_blank")}
+                    onClick={() => window.open(url, "_blank")}
                     className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-sm text-gray-800 dark:text-white dark:hover:bg-gray-950 hover:bg-gray-200"
                   >
-                    {file.name}
+                    {name}
                   </motion.button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </motion.div>

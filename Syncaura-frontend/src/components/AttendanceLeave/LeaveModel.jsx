@@ -9,8 +9,6 @@ const LeaveModel = ({ onClose, setLeaveData }) => {
         "Casual",
         "Sick",
         "Earned",
-        "Paid",
-        "Unpaid",
         "Maternity",
         "Paternity",
         "Marriage",

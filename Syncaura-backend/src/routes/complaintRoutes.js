@@ -2,6 +2,7 @@ import express from 'express';
 import { auth } from '../middlewares/auth.js';
 import { permit } from '../middlewares/role.js';
 import ROLES from '../config/roles.js';
+import upload from '../middlewares/upload.js';
 import {
   createComplaint,
   getAllComplaints,
@@ -26,7 +27,7 @@ router.use(auth);
 // Get complaint statistics
 router.get('/stats', permit(ROLES.ADMIN, ROLES.CO_ADMIN), getComplaintStats);
 // File a new complaint
-router.post('/', createComplaint);
+router.post('/', upload.array('attachments', 5), createComplaint);
 
 // Get complaints filed by current user
 router.get('/my-complaints', getMyComplaints);

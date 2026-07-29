@@ -8,6 +8,7 @@ import ComplaintsList from "../components/complaints/ComplaintsList/ComplaintsLi
 import Complaintheader from "../components/complaints/complaintHeader/Complaintheader";
 import ComplaintSlider from "../components/complaints/ComplaintSlider";
 import { getMyComplaints, createComplaint } from "../redux/features/complaintThunks";
+import { toast } from "react-toastify";
 
 export default function Complaints() {
   const dispatch = useDispatch();
@@ -58,7 +59,7 @@ export default function Complaints() {
       result = result.filter(
         (item) =>
           item.title?.toLowerCase().includes(debounceSearch.toLowerCase()) ||
-          item._id?.includes(debounceSearch)
+          item.id?.includes(debounceSearch)
       );
     }
 
@@ -67,11 +68,11 @@ export default function Complaints() {
         result = result.filter((item) => item.status === appliedFilters.status);
       }
       if (appliedFilters.date) {
-        result = result.filter((item) => item.createdAt?.startsWith(appliedFilters.date));
+        result = result.filter((item) => item.created_at?.startsWith(appliedFilters.date));
       }
       result.sort((a, b) => {
-        const dateA = new Date(a.createdAt);
-        const dateB = new Date(b.createdAt);
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
         return appliedFilters.order === "Ascending" ? dateA - dateB : dateB - dateA;
       });
     }
@@ -83,8 +84,15 @@ export default function Complaints() {
     setAppliedFilters(newFilters);
   };
 
-  const handleAddComplaint = (formData) => {
-    dispatch(createComplaint(formData));
+  const handleAddComplaint = async (complaint) => {
+    try {
+      const result = await dispatch(createComplaint(complaint)).unwrap();
+      toast.success(result.message || "Complaint submitted successfully");
+      setShowModal(false);
+    } catch (submissionError) {
+      toast.error(submissionError || "Unable to submit complaint. Please try again.");
+      throw submissionError;
+    }
   };
 
   return (

@@ -22,14 +22,14 @@ export default function ComplaintsList({
 };
  const mobileStatusStyle = (status) => {
     if (status === "open") return " bg-[#FFC2C2] dark:bg-[#3D2D2D] text-[#C71212]";
-    if (status === "in progress") return "bg-[#FEF2C2] dark:bg-[#3E3A29] text-[#C05328]";
+    if (status === "in-progress") return "bg-[#FEF2C2] dark:bg-[#3E3A29] text-[#C05328]";
     return "bg-[#D1FAE5] dark:bg-[#1F402F] text-[#29CC39]";
   };
 
   const mobileStatusIcon = (status) => {
     if (status === "open")
       return <CircleAlert className="size-4 fill-[#FFC2C2] text-[#C71212] dark:fill-[#3D2D2D]" />;
-    if (status === "in progress")
+    if (status === "in-progress")
       return <Clock className="size-4 text-[#C05328]   " />;
     return <CircleCheck className="size-4 fill-[#D1FAE5] text-[#29CC39] dark:fill-[#1F402F]  " />;
   };
@@ -88,7 +88,7 @@ export default function ComplaintsList({
           key={COMPLAINTS.length}
         >
 
-          {COMPLAINTS.map(({ id, subject, status, category, date }, idx) => (
+          {COMPLAINTS.map(({ id, title, status, category, created_at }, idx) => (
             <motion.div
               variants={itemVariants}
               onClick={() => setActiveId(id)}
@@ -117,13 +117,13 @@ export default function ComplaintsList({
 
               <div className="text-sm w-full flex items-center col-span-4 text-[#000000] dark:text-[#FFFFFF]">
                 <div className="flex flex-col items-start justify-start">
-                  <span className="uppercase font-semibold">{subject}</span>
+                  <span className="uppercase font-semibold">{title}</span>
                   <span className="text-xs">{category}</span>
                 </div>
               </div>
 
               <div className="text-sm flex items-center justify-center w-full font-semibold uppercase col-span-2 text-[#000000] dark:text-[#FFFFFF]">
-                {formatDate(date)}
+                {formatDate(created_at)}
               </div>
 
               <div className="text-xs flex items-center justify-center w-full font-semibold col-span-2 text-[#000000] dark:text-[#FFFFFF]">
@@ -163,7 +163,7 @@ export default function ComplaintsList({
     mt-5
   "
       >
-        {COMPLAINTS.map(({ id, subject, category, status, date }, idx) => (
+        {COMPLAINTS.map(({ id, title, category, status, created_at }, idx) => (
           <div
             key={COMPLAINTS.length + idx}
               onClick={() => setActiveId(id)}
@@ -187,12 +187,12 @@ export default function ComplaintsList({
               </div>
             </div>
             <div className="flex flex-col justify-center items-start w-full ">
-              <h1 className="text-base font-bold text-[#000000] dark:text-[#FFFFFF]" >{subject}</h1>
+              <h1 className="text-base font-bold text-[#000000] dark:text-[#FFFFFF]" >{title}</h1>
               <h2 className="text-sm font-light text-[#000000] dark:text-white" >{category}</h2>
             </div>
             <div className="flex items-center justify-start gap-2 ">
               <FaClock className="size-5 text-white dark:text-[#2E2F2F] fill-black dark:fill-gray-400"  />
-              <h1 className="text-[#000000] dark:text-[#FFFFFF] font-light text-xs" >{formatDate(date)}</h1>
+              <h1 className="text-[#000000] dark:text-[#FFFFFF] font-light text-xs" >{formatDate(created_at)}</h1>
             </div>
             <div className="absolute bottom-5 right-5 ">
               <Eye className="size-6 text-gray-700 dark:text-gray-300" />

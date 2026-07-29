@@ -11,7 +11,7 @@ import {
  */
 export const createComplaint = async (req, res, next) => {
   try {
-    const { title, description, category, severity, priority, isAnonymous, attachments } = req.body;
+    const { title, description, category, severity, priority, isAnonymous, attachments = [] } = req.body || {};
 
     if (!title || !description || !category) {
       return res.status(400).json({
@@ -38,14 +38,17 @@ export const createComplaint = async (req, res, next) => {
     const complaint = result.rows[0];
 
     // Handle attachments
-    if (attachments && Array.isArray(attachments)) {
-      for (const url of attachments) {
+    const attachmentUrls = req.files?.map((file) => `/uploads/${file.filename}`)
+      || (Array.isArray(attachments) ? attachments : []);
+
+    if (attachmentUrls.length) {
+      for (const url of attachmentUrls) {
         await pool.query(
           "INSERT INTO complaint_attachments (complaint_id, file_url) VALUES ($1, $2)",
           [complaint.id, url]
         );
       }
-      complaint.attachments = attachments;
+      complaint.attachments = attachmentUrls;
     }
 
     // Notify admins about new complaint
