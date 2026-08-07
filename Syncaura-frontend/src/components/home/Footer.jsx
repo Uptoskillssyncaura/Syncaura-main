@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from "react-i18next";
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Facebook, Instagram, Linkedin, Youtube,
   Twitter, Send, Zap, ArrowRight,
@@ -29,54 +28,35 @@ const ColHeading = ({ children }) => (
   </div>
 );
 
-const NavLink = ({ children, href, to, onClick }) => (
+const NavLink = ({ children, href, onClick }) => (
   <li>
-    {to ? (
-      <Link to={to} onClick={onClick}>
-        <motion.span
-          whileHover={{ x: 4 }}
-          className="flex items-center gap-1.5 text-sm cursor-pointer group transition-colors duration-200"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6366f1' }} />
-          <span className="group-hover:text-indigo-400 transition-colors">{children}</span>
-        </motion.span>
-      </Link>
-    ) : (
-      <a href={href} onClick={onClick}>
-        <motion.span
-          whileHover={{ x: 4 }}
-          className="flex items-center gap-1.5 text-sm cursor-pointer group transition-colors duration-200"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6366f1' }} />
-          <span className="group-hover:text-indigo-400 transition-colors">{children}</span>
-        </motion.span>
-      </a>
-    )}
+    <a href={href} onClick={onClick}>
+      <motion.span
+        whileHover={{ x: 4 }}
+        className="flex items-center gap-1.5 text-sm cursor-pointer group transition-colors duration-200"
+        style={{ color: 'var(--text-secondary)' }}
+      >
+        <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6366f1' }} />
+        <span className="group-hover:text-indigo-400 transition-colors">{children}</span>
+      </motion.span>
+    </a>
   </li>
 );
 
 const Footer = () => {
   const { t } = useTranslation();
-  const location = useLocation();
-  const navigate = useNavigate();
   const [email, setEmail] = useState(''); // Stores the user's email input
   const [status, setStatus] = useState(''); // Stores success or error messages
 
   const scrollToSection = (e, sectionId) => {
     if (!sectionId) return;
     e.preventDefault();
-    if (location.pathname !== "/") {
-      navigate(`/#${sectionId}`);
-    } else {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        window.scrollTo({
-          top: element.offsetTop - 80,
-          behavior: 'smooth',
-        });
-      }
+    const element = document.getElementById(sectionId);
+    if (element) {
+      window.scrollTo({
+        top: element.offsetTop - 80,
+        behavior: 'smooth',
+      });
     }
   };
 
@@ -229,21 +209,8 @@ const Footer = () => {
           <div>
             <ColHeading>{t("footer_company")}</ColHeading>
             <ul className="space-y-3">
-              <NavLink to="/about">{t("footer_about")}</NavLink>
-              <NavLink to="/learn-more">Learn More</NavLink>
-              {[
-                { label: t("footer_blog") },
-                { label: t("footer_careers") },
-                { label: t("footer_contact"), id: 'contact' },
-                { label: t("footer_social") }
-              ].map(item => (
-                <NavLink 
-                  key={item.label} 
-                  href={item.id ? `#${item.id}` : undefined}
-                  onClick={item.id ? (e) => scrollToSection(e, item.id) : undefined}
-                >
-                  {item.label}
-                </NavLink>
+              {[t("footer_about"), t("footer_blog"), t("footer_careers"), t("footer_contact"), t("footer_social"), t("footer_followUs")].map(item => (
+                <NavLink key={item}>{item}</NavLink>
               ))}
             </ul>
           </div>
