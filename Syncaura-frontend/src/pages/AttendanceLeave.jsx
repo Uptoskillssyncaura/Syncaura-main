@@ -7,6 +7,8 @@ import {
   XCircleIcon,
   Loader,
   UserCheck,
+  Home,
+  Plus,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AttendanceCard from "../components/AttendanceLeave/AttendanceCard";
@@ -28,6 +30,18 @@ const initialAttendanceStats = [
     icon: <CircleCheckBig className="size-3.5 text-[#29CC39]" />,
   },
   {
+    title: "Work From Home",
+    value: 5,
+    borderColor: "border-[#3361FF]",
+    icon: <Home className="size-3.5 text-[#3361FF]" />,
+  },
+  {
+    title: "Leave Taken",
+    value: 4,
+    borderColor: "border-[#FF9500]",
+    icon: <Calendar className="size-3.5 text-[#FF9500]" />,
+  },
+  {
     title: "Absent Days",
     value: 2,
     borderColor: "border-[#FF0000]",
@@ -36,12 +50,6 @@ const initialAttendanceStats = [
         <XCircleIcon className="size-full text-[#FF0000]" />
       </div>
     ),
-  },
-  {
-    title: "Leave Taken",
-    value: 4,
-    borderColor: "border-[#FF9500]",
-    icon: <Calendar className="size-3.5 text-[#FF9500]" />,
   },
 ];
 
@@ -378,12 +386,12 @@ toast.success(t("attendance_marked_success", { date: attendanceDate }));
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-wrap items-center gap-4 sm:gap-6 px-4 py-3 mt-2 w-full"
+        className="flex w-full flex-nowrap items-stretch gap-4 sm:gap-6 overflow-x-auto no-scrollbar px-4 py-3 mt-2"
       >
         {attendanceStats.map((item, index) => (
           <AttendanceCard key={index} {...item} />
         ))}
-       <div className="relative w-full flex justify-center mt-2">
+        <div className="relative shrink-0">
           {/* TOP CARD */}
           <motion.div
             onClick={() => setShowPopup((prev) => !prev)}
@@ -577,9 +585,11 @@ selectedTab === "Check-In"
 
       <button
         onClick={handleOpenCreateModal}
-        className="fixed cursor-pointer bottom-8 right-8 rounded-2xl font-semibold px-7 py-3 z-30 bg-[#2457C5] text-[#EDEDED] dark:bg-[#73FBFD] dark:text-[#000000] text-base lg:text-xl btn-hover"
+        className="fixed cursor-pointer bottom-8 right-8 rounded-2xl font-semibold px-7 py-3 z-30 bg-[#2457C5] text-[#EDEDED] dark:bg-[#73FBFD] dark:text-[#000000] text-base lg:text-xl btn-hover flex items-center justify-center gap-2"
       >
         <p>{t("applyLeave")}</p>
+        <Plus className="size-5 lg:size-6 text-[#EDEDED] dark:text-[#000000]" />
+        <p>Apply Leave</p>
       </button>
 
       {openModel && (

@@ -89,18 +89,18 @@ const AttendanceList = ({ LeaveData = [], currId, setCurrId, onEditLeave, onDele
                         : "scale-y-0 group-hover:scale-y-100"
                     }`}
               />
-              <div className=" text-base text-[#000000] dark:text-[#F8F8F8] font-medium flex items-center justify-center flex-3/9 flex-wrap w-full">
+              <div className=" text-base text-[#000000] dark:text-[#F8F8F8] font-medium flex items-center justify-center basis-[28%] flex-wrap">
                 <h1>{formattedDate(startDate)}</h1>
                 <h1>{" - "}</h1>
                 <h1>{formattedDate(endDate)}</h1>
               </div>
-              <h1 className=" text-base text-[#000000] dark:text-[#F8F8F8] font-medium flex items-center justify-center flex-1/9">
+              <h1 className=" text-base text-[#000000] dark:text-[#F8F8F8] font-medium flex items-center justify-center basis-[20%]">
                 {type}
               </h1>
-              <h1 className=" text-base text-[#000000] dark:text-[#F8F8F8] font-medium flex items-center justify-start flex-3/9">
+              <h1 className=" text-base text-[#000000] dark:text-[#F8F8F8] font-medium flex items-center justify-start basis-[28%]">
                 {reason}
               </h1>
-              <div className="  flex items-center justify-center flex-1/9">
+              <div className="  flex items-center justify-center basis-[12%]">
                 <div
                   className={`${statusColor[status] || "text-gray-700 bg-gray-100"} px-4 py-1 flex items-center justify-center gap-2 rounded-2xl`}
                 >
@@ -108,7 +108,7 @@ const AttendanceList = ({ LeaveData = [], currId, setCurrId, onEditLeave, onDele
                   <p className=" text-xs font-medium">{status}</p>
                 </div>
               </div>
-              <div className="text-base font-medium flex items-center justify-center gap-2 flex-1/9">
+              <div className="text-base font-medium flex items-center justify-center gap-2 basis-[12%]">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
