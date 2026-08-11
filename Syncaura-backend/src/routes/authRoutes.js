@@ -2,7 +2,8 @@ import { Router } from 'express';
 import {
   register, login, refresh, changePassword,
   forgotPassword, resetPassword, adminOnly,
-  requestPasswordOtp, changePasswordWithOtp, logout
+  requestPasswordOtp, changePasswordWithOtp, logout,
+  getProfile, updateProfile
 } from '../controllers/authController.js';
 import  {auth}  from '../middlewares/auth.js';
 import  {permit}  from '../middlewares/role.js';
@@ -31,6 +32,11 @@ router.post('/reset-password', resetPasswordValidator, resetPassword);
 // Traditional change password (with current password)
 router.put('/change-password', auth, changePasswordValidator, changePassword);
 //new 
+
+// Profile endpoints
+router.get('/profile', auth, getProfile);
+router.get('/me', auth, getProfile);
+router.put('/profile', auth, updateProfile);
 
 // Example role-based route
 router.get('/admin', auth, permit('admin'), adminOnly);

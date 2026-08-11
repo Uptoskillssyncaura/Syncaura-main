@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Check,
   CircleAlert,
@@ -47,6 +48,7 @@ const checkboxClass = `
 `;
 
 export default function TasksTable() {
+  const { t } = useTranslation();
   const [page] = useState(1);
   const perPage = 4;
   const rows = useMemo(() => tasks.slice((page - 1) * perPage, page * perPage), [page]);
@@ -54,7 +56,7 @@ export default function TasksTable() {
   return (
     <div className="w-full overflow-x-auto rounded-xl bg-white dark:bg-[#1E1E1E] shadow border border-gray-200 dark:border-[#2D2F31]">
       <h2 className="px-6 py-5 text-2xl font-bold text-gray-800 dark:text-white">
-        Tasks
+        {t("analytics_tasks_table_title")}
       </h2>
 
       <table className="min-w-[1000px] w-full text-sm">
@@ -62,13 +64,13 @@ export default function TasksTable() {
           <tr className="text-left text-gray-500 dark:text-[#6E717F] uppercase text-[11px] tracking-wider">
             {/* Checkbox removed from this header cell */}
             <th className="p-4 w-10"></th>
-            <th className="py-3">Task Name</th>
-            <th className="py-3">Project</th>
-            <th className="py-3">Status</th>
-            <th className="py-3">Priority</th>
-            <th className="py-3">Due Date</th>
-            <th className="py-3">Sprint</th>
-            <th className="text-center py-3">Actions</th>
+            <th className="py-3">{t("task_name_label")}</th>
+            <th className="py-3">{t("task_project_label")}</th>
+            <th className="py-3">{t("task_status_label")}</th>
+            <th className="py-3">{t("task_priority_label_table")}</th>
+            <th className="py-3">{t("task_due_date_label")}</th>
+            <th className="py-3">{t("task_sprint_label")}</th>
+            <th className="text-center py-3">{t("task_actions_label")}</th>
           </tr>
         </thead>
 
@@ -125,14 +127,14 @@ export default function TasksTable() {
 
       {/* Pagination Bar */}
       <div className="flex items-center justify-between px-6 py-4 text-sm text-gray-500 dark:text-[#6E717F] border-t border-gray-200 dark:border-[#2D2F31]">
-        <span>Showing 1–4 of 42 tasks</span>
+        <span>{t("analytics_showing_rows", { start: 1, end: 4, total: 42 })}</span>
 
         <div className="flex gap-2">
           <button className="px-4 py-1.5 rounded-md border border-gray-300 dark:border-[#2D2F31] bg-white dark:bg-[#1c1d1f] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#252629] transition-colors btn-hover">
-            Previous
+            {t("analytics_prev")}
           </button>
           <button className="px-4 py-1.5 rounded-md border border-gray-300 dark:border-[#2D2F31] bg-white dark:bg-[#1c1d1f] text-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#252629] transition-colors btn-hover">
-            Next
+            {t("analytics_next")}
           </button>
         </div>
       </div>

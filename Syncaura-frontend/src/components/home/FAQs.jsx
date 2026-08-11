@@ -1,44 +1,45 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from "react-i18next";
 import { ChevronDown, MessageCircleQuestion } from 'lucide-react';
 
 const faqData = [
   {
-    question: "What is FlowBit and how does it help my team?",
-    answer: "FlowBit is an all-in-one workspace that brings together project management, real-time chat, video meetings, document collaboration, attendance tracking, and performance analytics. Instead of juggling multiple tools, your team gets everything in a single, unified platform — so nothing falls through the cracks."
-
+    questionKey: "faq_q1",
+    answerKey: "faq_a1"
   },
   {
-    question: "How do I create and manage projects?",
-    answer: "Simply navigate to the Projects section, click 'New Project', and fill in your project details. You can create tasks, assign team members, set deadlines, and track progress using our intuitive Kanban boards. Filter by status (Ongoing, Completed, On Hold) and sort by date to stay organized."
+    questionKey: "faq_q2",
+    answerKey: "faq_a2"
   },
   {
-    question: "Does FlowBit support video meetings?",
-    answer: "Yes! FlowBit has built-in meeting scheduling with automatic Google Meet link generation. You can schedule meetings, view upcoming calls on your calendar, and join video conferences directly from the platform — no need to switch between tools."
+    questionKey: "faq_q3",
+    answerKey: "faq_a3"
   },
   {
-    question: "How does the attendance and leave system work?",
-    answer: "Team members can check in and check out daily to mark their attendance. The leave management system lets you apply for casual, sick, or earned leave with just a few clicks. Managers can approve or reject requests, and everyone can view team availability at a glance."
+    questionKey: "faq_q4",
+    answerKey: "faq_a4"
   },
   {
-    question: "Is my data secure on FlowBit?",
-    answer: "Absolutely. We use industry-standard encryption for all data in transit and at rest. FlowBit supports two-step verification for added account security, and our platform undergoes regular security audits to ensure your team's data stays protected."
+    questionKey: "faq_q5",
+    answerKey: "faq_a5"
   },
   {
-    question: "Can I use FlowBit on mobile devices?",
-    answer: "Yes, FlowBit is fully responsive and works seamlessly across desktops, tablets, and mobile devices. Access your projects, chat with your team, join meetings, and manage tasks from any device with a modern web browser."
+    questionKey: "faq_q6",
+    answerKey: "faq_a6"
   },
   {
-    question: "Does FlowBit support multiple languages?",
-    answer: "Yes! FlowBit currently supports English, Hindi, and Spanish, with more languages coming soon. You can switch languages anytime from your Settings page to use the platform in your preferred language."
+    questionKey: "faq_q7",
+    answerKey: "faq_a7"
   },
   {
-    question: "How do I get started with FlowBit?",
-    answer: "Getting started is easy — just click 'Start Free' to create your account. Once signed up, you can set up your first project, invite team members, and start collaborating right away. No credit card required for the free plan."
+    questionKey: "faq_q8",
+    answerKey: "faq_a8"
   }
 ];
 
 const FAQItem = ({ faq, index, isOpen, onToggle }) => {
+  const { t } = useTranslation();
   const itemId = `faq-item-${index}`;
   const contentId = `faq-content-${index}`;
 
@@ -90,7 +91,7 @@ const FAQItem = ({ faq, index, isOpen, onToggle }) => {
               className="text-[15px] md:text-base font-bold pr-4 leading-relaxed transition-colors duration-200"
               style={{ color: isOpen ? 'var(--text-primary)' : 'var(--text-secondary)' }}
             >
-              {faq.question}
+              {t(faq.questionKey)}
             </span>
           </div>
           
@@ -124,7 +125,7 @@ const FAQItem = ({ faq, index, isOpen, onToggle }) => {
                 className="text-[14px] md:text-[15px] leading-relaxed pb-6 px-5 md:px-6 md:pl-20 pr-8"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                {faq.answer}
+                {t(faq.answerKey)}
               </div>
             </motion.div>
           )}
@@ -135,6 +136,7 @@ const FAQItem = ({ faq, index, isOpen, onToggle }) => {
 };
 
 const FAQs = () => {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState(null);
 
   const handleToggle = (index) => {
@@ -176,12 +178,12 @@ const FAQs = () => {
             className="text-[34px] md:text-4xl lg:text-5xl font-black mb-5 tracking-tight"
             style={{ color: 'var(--text-primary)' }}
           >
-            Frequently{' '}
+            {t("faq_title")}{' '}
             <span
               className="text-transparent bg-clip-text"
               style={{ backgroundImage: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)' }}
             >
-              Asked Questions
+              {t("faq_title_highlight")}
             </span>
           </motion.h2>
           
@@ -193,7 +195,7 @@ const FAQs = () => {
             className="text-[15px] md:text-lg leading-relaxed max-w-2xl mx-auto"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Everything you need to know about FlowBit. Can't find the answer you're looking for? Feel free to contact our support team.
+            {t("faq_subtitle")}
           </motion.p>
         </div>
 

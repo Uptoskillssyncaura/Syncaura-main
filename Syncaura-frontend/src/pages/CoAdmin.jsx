@@ -1,19 +1,20 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import DashboardSection from "../components/coadmin/Dashboardsection";
 import ProjectsSection from "../components/coadmin/Projectssection";
 import AnalyticsSection from "../components/coadmin/Analyticssection";
 
-const TABS = ["Dashboard", "Projects", "Analytics"];
-
 export default function CoAdmin() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("Dashboard");
+  const TABS = [t("admin_tabs_dashboard"), t("admin_tabs_projects"), t("admin_tabs_analytics")];
 
   return (
     <div className="flex-1 flex flex-col bg-[#f8fafc] dark:bg-black min-h-[100vh] font-sans">
       {/* ── Page Header ── */}
       <div className="px-7 py-5 bg-white dark:bg-[#1c1c1e] border-b border-slate-100 dark:border-slate-800 flex items-center gap-6">
         <h1 className="text-[24px] font-bold text-[#1e293b] dark:text-white m-0 tracking-tight">
-          DashBoard
+          {t("coadmin_page_title")}
         </h1>
 
         {/* Tabs — bordered pill container matching Figma */}

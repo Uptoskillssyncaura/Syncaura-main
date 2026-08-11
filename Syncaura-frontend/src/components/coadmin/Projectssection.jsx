@@ -210,7 +210,7 @@ export default function ProjectsSection() {
         {/* Total Projects */}
         <div className="bg-white dark:bg-[#1c1c1e] rounded-xl px-4 py-3.5 border border-slate-100 dark:border-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.07)]">
           <div className="flex items-center justify-between gap-2 mb-5">
-            <span className="text-[12px] text-slate-400 font-semibold tracking-wide uppercase">Total Projects</span>
+            <span className="text-[12px] text-slate-400 font-semibold tracking-wide uppercase">{t("admin_total_projects")}</span>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
               <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" stroke="#94a3b8" strokeWidth="1.6" fill="#94a3b8" />
             </svg>

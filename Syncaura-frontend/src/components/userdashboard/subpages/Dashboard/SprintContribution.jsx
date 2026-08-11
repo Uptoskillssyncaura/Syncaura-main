@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import ContributionCard from "./ContributionCard";
 
 const SprintContribution = ({ CONTRIBUTIONS }) => {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -17,9 +19,8 @@ const SprintContribution = ({ CONTRIBUTIONS }) => {
         dark:shadow-[0_0_12px_#00000080] 
       "
     >
-      
       <h2 className="text-[#64748B] dark:text-gray-200 font-bold text-2xl sm:text-2xl mb-6">
-        Sprint Contribution
+        {t("sprint_contribution")}
       </h2>
 
       {/* Cards */}

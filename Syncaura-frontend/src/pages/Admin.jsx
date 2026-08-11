@@ -1,15 +1,17 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminDashboard from "../components/admin/adminDashboard.jsx";
 import ProjectsPage from "../components/admin/adminprojectdashboard/ProjectsPage.jsx";
 import AnalyticsSection from "../components/admin/adminanalyticaldashboard/AnalyticsSection.jsx";
 
 const Admin = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const tabs = [
-    { key: "dashboard", label: "Dashboard" },
-    { key: "projects", label: "Projects" },
-    { key: "analytics", label: "Analytics" },
+    { key: "dashboard", label: t("admin_tabs_dashboard") },
+    { key: "projects", label: t("admin_tabs_projects") },
+    { key: "analytics", label: t("admin_tabs_analytics") },
   ];
 
   return (
@@ -18,7 +20,7 @@ const Admin = () => {
     <div className="bg-white dark:bg-black px-8 py-4 flex items-center gap-8 transition-colors duration-300">
         {/* Title */}
         <h1 className="text-xl font-bold text-black dark:text-white tracking-wide whitespace-nowrap">
-          DashBoard
+          {t("admin_page_title")}
         </h1>
 
         {/* Tab Switcher */}

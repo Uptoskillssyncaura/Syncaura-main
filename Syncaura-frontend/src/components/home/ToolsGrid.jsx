@@ -1,78 +1,80 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from "react-i18next";
 import {
   Layers, MessageSquare, Video, Clock,
   FileText, BarChart3, ShieldCheck, Zap
 } from 'lucide-react';
 
-const tools = [
-  {
-    icon: Layers,
-    title: 'Task & Project Management',
-    description: 'Create tasks, set priorities, add deadlines, and track progress with Kanban or Gantt views — everything stays organized.',
-    color: '#3b82f6',
-    grad: 'linear-gradient(135deg, rgba(59,130,246,0.14), rgba(99,102,241,0.06))',
-    number: '01',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Real-time Chat',
-    description: 'Chat instantly, share files, and collaborate in private or group channels with real-time updates.',
-    color: '#8b5cf6',
-    grad: 'linear-gradient(135deg, rgba(139,92,246,0.14), rgba(99,102,241,0.06))',
-    number: '02',
-  },
-  {
-    icon: Video,
-    title: 'Meetings & Video Calls',
-    description: 'Schedule meetings with auto Google Meet/Zoom links, calendar sync, and notes — all in one place.',
-    color: '#06b6d4',
-    grad: 'linear-gradient(135deg, rgba(6,182,212,0.14), rgba(59,130,246,0.06))',
-    number: '03',
-  },
-  {
-    icon: Clock,
-    title: 'Attendance & Leave Tracker',
-    description: 'Mark attendance, request or approve leave, and monitor team availability easily.',
-    color: '#f59e0b',
-    grad: 'linear-gradient(135deg, rgba(245,158,11,0.14), rgba(239,68,68,0.06))',
-    number: '04',
-  },
-  {
-    icon: FileText,
-    title: 'Documents & Notes',
-    description: 'Create, share, and co-edit rich documents, meeting notes, and wikis — all in one searchable workspace.',
-    color: '#22c55e',
-    grad: 'linear-gradient(135deg, rgba(34,197,94,0.14), rgba(6,182,212,0.06))',
-    number: '05',
-  },
-  {
-    icon: BarChart3,
-    title: 'Performance Analytics',
-    description: 'Live dashboards, KPI tracking, and team insights to drive smarter decisions across your organization.',
-    color: '#ec4899',
-    grad: 'linear-gradient(135deg, rgba(236,72,153,0.14), rgba(139,92,246,0.06))',
-    number: '06',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Security & Compliance',
-    description: 'Enterprise-grade encryption, role-based access control, and audit logs to keep your data safe.',
-    color: '#14b8a6',
-    grad: 'linear-gradient(135deg, rgba(20,184,166,0.14), rgba(59,130,246,0.06))',
-    number: '07',
-  },
-  {
-    icon: Zap,
-    title: 'Automations & Integrations',
-    description: 'Connect your favourite tools and automate repetitive tasks so your team can focus on what matters.',
-    color: '#f97316',
-    grad: 'linear-gradient(135deg, rgba(249,115,22,0.14), rgba(245,158,11,0.06))',
-    number: '08',
-  },
-];
-
 const ToolsGrid = () => {
+  const { t } = useTranslation();
+
+  const tools = [
+    {
+      icon: Layers,
+      title: t("tools_task_title"),
+      description: t("tools_task_desc"),
+      color: '#3b82f6',
+      grad: 'linear-gradient(135deg, rgba(59,130,246,0.14), rgba(99,102,241,0.06))',
+      number: '01',
+    },
+    {
+      icon: MessageSquare,
+      title: t("tools_chat_title"),
+      description: t("tools_chat_desc"),
+      color: '#8b5cf6',
+      grad: 'linear-gradient(135deg, rgba(139,92,246,0.14), rgba(99,102,241,0.06))',
+      number: '02',
+    },
+    {
+      icon: Video,
+      title: t("tools_meetings_title"),
+      description: t("tools_meetings_desc"),
+      color: '#06b6d4',
+      grad: 'linear-gradient(135deg, rgba(6,182,212,0.14), rgba(59,130,246,0.06))',
+      number: '03',
+    },
+    {
+      icon: Clock,
+      title: t("tools_attendance_title"),
+      description: t("tools_attendance_desc"),
+      color: '#f59e0b',
+      grad: 'linear-gradient(135deg, rgba(245,158,11,0.14), rgba(239,68,68,0.06))',
+      number: '04',
+    },
+    {
+      icon: FileText,
+      title: t("tools_documents_title"),
+      description: t("tools_documents_desc"),
+      color: '#22c55e',
+      grad: 'linear-gradient(135deg, rgba(34,197,94,0.14), rgba(6,182,212,0.06))',
+      number: '05',
+    },
+    {
+      icon: BarChart3,
+      title: t("tools_analytics_title"),
+      description: t("tools_analytics_desc"),
+      color: '#ec4899',
+      grad: 'linear-gradient(135deg, rgba(236,72,153,0.14), rgba(139,92,246,0.06))',
+      number: '06',
+    },
+    {
+      icon: ShieldCheck,
+      title: t("tools_security_title"),
+      description: t("tools_security_desc"),
+      color: '#14b8a6',
+      grad: 'linear-gradient(135deg, rgba(20,184,166,0.14), rgba(59,130,246,0.06))',
+      number: '07',
+    },
+    {
+      icon: Zap,
+      title: t("tools_integrations_title"),
+      description: t("tools_integrations_desc"),
+      color: '#f97316',
+      grad: 'linear-gradient(135deg, rgba(249,115,22,0.14), rgba(245,158,11,0.06))',
+      number: '08',
+    },
+  ];
   return (
     <section
       id="features"
@@ -111,7 +113,7 @@ const ToolsGrid = () => {
             }}
           >
             <Zap size={11} className="animate-pulse" />
-            Tools &amp; Features
+            {t("tools_label")}
           </motion.div>
 
           {/* Headline */}
@@ -123,12 +125,12 @@ const ToolsGrid = () => {
             className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.05]"
             style={{ color: 'var(--text-primary)' }}
           >
-            Everything you need{' '}
+            {t("tools_title")}{' '}
             <span
               className="text-transparent bg-clip-text block sm:inline"
               style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%)' }}
             >
-              to work
+              {t("tools_title_highlight")}
             </span>
           </motion.h2>
 
@@ -141,11 +143,11 @@ const ToolsGrid = () => {
             className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Each feature built to save time and{' '}
+            {t("tools_subtitle")}{' '}
             <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              eliminate friction
+              {t("tools_subtitle_highlight")}
             </span>{' '}
-            from your daily workflow.
+            {t("tools_subtitle_tail")}
           </motion.p>
         </div>
 
@@ -241,4 +243,4 @@ const ToolsGrid = () => {
   );
 };
 
-export default ToolsGrid;
+export default ToolsGrid;

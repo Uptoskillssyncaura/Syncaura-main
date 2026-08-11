@@ -16,9 +16,7 @@ const ProtectRoute = ({ allowedRoles, publicOnly = false }) => {
   };
 
   // Public-only routes (sign-in, sign-up, home): redirect authenticated users away
-  if (publicOnly && isAuthenticated && user) {
-    return <Navigate to={getRoleHome()} replace />;
-  }
+ 
 
   // Protected routes: redirect unauthenticated users to sign-in
   if (!publicOnly && !isAuthenticated) {

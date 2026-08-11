@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Folder, MessageSquare, CheckSquare, Clock } from "lucide-react";
 
 // Map stats to icons
@@ -40,15 +41,17 @@ const colorMap = {
   },
 };
 
-// Stats data
-const stats = [
-  { title: "Active Projects", value: "08", note: "2 due this week", iconType: "projects", color: "blue" },
-  { title: "Unread Messages", value: "12", note: "4 chats pending", iconType: "messages", color: "green" },
-  { title: "Tasks Due Today", value: "12", note: "3 High Priority", iconType: "tasks", color: "orange" },
-  { title: "Pending Requests", value: "06", note: "Requires approval", iconType: "requests", color: "purple" },
-];
-
 const AdminStats = ({ isDark }) => {
+  const { t } = useTranslation();
+
+  // Stats data
+  const stats = [
+    { title: t("admin_stats_active_projects"), value: "08", note: t("admin_stats_2_due_week"), iconType: "projects", color: "blue" },
+    { title: t("admin_stats_unread_messages"), value: "12", note: t("admin_stats_4_chats_pending"), iconType: "messages", color: "green" },
+    { title: t("admin_stats_tasks_due_today"), value: "12", note: t("admin_stats_3_high_priority"), iconType: "tasks", color: "orange" },
+    { title: t("admin_stats_pending_requests"), value: "06", note: t("admin_stats_requires_approval"), iconType: "requests", color: "purple" },
+  ];
+
   return (
     <div className="ml-9 grid grid-cols-1 md:grid-cols-4 gap-6">
       {stats.map((item, i) => {

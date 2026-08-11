@@ -1,15 +1,17 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const BudgetUsage = () => {
+  const { t } = useTranslation();
   const data = [
-    { name: "Consumed", value: 75 },
-    { name: "Remaining", value: 25 },
+    { name: t("admin_budget_consumed"), value: 75 },
+    { name: t("admin_budget_remaining"), value: 25 },
   ];
 
   return (
     <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 p-8 mt-6 transition-colors duration-300">
-      <h2 className="text-2xl font-bold text-black dark:text-white mb-8">Budget Usage</h2>
+      <h2 className="text-2xl font-bold text-black dark:text-white mb-8">{t("admin_budget_usage_title")}</h2>
 
       <div className="flex items-center gap-16">
         <div className="relative w-48 h-48">
@@ -44,18 +46,18 @@ const BudgetUsage = () => {
           {/* Center Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-4xl font-bold text-gray-800 dark:text-white transition-colors">75%</span>
-            <span className="text-[11px] font-bold text-gray-400 dark:text-[#00f2ff] tracking-widest mt-1">CONSUMED</span>
+            <span className="text-[11px] font-bold text-gray-400 dark:text-[#00f2ff] tracking-widest mt-1">{t("admin_budget_consumed_label").toUpperCase()}</span>
           </div>
         </div>
 
         {/* Stats Row */}
         <div className="flex gap-20">
           <div className="text-center">
-            <p className="text-sm font-medium text-gray-400 mb-2">Allocated</p>
+            <p className="text-sm font-medium text-gray-400 mb-2">{t("admin_budget_allocated")}</p>
             <p className="text-2xl font-bold text-gray-800 dark:text-white transition-colors">$1.2M</p>
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium text-gray-400 mb-2">Remaining</p>
+            <p className="text-sm font-medium text-gray-400 mb-2">{t("admin_budget_remaining")}</p>
             {/* Text color conditional with Tailwind */}
             <p className="text-2xl font-bold text-blue-500 dark:text-[#00f2ff] transition-colors">300k</p>
           </div>

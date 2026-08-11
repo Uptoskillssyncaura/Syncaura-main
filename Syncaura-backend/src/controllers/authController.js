@@ -310,6 +310,60 @@ export const adminOnly = async (req, res) => {
   res.json({ message: 'Hello Admin!' });
 };
 
+export const getProfile = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const userRes = await pool.query(
+      'SELECT id, name, email, role, phone, language, created_at FROM users WHERE id = $1',
+      [userId]
+    );
+    if (userRes.rowCount === 0) return res.status(404).json({ message: 'User not found' });
+
+    res.json({ user: userRes.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { name, email, phone, language } = req.body;
+
+    if (email) {
+      const existingRes = await pool.query(
+        'SELECT id FROM users WHERE email = $1 AND id != $2',
+        [email.toLowerCase(), userId]
+      );
+      if (existingRes.rowCount > 0) {
+        return res.status(409).json({ message: 'Email already in use' });
+      }
+    }
+
+    const updateRes = await pool.query(
+      `UPDATE users 
+       SET name = COALESCE($1, name),
+           email = COALESCE($2, email),
+           phone = COALESCE($3, phone),
+           language = COALESCE($4, language),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $5 
+       RETURNING id, name, email, role, phone, language`,
+      [name, email ? email.toLowerCase() : null, phone, language, userId]
+    );
+
+    if (updateRes.rowCount === 0) return res.status(404).json({ message: 'User not found' });
+
+    res.json({ user: updateRes.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
 //new changes,
 
 export const logout = async (req, res) => {

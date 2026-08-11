@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Home, Sparkles, CreditCard, Mail, LogIn, ArrowRight } from 'lucide-react';
-import { useNavigate, Link } from "react-router-dom";
+import { Sun, Moon, Home, Sparkles, CreditCard, Mail, LogIn, ArrowRight, Users, Compass } from 'lucide-react';
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useDarkMode } from "../../hooks/useDarkMode";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useTranslation();
   const { theme, toggleTheme } = useDarkMode();
   const [activeSection, setActiveSection] = useState('home');
 
+  const isAboutPage = location.pathname === '/about';
+  const isLearnMorePage = location.pathname === '/learn-more';
+
   useEffect(() => {
     const handleScroll = () => {
+      if (window.scrollY < 50) {
+        setActiveSection('home');
+        return;
+      }
       const sections = ['home', 'features', 'contact'];
       const scrollPosition = window.scrollY + 100;
 
@@ -28,17 +38,34 @@ const Navbar = () => {
       }
     };
 
+    handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToSection = (e, sectionId) => {
     e.preventDefault();
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (location.pathname !== "/") {
+      navigate(`/#${sectionId}`);
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.substring(1);
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [location.pathname, location.hash]);
 
   return (
     <header
@@ -51,11 +78,12 @@ const Navbar = () => {
         style={{ borderColor: 'var(--border-color)' }}
       >
         <div className="gap-20 flex items-center">
-          <div
+          <Link
+            to="/"
             className="text-2xl font-bold text-blue-600 dark:text-[#4FE6E6]"
           >
             FlowBit
-          </div>
+          </Link>
 
           <nav 
             className="flex items-center gap-1 p-1.5 rounded-2xl"
@@ -71,12 +99,12 @@ const Navbar = () => {
               onClick={(e) => scrollToSection(e, 'home')}
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
               style={{
-                backgroundColor: activeSection === 'home' ? 'rgba(51, 102, 255, 0.1)' : '',
-                color: activeSection === 'home' ? 'var(--accent-color)' : 'var(--text-secondary)',
+                backgroundColor: (!isAboutPage && !isLearnMorePage && activeSection === 'home') ? 'rgba(51, 102, 255, 0.1)' : '',
+                color: (!isAboutPage && !isLearnMorePage && activeSection === 'home') ? 'var(--accent-color)' : 'var(--text-secondary)',
               }}
             >
               <Home className="w-4 h-4 transition-transform group-hover:scale-110" />
-              Home
+              {t("nav_home")}
             </a>
 
             <a
@@ -84,12 +112,12 @@ const Navbar = () => {
               onClick={(e) => scrollToSection(e, 'features')}
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
               style={{
-                backgroundColor: activeSection === 'features' ? 'rgba(51, 102, 255, 0.1)' : '',
-                color: activeSection === 'features' ? 'var(--accent-color)' : 'var(--text-secondary)',
+                backgroundColor: (!isAboutPage && !isLearnMorePage && activeSection === 'features') ? 'rgba(51, 102, 255, 0.1)' : '',
+                color: (!isAboutPage && !isLearnMorePage && activeSection === 'features') ? 'var(--accent-color)' : 'var(--text-secondary)',
               }}
             >
               <Sparkles className="w-4 h-4 transition-transform group-hover:scale-110" />
-              Features
+              {t("nav_features")}
             </a>
 
             <a
@@ -97,13 +125,37 @@ const Navbar = () => {
               onClick={(e) => scrollToSection(e, 'contact')}
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
               style={{
-                backgroundColor: activeSection === 'contact' ? 'rgba(51, 102, 255, 0.1)' : '',
-                color: activeSection === 'contact' ? 'var(--accent-color)' : 'var(--text-secondary)',
+                backgroundColor: (!isAboutPage && !isLearnMorePage && activeSection === 'contact') ? 'rgba(51, 102, 255, 0.1)' : '',
+                color: (!isAboutPage && !isLearnMorePage && activeSection === 'contact') ? 'var(--accent-color)' : 'var(--text-secondary)',
               }}
             >
               <Mail className="w-4 h-4 transition-transform group-hover:scale-110" />
-              Contact
+              {t("nav_contact")}
             </a>
+
+            <Link
+              to="/about"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
+              style={{
+                backgroundColor: isAboutPage ? 'rgba(51, 102, 255, 0.1)' : '',
+                color: isAboutPage ? 'var(--accent-color)' : 'var(--text-secondary)',
+              }}
+            >
+              <Users className="w-4 h-4 transition-transform group-hover:scale-110" />
+              About Us
+            </Link>
+
+            <Link
+              to="/learn-more"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
+              style={{
+                backgroundColor: isLearnMorePage ? 'rgba(51, 102, 255, 0.1)' : '',
+                color: isLearnMorePage ? 'var(--accent-color)' : 'var(--text-secondary)',
+              }}
+            >
+              <Compass className="w-4 h-4 transition-transform group-hover:scale-110" />
+              Learn More
+            </Link>
           </nav>
         </div>
 
@@ -111,7 +163,7 @@ const Navbar = () => {
           <button
             onClick={toggleTheme}
             className="w-9 h-9 flex items-center justify-center rounded-md hover:opacity-70 btn-hover"
-            aria-label="Toggle theme"
+            aria-label={t("toggle_theme")}
           >
             {theme === 'light' ? (
               <Sun className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
@@ -121,11 +173,11 @@ const Navbar = () => {
           </button>
 
           <button
-            onClick={() => navigate("/role-selection")}
+            onClick={() => navigate("/sign-in")}
             className="flex items-center gap-2 text-sm font-semibold transition-all hover:opacity-70 text-blue-600 dark:text-[#4FE6E6]"
           >
             <LogIn className="w-4 h-4" />
-            Login
+            {t("nav_login")}
           </button>
 
           <button
@@ -141,11 +193,12 @@ const Navbar = () => {
       {/* Mobile */}
       <div className="md:hidden">
         <div className="flex items-center justify-between px-6 py-5">
-          <div
+          <Link
+            to="/"
             className="text-[23px] font-bold tracking-tight text-blue-600 dark:text-[#4FE6E6]"
           >
             FlowBit
-          </div>
+          </Link>
 
           <button
             onClick={() => navigate("/SignUp")}
@@ -169,11 +222,11 @@ const Navbar = () => {
               className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
               style={{
                 color:
-                  activeSection === 'home'
+                  (!isAboutPage && !isLearnMorePage && activeSection === 'home')
                     ? 'var(--accent-color)'
                     : 'var(--text-secondary)',
                 borderColor:
-                  activeSection === 'home'
+                  (!isAboutPage && !isLearnMorePage && activeSection === 'home')
                     ? 'var(--accent-color)'
                     : 'transparent',
               }}
@@ -184,12 +237,16 @@ const Navbar = () => {
             <a
               href="#features"
               onClick={(e) => scrollToSection(e, 'features')}
-              className="text-sm font-medium whitespace-nowrap"
+              className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
               style={{
                 color:
-                  activeSection === 'features'
+                  (!isAboutPage && !isLearnMorePage && activeSection === 'features')
                     ? 'var(--accent-color)'
                     : 'var(--text-secondary)',
+                borderColor:
+                  (!isAboutPage && !isLearnMorePage && activeSection === 'features')
+                    ? 'var(--accent-color)'
+                    : 'transparent',
               }}
             >
               Features
@@ -198,16 +255,54 @@ const Navbar = () => {
             <a
               href="#contact"
               onClick={(e) => scrollToSection(e, 'contact')}
-              className="text-sm font-medium whitespace-nowrap"
+              className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
               style={{
                 color:
-                  activeSection === 'contact'
+                  (!isAboutPage && !isLearnMorePage && activeSection === 'contact')
                     ? 'var(--accent-color)'
                     : 'var(--text-secondary)',
+                borderColor:
+                  (!isAboutPage && !isLearnMorePage && activeSection === 'contact')
+                    ? 'var(--accent-color)'
+                    : 'transparent',
               }}
             >
               Contact
             </a>
+
+            <Link
+              to="/about"
+              className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
+              style={{
+                color:
+                  isAboutPage
+                    ? 'var(--accent-color)'
+                    : 'var(--text-secondary)',
+                borderColor:
+                  isAboutPage
+                    ? 'var(--accent-color)'
+                    : 'transparent',
+              }}
+            >
+              About
+            </Link>
+
+            <Link
+              to="/learn-more"
+              className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
+              style={{
+                color:
+                  isLearnMorePage
+                    ? 'var(--accent-color)'
+                    : 'var(--text-secondary)',
+                borderColor:
+                  isLearnMorePage
+                    ? 'var(--accent-color)'
+                    : 'transparent',
+              }}
+            >
+              Learn
+            </Link>
           </nav>
         </div>
       </div>

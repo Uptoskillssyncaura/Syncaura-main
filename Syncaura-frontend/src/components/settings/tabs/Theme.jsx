@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { setLanguage as setAppLanguage } from "../../../redux/slices/languageSlice";
 import i18n from "../../../i18n/i18n";
 import {
   setTheme as setUiTheme,
@@ -26,12 +27,33 @@ const Theme = () => {
   const dispatch = useDispatch();
 
   // Default values
-  const {
-    theme = "light",
-    font = "Arial",
-    fontSize = "medium",
-    zoom = 100,
-  } = useSelector((s) => s.ui || {});
+  const { theme = "light", font = "Arial", fontSize = "medium", zoom = 100 } =
+    useSelector((s) => s.ui || {});
+
+  // Apply page zoom based on zoom state
+  useEffect(() => {
+    document.body.style.zoom = `${zoom}%`;
+    // Optional: also set transform for better cross‑browser support
+    // document.documentElement.style.transform = `scale(${zoom / 100})`;
+    //document.documentElement.style.transformOrigin = '0 0';
+    return () => {
+      // Reset on cleanup
+      document.body.style.zoom = '';
+      // document.documentElement.style.transform = '';
+      // document.documentElement.style.transformOrigin = '';
+    };
+  }, [zoom]);
+  // Apply font size based on fontSize state
+  useEffect(() => {
+    const sizeMap = {
+      small: "85%",
+      medium: "100%",
+      large: "115%",
+      xlarge: "130%",
+    };
+    const size = sizeMap[fontSize] || "100%";
+    document.documentElement.style.fontSize = size;
+  }, [fontSize]);
 
   const [language, setLanguage] = useState(
     (localStorage.getItem("app_language") || i18n.language || "en").substring(
@@ -78,8 +100,16 @@ const Theme = () => {
 
   const handleLanguageChange = (e) => {
     const code = e.target.value;
+
+    console.log("Selected:", code);
+
     setLanguage(code);
+    dispatch(setAppLanguage(code));
+    localStorage.setItem("app_language", code);
+
     i18n.changeLanguage(code);
+
+    console.log("After change:", i18n.language);
   };
 
   const handleFontChange = (e) => dispatch(setFont(e.target.value));
@@ -179,6 +209,10 @@ const Theme = () => {
                 onChange={handleFontSizeChange}
                 className="bg-white dark:bg-[#0B0B0B] text-black dark:text-white border border-gray-300 dark:border-[#2A2A2A] px-3 py-1 rounded-md"
               >
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+                <option value="xlarge">Extra Large</option>
                 <option value="small">{t("Small") || "Small"}</option>
                 <option value="medium">{t("Medium") || "Medium"}</option>
                 <option value="large">{t("Large") || "Large"}</option>

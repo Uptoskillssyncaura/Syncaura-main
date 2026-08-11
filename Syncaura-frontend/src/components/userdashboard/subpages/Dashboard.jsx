@@ -6,6 +6,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import TopCard from "../TopCard";
 import CircularProgress from "../CircularProgress";
 import TaskStatusDistribution from "../TaskGraph/TaskStatusDistribution";
@@ -17,6 +18,7 @@ import { IoAlert } from "react-icons/io5";
 import RecentActivityCard from "../RecentActivityCard";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // --- NEW FUNCTIONAL STATES ---
@@ -56,10 +58,10 @@ const Dashboard = () => {
     : deadlineTask.filter(task => task.status === deadlineFilter);
 
   const cardData = [
-    { title: "Total Tasks", count: 24, iconData: <ClipboardListIcon className="text-white dark:text-gray-900 fill-blue-600 size-10" /> },
-    { title: "Completed", count: 12, iconData: <div className="flex items-center justify-center p-2 rounded-full bg-[#1BC963]"><Check className="size-5 text-white dark:text-gray-900" /></div> },
-    { title: "in Progress", count: 8, iconData: <div className="flex items-center justify-center p-2 rounded-full bg-[#FBB309]"><EllipsisIcon className="size-5 text-white dark:text-gray-900" /></div> },
-    { title: "Overdue", count: 4, iconData: <CircleAlert className="size-10 text-white dark:text-gray-900 fill-[#EF4444]" /> },
+    { title: t("dashboard_total_tasks"), count: 24, iconData: <ClipboardListIcon className="text-white dark:text-gray-900 fill-blue-600 size-10" /> },
+    { title: t("dashboard_completed"), count: 12, iconData: <div className="flex items-center justify-center p-2 rounded-full bg-[#1BC963]"><Check className="size-5 text-white dark:text-gray-900" /></div> },
+    { title: t("dashboard_in_progress"), count: 8, iconData: <div className="flex items-center justify-center p-2 rounded-full bg-[#FBB309]"><EllipsisIcon className="size-5 text-white dark:text-gray-900" /></div> },
+    { title: t("dashboard_overdue"), count: 4, iconData: <CircleAlert className="size-10 text-white dark:text-gray-900 fill-[#EF4444]" /> },
   ];
 
   return (
@@ -93,21 +95,21 @@ const Dashboard = () => {
       {/* 1. Health Status */}
       <div className="flex flex-col w-full gap-4 sm:gap-5 py-4 px-4 sm:px-6 md:px-8 pb-6 sm:pb-10 rounded-xl bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#2d2f31] shadow-none">
         <div className="flex items-center justify-start w-full">
-          <h1 className="text-[#6E7184] dark:text-gray-200 font-bold text-xl sm:text-2xl">Health Status</h1>
+          <h1 className="text-[#6E7184] dark:text-gray-200 font-bold text-xl sm:text-2xl">{t("dashboard_health_status")}</h1>
         </div>
         <div className="flex flex-col xsm:flex-row items-center md:items-center justify-center md:justify-start w-full gap-6 sm:gap-10 md:gap-20 px-2 sm:px-6 md:px-10 py-2">
           <div className="[--chart-text:#000000] dark:[--chart-text:#FFFFFF]">
             <CircularProgress percentage={60} startAngle={20} size={160} label="PROJECTS" data={12} fontSize={32} textSize={14} textColor="var(--chart-text)" labelColor="#94A3B8" progressColor="#127FEC" trackColor="#E5E7EB" className="text-[#E5E7EB] dark:text-[#2A2A2A]" innerBg="bg-white dark:bg-[#1E1E1E]" />
           </div>
           <div className="flex flex-col items-center md:items-start justify-center gap-2 text-center md:text-left">
-            <h1 className="text-[#94A3B8] dark:text-gray-400 font-semibold text-base sm:text-lg">Spiral Goal Progress</h1>
+            <h1 className="text-[#94A3B8] dark:text-gray-400 font-semibold text-base sm:text-lg">{t("dashboard_spiral_goal_progress")}</h1>
             <div className="flex items-center gap-3">
               <h1 className="text-black dark:text-white font-bold text-xl sm:text-3xl">+5%</h1>
               <div className="flex items-center justify-center px-3 py-1 rounded-full bg-[#ECFDF5] dark:bg-green-900/20 border border-[#D1FAE5]">
-                <p className="text-[#10B981] dark:text-green-400 font-bold text-[9px] sm:text-[10px] tracking-wide uppercase">UP FROM LAST WEEK</p>
+                <p className="text-[#10B981] dark:text-green-400 font-bold text-[9px] sm:text-[10px] tracking-wide uppercase">{t("dashboard_up_from_last_week")}</p>
               </div>
             </div>
-            <h1 className="text-[#CBD5E1] dark:text-gray-500 font-medium text-xs sm:text-sm tracking-wide">Target: 80% by Friday</h1>
+            <h1 className="text-[#CBD5E1] dark:text-gray-500 font-medium text-xs sm:text-sm tracking-wide">{t("dashboard_target", { percent: 80 })}</h1>
           </div>
         </div>
       </div>
@@ -123,19 +125,19 @@ const Dashboard = () => {
       {/* 4. Upcoming Deadlines with Filter Functionality */}
       <div className="flex flex-col items-center justify-start w-full gap-y-7 shadow-[0_0_10px_0_#54545440] dark:shadow-[0_0_12px_#00000080] py-4 px-4 sm:px-6 md:px-8 pb-6 sm:pb-10 rounded-xl bg-white dark:bg-[#1E1E1E] border border-transparent dark:border-[#2A2A2A]">
         <div className="flex items-center justify-between w-full">
-          <h1 className="text-[#6E7184] dark:text-gray-200 font-bold text-2xl">Upcoming Deadlines</h1>
+          <h1 className="text-[#6E7184] dark:text-gray-200 font-bold text-2xl">{t("dashboard_upcoming_deadlines")}</h1>
           <div className="flex items-center gap-4">
             {/* Filter Dropdown/Toggle Simulation */}
             <select 
               className="bg-gray-50 dark:bg-[#2A2A2A] border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-sm font-medium text-gray-600 dark:text-gray-300 outline-none"
               onChange={(e) => setDeadlineFilter(e.target.value)}
             >
-              <option value="ALL">All Priorities</option>
-              <option value="HIGH">High Only</option>
-              <option value="MEDIUM">Medium Only</option>
-              <option value="LOW">Low Only</option>
+              <option value="ALL">{t("dashboard_all_priorities")}</option>
+              <option value="HIGH">{t("dashboard_high_only")}</option>
+              <option value="MEDIUM">{t("dashboard_medium_only")}</option>
+              <option value="LOW">{t("dashboard_low_only")}</option>
             </select>
-            <motion.p whileHover={{ scale: 1.08, x: 6 }} className="text-[#C05328] dark:text-blue-400 text-lg font-medium cursor-pointer hover:underline">View All</motion.p>
+            <motion.p whileHover={{ scale: 1.08, x: 6 }} className="text-[#C05328] dark:text-blue-400 text-lg font-medium cursor-pointer hover:underline">{t("dashboard_view_all")}</motion.p>
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-start w-full gap-6 px-0 min-h-[100px]">
@@ -163,8 +165,8 @@ const Dashboard = () => {
       {/* 6. Issues & Alerts with Dismiss Logic */}
       <div className="flex flex-col items-center justify-start w-full gap-y-7 shadow-[0_0_10px_0_#54545440] dark:shadow-[0_0_12px_#00000080] py-4 px-4 sm:px-6 md:px-8 pb-6 sm:pb-10 rounded-xl bg-white dark:bg-[#1E1E1E] border border-transparent dark:border-[#2A2A2A]">
         <div className="flex items-center justify-between w-full">
-          <h1 className="text-[#6E7184] dark:text-gray-200 font-bold text-2xl">Issues & Alerts</h1>
-          <motion.p whileHover={{ scale: 1.08, x: 6 }} className="text-[#C05328] dark:text-blue-400 text-lg font-medium cursor-pointer hover:underline">View All</motion.p>
+          <h1 className="text-[#6E7184] dark:text-gray-200 font-bold text-2xl">{t("dashboard_issues_alerts")}</h1>
+<motion.p whileHover={{ scale: 1.08, x: 6 }} className="text-[#C05328] dark:text-blue-400 text-lg font-medium cursor-pointer hover:underline">{t("dashboard_view_all")}</motion.p>
         </div>
         <div className="flex flex-wrap gap-4 md:gap-5 w-full justify-center xl:justify-start">
           <AnimatePresence>
@@ -193,7 +195,7 @@ const Dashboard = () => {
             ))}
           </AnimatePresence>
           {activeAlerts.length === 0 && (
-            <button onClick={() => setActiveAlerts([{id:1, title: "API Documentation", type: "blue", link: "Resume Work →"}, {id:2, title: "User Dashboard UI", type: "red", link: "Nudge Designer"}])} className="text-sm text-blue-500 underline btn-hover">Reset Alerts</button>
+            <button onClick={() => setActiveAlerts([{id:1, title: "API Documentation", type: "blue", link: "Resume Work →"}, {id:2, title: "User Dashboard UI", type: "red", link: "Nudge Designer"}])} className="text-sm text-blue-500 underline btn-hover">{t("dashboard_reset_alerts")}</button>
           )}
         </div>
       </div>

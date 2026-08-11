@@ -1,34 +1,36 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
 const ProjectRisks = () => {
+  const { t } = useTranslation();
 
   const data = [
     {
-      name: "Alpha Redesign",
-      risk: "Backend integration delay",
-      owner: "John D.",
+      name: t("admin_project_alpha"),
+      risk: t("admin_risk_backend_delay"),
+      owner: t("admin_owner_john"),
+      severity: t("admin_severity_high"),
       initials: "JD",
       avatarColor: "bg-purple-100 text-purple-600 dark:bg-purple-600 dark:text-white",
-      severity: "High",
       sevColor: "text-red-600 bg-red-50 border-red-100 dark:bg-transparent dark:border-red-600 dark:text-red-500"
     },
     {
-      name: "Mobile App v2",
-      risk: "Resource shortage in QA",
-      owner: "Sarah M.",
+      name: t("admin_project_mobile"),
+      risk: t("admin_risk_resource_shortage"),
+      owner: t("admin_owner_sarah"),
+      severity: t("admin_severity_medium"),
       initials: "SM",
       avatarColor: "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-white",
-      severity: "Medium",
       sevColor: "text-yellow-600 bg-yellow-50 border-yellow-100 dark:bg-transparent dark:border-yellow-600 dark:text-yellow-500"
     },
     {
-      name: "Cloud Migration",
-      risk: "Minor budget variance",
-      owner: "Alex K.",
+      name: t("admin_project_cloud"),
+      risk: t("admin_risk_budget_variance"),
+      owner: t("admin_owner_alex"),
+      severity: t("admin_severity_low"),
       initials: "AK",
       avatarColor: "bg-green-100 text-green-600 dark:bg-green-600 dark:text-white",
-      severity: "Low",
       sevColor: "text-gray-600 bg-gray-50 border-gray-200 dark:bg-transparent dark:border-green-600 dark:text-green-500"
     },
   ];
@@ -61,7 +63,7 @@ const ProjectRisks = () => {
       <div className="p-4 px-6 flex justify-between items-center border-b border-gray-100 dark:border-zinc-800/50">
 
         <h2 className="text-2xl font-bold  text-black dark:text-white">
-          Project Risks
+          {t("admin_project_risks_title")}
         </h2>
 
         <motion.button
@@ -69,7 +71,7 @@ const ProjectRisks = () => {
           whileTap={{ scale: 0.95 }}
           className="text-xl font-bold text-gray-900 dark:text-[#00a3ff]"
         >
-          View All
+          {t("admin_view_all")}
         </motion.button>
 
       </div>
@@ -81,10 +83,10 @@ const ProjectRisks = () => {
 
           <thead>
             <tr className="bg-gray-50/50 dark:bg-[#161b22] text-[13px] uppercase tracking-wider text-gray-400 border-b border-gray-100 dark:border-zinc-800">
-              <th className="py-4 px-6 text-l font-semibold dark:text-white">Project Name</th>
-              <th className="py-4 px-6 text-l font-semibold dark:text-white">Risk Description</th>
-              <th className="py-4 px-6 text-l font-semibold dark:text-white">Owner</th>
-              <th className="py-4 pr-20 text-l text-right font-semibold dark:text-white">Severity</th>
+              <th className="py-4 px-6 text-l font-semibold dark:text-white">{t("admin_project_name")}</th>
+              <th className="py-4 px-6 text-l font-semibold dark:text-white">{t("admin_risk_description")}</th>
+              <th className="py-4 px-6 text-l font-semibold dark:text-white">{t("admin_owner")}</th>
+              <th className="py-4 pr-20 text-l text-right font-semibold dark:text-white">{t("admin_severity")}</th>
             </tr>
           </thead>
 

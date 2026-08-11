@@ -15,7 +15,10 @@ export const auth = async (req, res, next) => {
 //    console.log("Authorization Header:", req.headers.authorization);
 // console.log("Extracted Token:", token); 
 
-    const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+  const payload = jwt.verify(
+  token, 
+  process.env.JWT_ACCESS_SECRET || process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET
+);
 
     // Fetch full user from DB
     const result = await pool.query("SELECT * FROM users WHERE id = $1", [payload.sub || payload.id]);
@@ -24,6 +27,7 @@ export const auth = async (req, res, next) => {
 
 
     const user = result.rows[0];
+    delete user.password;
     req.user = user;
     
     // Map Google tokens if needed

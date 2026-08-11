@@ -1,16 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
-const projectStatusData = [
-  { name: "Completed", value: 65, color: "#6366F1" },
-  { name: "In Progress", value: 40, color: "#10B981" },
-  { name: "On Hold", value: 75, color: "#F59E0B" },
-  { name: "Delayed", value: 55, color: "#EF4444" },
-];
-
-const productivityData = [20, 35, 28, 55, 48, 70];
-
 const AdminTable = () => {
+  const { t } = useTranslation();
   const isDarkMode = useSelector((state) => state.theme.isDark);
+
+  const projectStatusData = [
+    { name: t("admin_table_completed"), value: 65, color: "#6366F1" },
+    { name: t("admin_table_in_progress"), value: 40, color: "#10B981" },
+    { name: t("admin_table_on_hold"), value: 75, color: "#F59E0B" },
+    { name: t("admin_table_delayed"), value: 55, color: "#EF4444" },
+  ];
+
+  const productivityData = [20, 35, 28, 55, 48, 70];
 
   const maxValue = Math.max(...productivityData);
 
@@ -41,7 +43,7 @@ const AdminTable = () => {
       {/* PROJECT STATUS */}
       <div style={cardStyle}>
         <h3 style={{ color: valueColor, fontWeight: 600, marginBottom: "1.5rem" }}>
-          Project Status
+          {t("admin_table_project_status")}
         </h3>
 
         <div className="flex items-end justify-between h-[220px] px-15 mt-5">
@@ -75,9 +77,9 @@ const AdminTable = () => {
       <div style={cardStyle}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ color: valueColor, fontWeight: 600, fontSize: "0.875rem" }}>
-            Team Productivity
+            {t("admin_table_team_productivity")}
           </h3>
-          <span style={{ fontSize: "0.75rem", color: labelColor }}>Last 30 Days</span>
+          <span style={{ fontSize: "0.75rem", color: labelColor }}>{t("admin_table_last_30_days")}</span>
         </div>
 
         <div className="relative h-[220px]">

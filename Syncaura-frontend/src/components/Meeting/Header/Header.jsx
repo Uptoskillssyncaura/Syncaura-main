@@ -1,9 +1,12 @@
 import ToggleSwitch from "../../dashboard/Header/ToggleSwitch";
 import { useSelector } from "react-redux";
 import { Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Header = ({ setOpen }) => {
+  const { t } = useTranslation();
   const user = useSelector((state) => state.auth.user);
+  const displayName = user?.name || t("user_default_name");
 
   const today = new Date();
 
@@ -37,7 +40,9 @@ const Header = ({ setOpen }) => {
             {/* Profile Text */}
             <div className="flex flex-col">
               <div className="flex gap-1 items-center text-black dark:text-white">
-                <h1 className="font-light text-base sm:text-lg">Hello!</h1>
+                <h1 className="font-light text-base sm:text-lg">
+                  {t("hello")}
+                </h1>
                 <h1 className="font-semibold text-base sm:text-lg">
                   {/* {user?.name || "John Doe"} */}
                   
@@ -48,7 +53,7 @@ const Header = ({ setOpen }) => {
               </div>
 
               <div className="text-[#989696] font-semibold text-xs sm:text-sm -mt-1">
-                Employee
+                {t("employee_label")}
               </div>
             </div>
           </div>
@@ -73,7 +78,7 @@ const Header = ({ setOpen }) => {
               type="button"
               onClick={() => setOpen?.(true)}
               className="inline-flex items-center justify-center rounded-full p-2 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
-              aria-label="Open sidebar"
+              aria-label={t("open_sidebar")}
             >
               <Menu size={22} />
             </button>

@@ -8,8 +8,10 @@ import NewNoticeModal from "../components/notice/NewNoticeModel";
 import { AnimatePresence, motion } from "framer-motion";
 import NoticeFilter from "../components/notice/NoticeFilter";
 import { fetchNotices, createNotice } from "../redux/features/noticeThunks";
+import { useTranslation } from "react-i18next";
 
 const Notice = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { notices, isLoading } = useSelector((state) => state.notice);
   const isdark = useSelector((state) => state.theme.isDark);
@@ -70,7 +72,7 @@ const Notice = () => {
     <div className="relative w-full transition-colors duration-500 border-t dark:border-[#000000] h-full bg-[#FFFFFF] dark:bg-black pt-6 pb-24 overflow-y-auto">
       <div className="flex flex-col sm:flex-row items-center justify-center mb-8 border-b border-[#E0DDDD] dark:border-[#575757] pt-3 px-5 pb-2 w-full gap-y-2">
         <h1 className="flex-2/3 flex items-center justify-center sm:justify-start text-2xl font-semibold dark:text-gray-100 text-[#000000] w-full">
-          Notice Board Management
+          {t("noticeBoardManagement")}
         </h1>
         <div className="flex-1/3 flex items-center justify-center sm:justify-end gap-2">
           <button
@@ -78,7 +80,7 @@ const Notice = () => {
             className={`btn-hover flex-1/4 flex items-center justify-center w-full px-5 py-1 gap-2 border rounded-4xl ${showFilter ? "border-[#2461E6] dark:border-[#73FBFD]" : "border-[#989696] dark:border-[#FFFFFF]"}`}
           >
             <Funnel className={`size-5 ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"}`} />
-            <span className={`text-lg ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#575757] dark:text-[#FFFFFF]"}`}>Filter</span>
+            <span className={`text-lg ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#575757] dark:text-[#FFFFFF]"}`}>{t("filter")}</span>
           </button>
           <AnimatePresence mode="wait">
             {showFilter && (
@@ -95,7 +97,7 @@ const Notice = () => {
             <Search className="size-5 text-gray-500" />
             <input
               onChange={(e) => setSearch(e.target.value)}
-              type="text" value={search} placeholder="Search"
+              type="text" value={search} placeholder={t("search")}
               className="flex-1 outline-none text-[#A19C9C] dark:text-[#acabab] text-sm placeholder:text-sm placeholder:text-[#A19C9C] dark:placeholder:text-[#acabab]"
             />
           </div>
@@ -108,16 +110,16 @@ const Notice = () => {
 
       <div className="flex flex-col items-start justify-center w-full">
         <div className="flex items-center justify-start w-full px-2 md:px-10">
-          <h1 className="text-2xl text-black dark:text-white font-medium px-2 md:px-5">Latest Updates</h1>
+          <h1 className="text-2xl text-black dark:text-white font-medium px-2 md:px-5">{t("latestUpdates")}</h1>
         </div>
         <div className="flex items-center justify-center w-full px-2 md:px-10 mt-3">
           <motion.div
             className="flex flex-col gap-2 justify-center w-full"
             variants={containerVariants} initial="hidden" animate="show" key={fewNotification.length}
           >
-            {isLoading && <p className="text-center text-gray-400 py-4">Loading...</p>}
+            {isLoading && <p className="text-center text-gray-400 py-4">{t("loadingDocuments")}</p>}
             {!isLoading && fewNotification.length === 0 && (
-              <p className="text-center text-gray-400 py-4">No notices found.</p>
+              <p className="text-center text-gray-400 py-4">{t("notice_empty")}</p>
             )}
             {fewNotification.map((item, idx) => (
               <motion.div key={item._id} variants={itemVariants}>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const names = ["Sarah", "Mike", "Jess", "David"];
 
@@ -55,6 +56,7 @@ function TooltipHint({ text, children }) {
 
 // ─── Main Dashboard Section ───────────────────────────────────────────────────
 export default function DashboardSection() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("Workload");
   const [dismissedAlerts, setDismissedAlerts] = useState([]);
   const [expandedBottleneck, setExpandedBottleneck] = useState(null);
@@ -166,7 +168,7 @@ export default function DashboardSection() {
         {/* Total Tasks */}
         <div className="card-stagger bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)] hover-lift cursor-default">
           <div className="flex justify-between items-start">
-            <p className="text-xs text-slate-400 mb-1">Total Tasks</p>
+            <p className="text-xs text-slate-400 mb-1">{t("coadmin_total_tasks")}</p>
             <TooltipHint text="All tasks this sprint">
               <div className="w-9 h-9 rounded-lg bg-blue-200 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
@@ -191,7 +193,7 @@ export default function DashboardSection() {
         {/* Completed */}
         <div className="card-stagger bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)] hover-lift cursor-default">
           <div className="flex justify-between items-start">
-            <p className="text-xs text-slate-400 mb-1">Completed</p>
+            <p className="text-xs text-slate-400 mb-1">{t("coadmin_completed")}</p>
             <TooltipHint text="Tasks finished">
               <div className="w-9 h-9 rounded-2xl bg-green-200 dark:bg-green-900/50 flex items-center justify-center shrink-0">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -211,7 +213,7 @@ export default function DashboardSection() {
         {/* In Progress */}
         <div className="card-stagger bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)] hover-lift cursor-default">
           <div className="flex justify-between items-start">
-            <p className="text-xs text-slate-400 mb-1">In Progress</p>
+            <p className="text-xs text-slate-400 mb-1">{t("coadmin_in_progress")}</p>
             <TooltipHint text="Actively being worked on">
               <div className="w-9 h-9 rounded-2xl bg-blue-200 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
@@ -231,7 +233,7 @@ export default function DashboardSection() {
         {/* Blocked */}
         <div className="card-stagger bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)] hover-lift cursor-default">
           <div className="flex justify-between items-start">
-            <p className="text-xs text-slate-400 mb-1">Blocked</p>
+            <p className="text-xs text-slate-400 mb-1">{t("coadmin_blocked")}</p>
             <TooltipHint text="Needs immediate attention">
               <div className="w-9 h-9 rounded-2xl bg-red-200 dark:bg-red-900/50 flex items-center justify-center shrink-0 anim-pulse">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -252,7 +254,7 @@ export default function DashboardSection() {
         {/* Risk Level */}
         <div className="card-stagger bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)] hover-lift cursor-default">
           <div className="flex justify-between items-start">
-            <p className="text-xs text-slate-400 mb-1">Risk Level</p>
+            <p className="text-xs text-slate-400 mb-1">{t("coadmin_risk_level")}</p>
             <TooltipHint text="Overall sprint risk">
               <div className="w-9 h-9 rounded-2xl bg-amber-200 dark:bg-amber-900/50 flex items-center justify-center shrink-0">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -264,7 +266,7 @@ export default function DashboardSection() {
             </TooltipHint>
           </div>
           <div className="flex gap-3">
-            <p className="text-3xl font-bold text-slate-800 dark:text-white leading-none">Moderate</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-white leading-none">{t("coadmin_moderate")}</p>
           </div>
         </div>
       </div>
@@ -273,25 +275,25 @@ export default function DashboardSection() {
       <div className="anim-fade-in-up bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)]"
         style={{ animationDelay: "150ms" }}>
         <div className="flex justify-between items-center mb-3">
-          <p className="font-bold text-slate-500 dark:text-slate-400">Sprint Status</p>
+          <p className="font-bold text-slate-500 dark:text-slate-400">{t("coadmin_sprint_status")}</p>
         </div>
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-bold text-slate-500 dark:text-slate-400 sm:ml-8">Sprint Completion</span>
+          <span className="text-sm font-bold text-slate-500 dark:text-slate-400 sm:ml-8">{t("coadmin_sprint_completion")}</span>
           <span className="text-xl font-extrabold sm:mr-10 text-slate-800 dark:text-white">62%</span>
         </div>
         <div className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden sm:w-[calc(100%-5rem)] sm:ml-[5rem]">
           <div className="h-full w-[62%] bg-blue-500 rounded-full" />
         </div>
         <div className="flex justify-between mt-2 sm:w-[calc(100%-5rem)] sm:ml-[5rem]">
-          <span className="text-[12px] text-slate-500 dark:text-slate-400">Day 8 of 14</span>
-          <span className="text-[12px] text-slate-500 dark:text-slate-400">6 days remaining</span>
+          <span className="text-[12px] text-slate-500 dark:text-slate-400">{t("coadmin_day_of_total", { current: 8, total: 14 })}</span>
+          <span className="text-[12px] text-slate-500 dark:text-slate-400">{t("coadmin_days_remaining", { count: 6 })}</span>
         </div>
       </div>
 
       {/* ── Sprint Health (Planned vs Actual) ── */}
       <div className="anim-fade-in-up bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)]"
         style={{ animationDelay: "200ms" }}>
-        <p className="font-bold text-slate-500 dark:text-slate-400 mb-4">Sprint Health (Planned vs Actual)</p>
+        <p className="font-bold text-slate-500 dark:text-slate-400 mb-4">{t("coadmin_sprint_health")}</p>
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
           <div className="relative shrink-0 w-[160px] h-[160px] md:w-[200px] md:h-[200px]">
             <svg viewBox="0 0 36 36" className="w-full h-full" style={{ transform: "rotate(-165deg)" }}>
@@ -303,7 +305,7 @@ export default function DashboardSection() {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-3xl font-bold text-slate-600 dark:text-slate-300">90%</span>
-              <span className="text-[11px] text-slate-400 text-center leading-tight">Adherence</span>
+              <span className="text-[11px] text-slate-400 text-center leading-tight">{t("coadmin_adherence")}</span>
             </div>
           </div>
           <div className="flex flex-wrap justify-center gap-4 md:gap-10">
@@ -327,7 +329,7 @@ export default function DashboardSection() {
       <div className="anim-fade-in-up bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)]"
         style={{ animationDelay: "250ms" }}>
         <div className="flex justify-between items-center mb-1">
-          <span className="font-bold text-slate-500 dark:text-slate-400">Project Progress Overview</span>
+          <span className="font-bold text-slate-500 dark:text-slate-400">{t("coadmin_project_progress_overview")}</span>
           <button
             onClick={() => setViewDetailsOpen(v => !v)}
             className="text-xs text-blue-500 cursor-pointer border-0 bg-transparent hover:text-blue-700 transition-colors font-medium btn-press btn-hover"
@@ -335,7 +337,7 @@ export default function DashboardSection() {
             {viewDetailsOpen ? "Hide Details ▲" : "View Details ▼"}
           </button>
         </div>
-        <p className="text-[13px] text-slate-500 dark:text-slate-400 ml-3 mb-3">Sprint Completion</p>
+        <p className="text-[13px] text-slate-500 dark:text-slate-400 ml-3 mb-3">{t("coadmin_sprint_completion")}</p>
 
         {progressRows.map((row) => (
           <div key={row.name} className="sm:ml-6 ml-2 sm:mr-4 mr-2 mb-3">
@@ -374,7 +376,7 @@ export default function DashboardSection() {
       <div className="anim-fade-in-up bg-white dark:bg-[#1c1c1e] rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)]"
         style={{ animationDelay: "300ms" }}>
         <div className="flex justify-between items-center mb-4">
-          <span className="font-bold text-slate-500 dark:text-slate-400">Team Completed vs Avg Time</span>
+          <span className="font-bold text-slate-500 dark:text-slate-400">{t("coadmin_team_completed_vs_avg")}</span>
           <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 gap-0.5">
             {["Workload", "Productivity"].map((tab) => (
               <button
@@ -415,9 +417,9 @@ export default function DashboardSection() {
       <div className="anim-fade-in-up bg-white dark:bg-[#1c1c1e] rounded-xl p-5 border border-slate-100 dark:border-slate-800 shadow-[0_6px_8px_-2px_rgba(0,0,0,0.18)] w-full"
         style={{ animationDelay: "350ms" }}>
         <div className="flex justify-between items-center mb-5">
-          <span className="text-base font-bold text-slate-500 dark:text-slate-400">Bottleneck Detection</span>
+          <span className="text-base font-bold text-slate-500 dark:text-slate-400">{t("coadmin_bottleneck_detection")}</span>
           <span className="text-[11px] text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-1.5 bg-slate-100 dark:bg-slate-800">
-            Avg Wait Time
+            {t("coadmin_avg_wait_time")}
           </span>
         </div>
 
@@ -470,7 +472,7 @@ export default function DashboardSection() {
         style={{ animationDelay: "400ms", minHeight: "155px", padding: "12px 16px", boxSizing: "border-box" }}
       >
         <div className="flex justify-between items-center mb-6">
-          <span className="text-3xl font-extrabold text-[#64748b] dark:text-slate-300">Issues & Alerts</span>
+          <span className="text-3xl font-extrabold text-[#64748b] dark:text-slate-300">{t("coadmin_issues_alerts")}</span>
           <span className="text-[12px] bg-red-50 text-red-400 rounded-full px-3 py-1 font-bold">
             {visibleAlerts.length} New
           </span>
@@ -503,7 +505,7 @@ export default function DashboardSection() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-[11px] text-slate-300 font-medium">
-                  <span>Assigned: <span className="text-slate-400">{a.team}</span></span>
+                  <span>{t("coadmin_assigned_to")} <span className="text-slate-400">{a.team}</span></span>
                   <span className="flex items-center gap-1">
                     <div className="w-1 h-1 rounded-full bg-slate-300" />
                     {a.time}
@@ -518,9 +520,9 @@ export default function DashboardSection() {
             <button
               className="bg-[#94a3b8] hover:bg-slate-500 text-white rounded-xl text-[12px] font-bold cursor-pointer border-0 w-full md:w-[65px] flex md:flex-col items-center justify-center gap-2 md:gap-1 btn-press py-3 md:py-0 btn-hover"
             >
-              <span className="leading-none text-center">View<br className="hidden md:block"/>All</span>
+              <span className="leading-none text-center">{t("coadmin_view_all")}</span>
               <span className="text-sm md:text-sm font-black">12</span>
-              <span className="leading-none text-center">Issues</span>
+              <span className="leading-none text-center">{t("coadmin_issues_count")}</span>
             </button>
           </div>
 

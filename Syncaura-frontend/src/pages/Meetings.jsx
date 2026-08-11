@@ -163,7 +163,7 @@ export default function Meetings() {
                 </button>
 
                 <h1 className="text-2xl font-bold text-black dark:text-white">
-                  Meetings
+                  {t("meetings")}
                 </h1>
               </div>
               <button
@@ -174,7 +174,7 @@ export default function Meetings() {
                   className="text-[#111827] dark:text-white"
                 />
 
-                <span className="text-sm font-medium">Sync Calendar</span>
+                <span className="text-sm font-medium">{t("syncCalendar")}</span>
               </button>
             </div>
 
@@ -182,10 +182,10 @@ export default function Meetings() {
             <div className="hidden lg:flex items-start justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-[#111827] dark:text-white">
-                  Meetings
+                  {t("meetings")}
                 </h1>
                 <p className="text-sm text-[#6b7280] dark:text-[#bdbdbd] mt-1">
-                  Manage your schedule and prepare for upcoming calls
+                  {t("meetingsSubtitle")}
                 </p>
               </div>
               <button
@@ -196,7 +196,7 @@ export default function Meetings() {
                   className="text-[#111827] dark:text-white"
                 />
 
-                <span className="text-[13px] font-medium">Sync Calendar</span>
+                <span className="text-[13px] font-medium">{t("syncCalendar")}</span>
               </button>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function Meetings() {
                 >
                   <Funnel size={14} />
                   <span className="text-[13px]">
-                    Filter
+                    {t("filter")}
                   </span>
                   {appliedFilters && (
                     <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb] dark:bg-[#73FBFD]" />
@@ -248,10 +248,10 @@ export default function Meetings() {
 
                   <input
                     type="text"
-                    placeholder="Search meetings..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="bg-transparent outline-none border-none pl-3 w-full text-[13px] text-[#111827] dark:text-white"
+placeholder={t("searchMeetings")}
+value={search}
+onChange={(e) => setSearch(e.target.value)}
+className="bg-transparent outline-none border-none pl-3 w-full text-[13px] text-[#111827] dark:text-white"
                   />
                 </div>
               </div>

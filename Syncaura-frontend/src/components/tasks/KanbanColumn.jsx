@@ -1,32 +1,32 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import TaskCard from "./TaskCard";
 
-const COLUMN_CONFIG = {
-  TODO: {
-    label: "To Do",
-    color: "bg-slate-100 dark:bg-slate-800/50",
-    headerColor: "text-slate-600 dark:text-slate-400",
-    countColor: "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300",
-    indicator: "bg-slate-400",
-  },
-  IN_PROGRESS: {
-    label: "In Progress",
-    color: "bg-blue-50 dark:bg-blue-950/30",
-    headerColor: "text-blue-600 dark:text-blue-400",
-    countColor: "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300",
-    indicator: "bg-blue-500",
-  },
-  DONE: {
-    label: "Done",
-    color: "bg-emerald-50 dark:bg-emerald-950/20",
-    headerColor: "text-emerald-600 dark:text-emerald-400",
-    countColor: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300",
-    indicator: "bg-emerald-500",
-  },
-};
-
 const KanbanColumn = ({ status, tasks, onOpenTask, onDeleteTask }) => {
-  const config = COLUMN_CONFIG[status];
+  const { t } = useTranslation();
+  const config = {
+    TODO: {
+      label: t("task_status_todo"),
+      color: "bg-slate-100 dark:bg-slate-800/50",
+      headerColor: "text-slate-600 dark:text-slate-400",
+      countColor: "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300",
+      indicator: "bg-slate-400",
+    },
+    IN_PROGRESS: {
+      label: t("task_status_in_progress"),
+      color: "bg-blue-50 dark:bg-blue-950/30",
+      headerColor: "text-blue-600 dark:text-blue-400",
+      countColor: "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300",
+      indicator: "bg-blue-500",
+    },
+    DONE: {
+      label: t("task_status_done"),
+      color: "bg-emerald-50 dark:bg-emerald-950/20",
+      headerColor: "text-emerald-600 dark:text-emerald-400",
+      countColor: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300",
+      indicator: "bg-emerald-500",
+    },
+  }[status];
 
   return (
     <div className={`rounded-2xl ${config.color} p-4 flex flex-col gap-3 min-h-[300px]`}>
@@ -51,7 +51,7 @@ const KanbanColumn = ({ status, tasks, onOpenTask, onDeleteTask }) => {
             className="flex-1 flex items-center justify-center"
           >
             <p className="text-xs text-gray-400 dark:text-gray-600 italic text-center py-8">
-              No tasks yet
+              {t("task_no_tasks")}
             </p>
           </motion.div>
         ) : (

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const contributions = [
   { title: "Mobile App Launch", value: 75 },
@@ -8,6 +9,7 @@ const contributions = [
 ];
 
 export default function ProjectContributionCard() {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -15,9 +17,9 @@ export default function ProjectContributionCard() {
       className="w-full bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-white rounded-xl p-6 border border-slate-200 dark:border-[#2d2f31] shadow-sm dark:shadow-none"
     >
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold">My Individual Contribution</h2>
+        <h2 className="text-2xl font-bold">{t("project_individual_contribution")}</h2>
         <button className="text-xs text-cyan-600 dark:text-[#00D2FF] font-bold tracking-tight hover:underline transition-colors btn-hover">
-          View Detailed Log
+          {t("project_view_detailed_log")}
         </button>
       </div>
 

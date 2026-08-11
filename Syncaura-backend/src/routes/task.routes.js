@@ -30,9 +30,9 @@ router.patch("/:id/status", auth, updateTaskStatus);
 router.patch("/:id/start", auth, startTask);
 router.post("/:taskId/subtasks", auth, addSubtask);
 
-// 3. Admin-Only Actions (Protected: Auth + RBAC Permit)
-router.post("/", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), createTask);
-router.put("/:id", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), updateTask);
-router.delete("/:id", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), deleteTask);
+// Task CRUD
+router.post("/", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN), createTask);
+router.put("/:id", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN), updateTask);
+router.delete("/:id", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN), deleteTask);
 
 export default router;

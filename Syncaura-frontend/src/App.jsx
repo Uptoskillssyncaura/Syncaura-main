@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import i18n from "./i18n/i18n";
 import { Provider, useDispatch, useSelector } from "react-redux";
 // import { store } from "./redux/store";
 import MainLayout from "./layouts/MainLayout";
 import { lazy, Suspense, useEffect } from "react";
-import LearnMore from "./pages/LearnMore";
+const LearnMore = lazy(() => import("./pages/LearnMore"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
 
 const Projects = lazy(() => import("./pages/Projects"));
 const Tasks = lazy(() => import("./pages/Tasks"));
@@ -23,7 +25,6 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Admin = lazy(() => import("./pages/Admin"));
 const CoAdmin = lazy(() => import("./pages/CoAdmin"));
 const Home = lazy(() => import("./pages/Home"));
-const RoleSelection = lazy(() => import("./pages/RoleSelection"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const GithubCallback = lazy(() => import("./pages/GithubCallback"));
 
@@ -43,6 +44,7 @@ import ProtectRoute from "./RouteProtection/ProtectRoute";
 export default function App() {
   const dispatch = useDispatch();
   const isDark = useSelector((state) => state.theme.isDark);
+  const language = useSelector((state) => state.language.language);
   // const user = useSelector((state) => state.auth.user);
   const authChecking = useSelector((state) => state.auth.authChecking);
 
@@ -106,6 +108,12 @@ export default function App() {
       });
   }, [dispatch]);
 
+  useEffect(() => {
+    if (language && i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language]);
+
   // Apply global page zoom + font size (runs on every page, since App.jsx is always mounted)
   const { fontSize = "medium", zoom = 100 } = useSelector(
     (state) => state.ui || {},
@@ -159,7 +167,6 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/sign-in" element={<SignIn />} />
-              <Route path="/role-selection" element={<RoleSelection />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/sign-up" element={<SignUp />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
@@ -167,8 +174,11 @@ export default function App() {
                 path="/auth/github/callback"
                 element={<GithubCallback />}
               />
-              <Route path="/learn-more" element={<LearnMore />} />
             </Route>
+
+            {/* General Public routes */}
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/learn-more" element={<LearnMore />} />
 
             <Route
               element={

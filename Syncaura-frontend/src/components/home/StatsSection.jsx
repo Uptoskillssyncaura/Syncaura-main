@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, animate, useInView } from 'framer-motion';
+import { useTranslation } from "react-i18next";
 import { Users, TrendingUp, BookOpen, ArrowRight } from 'lucide-react';
 import img3 from "../../assets/3-Photoroom.png";
 import img5 from "../../assets/5-Photoroom.png";
@@ -17,6 +18,7 @@ import img17 from "../../assets/17-Photoroom.png";
 const trustImages = [img3, img5, img6, img9, img10, img12, img13, img14, img15, img16, img17];
 
 const StatsSection = () => {
+  const { t } = useTranslation();
   const sectionRef = useRef(null); // Reference to track when this section scrolls into view
   const usersRef = useRef(null); // Reference for the "2M+" counter
   const satisfactionRef = useRef(null); // Reference for the "98%" counter
@@ -116,7 +118,7 @@ const StatsSection = () => {
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 mb-6 shadow-sm"
               >
                 <TrendingUp className="w-4 h-4" />
-                <span className="text-xs font-black tracking-[0.2em] uppercase">Growth</span>
+                <span className="text-xs font-black tracking-[0.2em] uppercase">{t("stats_label")}</span>
               </motion.div>
 
               <motion.h2 
@@ -126,7 +128,7 @@ const StatsSection = () => {
                 className="text-4xl md:text-5xl lg:text-[54px] font-black tracking-tighter mb-6 leading-[1.1]" 
                 style={{ color: 'var(--text-primary)' }}
               >
-                Millions trust FlowBit daily
+                {t("stats_title")}
               </motion.h2>
 
               <motion.p 
@@ -136,7 +138,7 @@ const StatsSection = () => {
                 className="text-base md:text-lg lg:text-xl font-medium max-w-2xl leading-relaxed" 
                 style={{ color: 'var(--text-secondary)' }}
               >
-                Over <strong className="font-bold text-indigo-500 dark:text-indigo-400">two million users</strong> worldwide depend on FlowBit to manage their work. Students, teams, and organizations choose us because we deliver results.
+                {t("stats_description")}
               </motion.p>
             </div>
 
@@ -178,7 +180,7 @@ const StatsSection = () => {
                   </h3>
                   <div className="h-[2px] w-10 bg-indigo-500/40 mb-3 rounded-full" />
                   <p className="text-sm md:text-base font-medium" style={{ color: 'var(--text-secondary)' }}>
-                    Active users across the globe
+                    {t("stats_users")}
                   </p>
                 </div>
               </motion.div>
@@ -215,7 +217,7 @@ const StatsSection = () => {
                   </h3>
                   <div className="h-[2px] w-10 bg-teal-500/40 mb-3 rounded-full" />
                   <p className="text-sm md:text-base font-medium" style={{ color: 'var(--text-secondary)' }}>
-                    User satisfaction rating from our community
+                    {t("stats_satisfaction")}
                   </p>
                 </div>
               </motion.div>
@@ -242,7 +244,7 @@ const StatsSection = () => {
           <div className="flex items-center justify-center gap-3 md:gap-6 mb-8 pt-6">
             <div className="h-[1px] w-12 md:w-32" style={{ background: 'linear-gradient(to right, transparent, var(--text-secondary))', opacity: 0.3 }}></div>
             <p className="text-center text-base md:text-xl lg:text-2xl font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--text-secondary)' }}>
-              Trusted by Top Professionals
+              {t("stats_trusted")}
             </p>
             <div className="h-[1px] w-12 md:w-32" style={{ background: 'linear-gradient(to left, transparent, var(--text-secondary))', opacity: 0.3 }}></div>
           </div>

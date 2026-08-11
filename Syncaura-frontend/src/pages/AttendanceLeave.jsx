@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import { leaveHistory } from "../constant/constant";
 import LeaveModel from "../components/AttendanceLeave/LeaveModel";
 import AttendanceLeaveFilter from "../components/AttendanceLeave/AttendanceLeaveFilter";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 const initialAttendanceStats = [
@@ -59,6 +60,7 @@ const getInitialAttendanceState = () => ({
 });
 
 const AttendanceLeave = () => {
+  const { t } = useTranslation();
   const user = useSelector((state) => state.auth.user);
   const [selectedId, setSelectedId] = useState(0);
   const [openModel, setOpenModel] = useState(false);
@@ -134,20 +136,40 @@ const AttendanceLeave = () => {
   const canCheckOut = Boolean(checkInTime) && !checkOutTime;
 
   const handleConfirmAttendance = () => {
-    if (selectedTab === "Check-In" && !canCheckIn) {
-      toast.info(`You have already checked in today at ${checkInTime}`);
-      setShowPopup(false);
-      return;
-    }
-    if (selectedTab === "CheckOut" && !canCheckOut) {
-      if (checkOutTime) {
-        toast.info(`You have already checked out today at ${checkOutTime}`);
-        setShowPopup(false);
-        return;
-      }
-      toast.error("Please check in before checking out!");
-      return;
-    }
+const nextState = {
+  presentDays: attendanceStateRef.current.presentDays + 1,
+  records: {
+    ...attendanceStateRef.current.records,
+    [attendanceDate]: { ...currentRecord, checkInTime: timeString },
+  },
+};
+
+saveAttendanceState(nextState);
+
+setAttendanceStats((previousStats) =>
+  previousStats.map((stat) =>
+    stat.title === "Present Days"
+      ? { ...stat, value: nextState.presentDays }
+      : stat,
+  ),
+);
+
+setSelectedTab("CheckOut");
+
+toast.success(t("attendance_marked_success", { date: attendanceDate }));
+} else if (selectedTab === "CheckOut") {
+  setCheckOutTime(timeString);
+
+  saveAttendanceState({
+    ...attendanceStateRef.current,
+    records: {
+      ...attendanceStateRef.current.records,
+      [attendanceDate]: { ...currentRecord, checkOutTime: timeString },
+    },
+  });
+
+  toast.success(t("attendance_checkout_success"));
+}
 
     setIsSubmitting(true);
     // This is UI-only until the backend provides attendance endpoints.
@@ -158,31 +180,47 @@ const AttendanceLeave = () => {
       
       if (selectedTab === "Check-In") {
         setCheckInTime(timeString);
-        const nextState = {
-          presentDays: attendanceStateRef.current.presentDays + 1,
-          records: {
-            ...attendanceStateRef.current.records,
-            [attendanceDate]: { ...currentRecord, checkInTime: timeString },
-          },
-        };
-        saveAttendanceState(nextState);
-        setAttendanceStats((previousStats) =>
-          previousStats.map((stat) =>
-            stat.title === "Present Days" ? { ...stat, value: nextState.presentDays } : stat,
-          ),
-        );
-        setSelectedTab("CheckOut");
-        toast.success(`Attendance marked successfully for ${attendanceDate}!`);
-      } else if (selectedTab === "CheckOut") {
-        setCheckOutTime(timeString);
-        saveAttendanceState({
-          ...attendanceStateRef.current,
-          records: {
-            ...attendanceStateRef.current.records,
-            [attendanceDate]: { ...currentRecord, checkOutTime: timeString },
-          },
-        });
-        toast.success("Check-out recorded successfully!");
+const nextState = {
+  presentDays: attendanceStateRef.current.presentDays + 1,
+  records: {
+    ...attendanceStateRef.current.records,
+    [attendanceDate]: {
+      ...currentRecord,
+      checkInTime: timeString,
+    },
+  },
+};
+
+saveAttendanceState(nextState);
+
+setAttendanceStats((previousStats) =>
+  previousStats.map((stat) =>
+    stat.title === "Present Days"
+      ? { ...stat, value: nextState.presentDays }
+      : stat,
+  ),
+);
+
+setSelectedTab("CheckOut");
+
+toast.success(t("attendance_marked_success", { date: attendanceDate }));
+
+} else if (selectedTab === "CheckOut") {
+  setCheckOutTime(timeString);
+
+  saveAttendanceState({
+    ...attendanceStateRef.current,
+    records: {
+      ...attendanceStateRef.current.records,
+      [attendanceDate]: {
+        ...currentRecord,
+        checkOutTime: timeString,
+      },
+    },
+  });
+
+  toast.success(t("attendance_checkout_success"));
+}
       }
       setIsSubmitting(false);
       setShowPopup(false);
@@ -286,7 +324,7 @@ const AttendanceLeave = () => {
     <div className="relative w-full min-h-[calc(92vh)] flex flex-col bg-[#FFFFFF] dark:bg-[#000000]">
       <div className="flex flex-col sm:flex-row gap-y-3 items-center justify-between px-5 py-5 border-b border-[#EDEDED]">
         <h1 className="text-2xl flex-2/5 xl:flex-3/5 font-medium text-[#000000] dark:text-[#FFFFFF]">
-          Attendance And Leave Management
+          {t("attendanceAndLeaveManagement")}
         </h1>
         <div className="flex w-full flex-3/5 md:flex-2/5 2xl:flex-1/5 items-center justify-center gap-2 ">
           <Link
@@ -306,7 +344,7 @@ const AttendanceLeave = () => {
             <h1
               className={`text-base ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#575757] dark:text-[#8f8e8e]"}  font-semibold`}
             >
-              Filter
+              {t("filter")}
             </h1>
           </button>
           <AnimatePresence mode="wait">
@@ -330,7 +368,7 @@ const AttendanceLeave = () => {
             <input
               onChange={(e) => setSearch(e.target.value)}
               value={search}
-              placeholder="Search"
+              placeholder={t("search")}
               className="bg-transparent  dark:text-[#A19C9C] dark:placeholder:text-[#A19C9C] text-[#5C5C5C] placeholder:text-[#5C5C5C] outline-none text-sm w-full"
             />
           </div>
@@ -354,16 +392,16 @@ const AttendanceLeave = () => {
             className="cursor-pointer w-[220px] min-h-[90px] px-4 rounded-2xl shadow-[0_0_10px_1px_#EDEDED] dark:shadow-[0_0_10px_1px_#171717] bg-[#FFFFFF] dark:bg-[#2E2F2F] flex flex-col justify-center"
           >
             <h1 className={`font-medium text-lg ${checkInTime ? 'text-[#29CC39]' : 'text-[#FF0000]'}`}>
-              {checkInTime ? 'Presence Marked' : 'Mark the Presence'}
+              {checkInTime ? t("attendance_presence_marked") : t("attendance_mark_presence")}
             </h1>
 
             <div className="flex items-center justify-between mt-1">
               <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
-                In: {checkInTime || '-'}
+                {t("attendance_in")}: {checkInTime || '-'}
               </p>
 
               <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
-                Out: {checkOutTime || '-'}
+                {t("attendance_out")}: {checkOutTime || '-'}
               </p>
             </div>
           </motion.div>
@@ -402,13 +440,13 @@ const AttendanceLeave = () => {
                     <div className="flex items-center gap-2">
                       <Clock className="size-5 text-[#000000] dark:text-[#F8F8F8]" />
                       <h1 className="font-medium text-xl text-[#000000] dark:text-[#F8F8F8]">
-                        Daily Attendance
+                        {t("dailyAttendance")}
                       </h1>
                     </div>
 
                     <div className={`flex items-center justify-center px-3 py-1 rounded-2xl ${checkInTime ? 'bg-[#D1FAE5]' : 'bg-[#FFE2E2D1]'}`}>
                       <p className={`text-sm font-normal ${checkInTime ? 'text-[#29CC39]' : 'text-[#FF0000]'}`}>
-                        {checkInTime ? 'Present' : 'Absent'}
+                        {checkInTime ? t("present") : t("absent")}
                       </p>
                     </div>
                   </div>
@@ -468,12 +506,18 @@ const AttendanceLeave = () => {
                       {isSubmitting ? (
                         <>
                           <Loader className="size-4 animate-spin" />
-                          Confirming...
+                          {t("attendance_confirming")}
                         </>
                       ) : (
-                        selectedTab === "Check-In"
-                          ? canCheckIn ? "Check In" : "Checked In"
-                          : canCheckOut ? "Check Out" : checkOutTime ? "Attendance Complete" : "Check In First"
+selectedTab === "Check-In"
+  ? canCheckIn
+    ? "Check In"
+    : "Checked In"
+  : canCheckOut
+    ? "Check Out"
+    : checkOutTime
+      ? "Attendance Complete"
+      : t("attendance_check_in_required")
                       )}
                     </button>
                   </div>
@@ -494,19 +538,19 @@ const AttendanceLeave = () => {
           px-11 py-5"
         >
           <h1 className="uppercase text-base font-medium dark:text-[#FFFFFF] text-[#000000] flex-3/9 w-full text-center">
-            Date Range
+            {t("dateRange")}
           </h1>
           <h1 className="uppercase text-base font-medium dark:text-[#FFFFFF] text-[#000000] flex-1/9 w-full text-center">
-            Type
+            {t("type")}
           </h1>
           <h1 className="uppercase text-base font-medium dark:text-[#FFFFFF] text-[#000000] flex-3/9 w-full text-left">
-            Reason
+            {t("reason")}
           </h1>
           <h1 className="uppercase text-base font-medium dark:text-[#FFFFFF] text-[#000000] flex-1/9 w-full text-center">
-            Status
+            {t("status")}
           </h1>
           <h1 className="uppercase text-base font-medium dark:text-[#FFFFFF] text-[#000000] flex-1/9 w-full text-center">
-            Actions
+            {t("actions")}
           </h1>
         </div>
 
@@ -520,7 +564,7 @@ const AttendanceLeave = () => {
       </div>
       <div className="flex bg-[#FFFFFF] dark:bg-[#000000] flex-col items-center justify-center gap-5 md:hidden mt-5  w-full px-5 sm:px-10 ">
         <h1 className="flex items-center justify-center w-full text-2xl text-black dark:text-white font-bold">
-          Leave List
+          {t("leaveList")}
         </h1>
         <AttendanceList
           currId={selectedId}
@@ -535,7 +579,7 @@ const AttendanceLeave = () => {
         onClick={handleOpenCreateModal}
         className="fixed cursor-pointer bottom-8 right-8 rounded-2xl font-semibold px-7 py-3 z-30 bg-[#2457C5] text-[#EDEDED] dark:bg-[#73FBFD] dark:text-[#000000] text-base lg:text-xl btn-hover"
       >
-        <p>Apply Leave</p>
+        <p>{t("applyLeave")}</p>
       </button>
 
       {openModel && (
@@ -544,6 +588,66 @@ const AttendanceLeave = () => {
           setLeaveData={setLeaveData}
           editingLeave={leaveToEdit}
         />
+      )}
+
+      {selectedLeaveDetail && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/40 backdrop-blur-xs"
+            onClick={() => setSelectedLeaveDetail(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white dark:bg-[#2E2F2F] rounded-2xl p-6 w-full max-w-md shadow-2xl relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4 border-b pb-3 dark:border-gray-700">
+                <h2 className="text-xl font-bold dark:text-white text-black">
+                  {t("leaveDetails")}
+                </h2>
+                <button
+                  onClick={() => setSelectedLeaveDetail(null)}
+                  className="text-gray-500 hover:text-black dark:hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex flex-col gap-3 text-sm dark:text-gray-200">
+                <div>
+                  <span className="font-semibold text-gray-500 dark:text-gray-400">{t("leaveTypeLabel")}</span>{" "}
+                  <span className="font-bold text-blue-600 dark:text-[#73FBFD]">{selectedLeaveDetail.type}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-500 dark:text-gray-400">{t("status")}</span>{" "}
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedLeaveDetail.status === 'Approved' ? 'bg-green-100 text-green-700' : selectedLeaveDetail.status === 'Pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                    {selectedLeaveDetail.status}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-500 dark:text-gray-400">{t("duration")}</span>{" "}
+                  {new Date(selectedLeaveDetail.startDate).toLocaleDateString()} - {new Date(selectedLeaveDetail.endDate).toLocaleDateString()}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-500 dark:text-gray-400">{t("reason")}</span>
+                  <p className="mt-1 p-3 bg-gray-100 dark:bg-black/30 rounded-xl italic">
+                    "{selectedLeaveDetail.reason}"
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedLeaveDetail(null)}
+                className="mt-6 w-full bg-blue-600 dark:bg-[#73FBFD] dark:text-black text-white py-2 rounded-xl font-medium"
+              >
+                {t("close")}
+              </button>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );

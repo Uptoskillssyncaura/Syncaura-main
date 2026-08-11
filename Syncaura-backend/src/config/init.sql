@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS users (
   refresh_token_id TEXT DEFAULT null,
   otp_code VARCHAR(10) DEFAULT null,
   otp_expires_at TIMESTAMP DEFAULT null,
+  phone VARCHAR(20) DEFAULT null,
+  language VARCHAR(10) DEFAULT 'en',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

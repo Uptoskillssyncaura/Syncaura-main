@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { GiCheckedShield } from "react-icons/gi";
 import { FiServer } from "react-icons/fi";
@@ -7,30 +8,31 @@ import { IoCloud } from "react-icons/io5";
 import { FiClock } from "react-icons/fi";
 
 const IssuesAndAlerts = () => {
+  const { t } = useTranslation();
 
   const alerts = [
     {
-      title: "Unauthorized Access Attempt",
-      subtitle: "IP.192.168.1.45",
-      time: "2 mins ago",
+      title: t("admin_alert_unauthorized"),
+      subtitle: t("admin_alert_ip"),
+      time: t("admin_time_2_mins"),
       icon: <GiCheckedShield className="text-red-500 dark:text-[#ff4d4d] text-2xl dark:drop-shadow-[0_0_5px_#ff4d4d]" />,
     },
     {
-      title: "Server Load High",
-      subtitle: "Cluster B usage > 90%",
-      time: "15 mins ago",
+      title: t("admin_alert_server_load"),
+      subtitle: t("admin_alert_cluster"),
+      time: t("admin_time_15_mins"),
       icon: <FiServer className="text-orange-500 dark:text-[#ffd700] text-2xl dark:drop-shadow-[0_0_5px_#ffd700]" />,
     },
     {
-      title: "System Patch Available",
-      subtitle: "v2.4.1 Security Patch",
-      time: "1 hour ago",
+      title: t("admin_alert_patch"),
+      subtitle: t("admin_alert_patch_version"),
+      time: t("admin_time_1_hour"),
       icon: <AiOutlineHistory className="text-blue-500 dark:text-[#00f2ff] text-2xl dark:drop-shadow-[0_0_5px_#00f2ff]" />,
     },
     {
-      title: "Daily Backup Completed",
-      subtitle: "Success",
-      time: "4 hours ago",
+      title: t("admin_alert_backup"),
+      subtitle: t("admin_alert_success"),
+      time: t("admin_time_4_hours"),
       icon: <IoCloud className="text-gray-600 dark:text-gray-400 text-2xl" />,
     },
   ];
@@ -59,7 +61,7 @@ const IssuesAndAlerts = () => {
     >
 
       <h2 className="text-2xl font-bold text-zinc-500 dark:text-white mb-6 px-2">
-        Issues & Alerts
+        {t("admin_issues_alerts_title")}
       </h2>
 
       <motion.div
@@ -112,7 +114,7 @@ const IssuesAndAlerts = () => {
           whileTap={{ scale: 0.95 }}
           className="shrink-0 bg-gray-100 dark:bg-[#161b22] hover:bg-gray-200 dark:hover:bg-zinc-800 px-4 rounded-xl text-[13px] font-bold text-gray-500 dark:text-white border border-gray-200 dark:border-zinc-800 transition"
         >
-          View<br/>All
+          {t("admin_view_all").split(" ").join("\n")}
         </motion.button>
 
       </motion.div>

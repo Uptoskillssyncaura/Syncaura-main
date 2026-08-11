@@ -25,6 +25,7 @@ const DotGrid = () => (
 );
 
 const Header = memo(({ currTab, show, setShow }) => {
+  const { t } = useTranslation();
   return (
     <div className="header-layout">
       <div className="flex gap-3 xl:gap-9 items-center col-span-3">
@@ -51,7 +52,7 @@ const Header = memo(({ currTab, show, setShow }) => {
       >
         <input
           type="text"
-          placeholder="Try Searching <<New Pages today>>"
+          placeholder={t("searchPlaceholder")}
           className="flex-1 outline-none text-gray-700 dark:text-gray-300 text-sm font-semibold placeholder:text-xs placeholder:font-bold"
         />
         <Search className="size-5 text-gray-500" />

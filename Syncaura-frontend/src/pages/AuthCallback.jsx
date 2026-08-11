@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { setCredentials } from "../redux/slices/authSlice";
 import { toast } from "react-toastify";
 import { Loader } from "lucide-react";
@@ -9,6 +10,7 @@ const AuthCallback = () => {
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const isDark = useSelector((state) => state.theme.isDark);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const AuthCallback = () => {
     const userName = searchParams.get("name");
 
     if (error) {
-      toast.error(decodeURIComponent(error) || "Google authentication failed");
+      toast.error(decodeURIComponent(error) || t("auth_google_auth_failed"));
       navigate("/sign-in", { replace: true });
       return;
     }
@@ -36,12 +38,12 @@ const AuthCallback = () => {
         // Update auth state in Redux
         dispatch(
           setCredentials({
-            user: { name: userName || "User", role: role || "user" },
+            user: { name: userName || t("auth_default_user"), role: role || t("auth_default_role") },
             token,
           })
         );
 
-        toast.success(`Welcome Back ${userName || "User"}!!`);
+        toast.success(t("auth_welcome_back", { name: userName || t("auth_default_user") }));
 
         // Route to the appropriate dashboard based on user role
         switch (role) {
@@ -56,13 +58,13 @@ const AuthCallback = () => {
         }
       } catch (err) {
         console.error("Error setting OAuth credentials:", err);
-        toast.error("Failed to parse login credentials. Please try again.");
+        toast.error(t("auth_credentials_failed"));
         navigate("/sign-in", { replace: true });
       }
     } else {
       // If landed on callback page without token or error, redirect to sign-in
       const timeout = setTimeout(() => {
-        toast.error("OAuth session expired or invalid. Please login again.");
+        toast.error(t("auth_oauth_expired"));
         navigate("/sign-in", { replace: true });
       }, 1500);
 
@@ -88,10 +90,10 @@ const AuthCallback = () => {
 
         {/* Text Details */}
         <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">
-          Securing Connection
+          {t("auth_callback_heading")}
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Authenticating with Google Services. Please do not close or refresh this window.
+          {t("auth_callback_message")}
         </p>
       </div>
     </div>

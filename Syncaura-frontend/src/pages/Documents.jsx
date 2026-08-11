@@ -1,5 +1,6 @@
 import { Download, ListFilter, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDocuments, createDocument } from "../redux/features/documentThunks";
 import TableRow from "../components/Document/TableRow";
@@ -10,10 +11,11 @@ import DocumentFilter from "../components/Document/DocumentFilter";
 
 export default function Documents() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { documents, loading, error } = useSelector((state) => state.documents);
 
-  const tab = ["All Files", "Recent", "Shared with me", "Achived"];
-  const [selectedTab, setSelectedTab] = useState("All Files");
+  const tab = [t("allFiles"), t("recent"), t("sharedWithMe"), t("archived")];
+  const [selectedTab, setSelectedTab] = useState(t("allFiles"));
   const [showModal, setShowModal] = useState(false);
   const [currId, setCurrId] = useState(null);
   
@@ -85,12 +87,12 @@ export default function Documents() {
     <div className="relative w-full transition-colors duration-500 border-t dark:border-[#000000] h-full bg-[#FFFFFF] dark:bg-black pt-6 pb-24 overflow-y-auto">
       <div className="flex items-center justify-between w-full px-2 sm:px-7">
         <div className="flex items-center justify-start">
-          <h1 className="text-[#000000] text-xl lg:text-2xl font-semibold dark:text-[#FFFFFF]">Documents and Report</h1>
+          <h1 className="text-[#000000] text-xl lg:text-2xl font-semibold dark:text-[#FFFFFF]">{t("documentsAndReports")}</h1>
         </div>
         <div className="flex items-center justify-end">
           <div className="flex items-center justify-center rounded-4xl border gap-2 border-[#2461E6] dark:border-[#73FBFD] px-3 sm:px-5 py-1 sm:py-2">
             <Download className="text-[#2457C5] dark:text-[#73FBFD] size-4 sm:size-5" />
-            <p className="text-xs sm:text-base font-bold text-[#2457C5] dark:text-[#73FBFD]">Export All</p>
+            <p className="text-xs sm:text-base font-bold text-[#2457C5] dark:text-[#73FBFD]">{t("exportAll")}</p>
           </div>
         </div>
       </div>
@@ -120,7 +122,7 @@ export default function Documents() {
             }`}
           >
             <ListFilter className={`size-5 ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"}`} />
-            <h1 className={`text-sm ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"} font-semibold`}>Filter</h1>
+            <h1 className={`text-sm ${showFilter ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"} font-semibold`}>{t("filter")}</h1>
           </button>
 
           <AnimatePresence mode="wait">
@@ -143,7 +145,7 @@ export default function Documents() {
               onChange={(e) => setSearch(e.target.value)}
               type="text"
               value={search}
-              placeholder="Search"
+              placeholder={t("search")}
               className="flex-1 outline-none text-[#A19C9C] dark:text-[#acabab] text-sm placeholder:text-sm placeholder:text-[#A19C9C] dark:placeholder:text-[#acabab]"
             />
           </div>
@@ -151,18 +153,18 @@ export default function Documents() {
 
         <div className="flex flex-col items-center justify-center w-[99.5%] gap-4 mt-5">
           <div className="hidden md:flex items-center justify-center w-full border px-10 py-3 border-gray-200 dark:border-gray-700">
-            <div className="flex-4/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Name</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Type</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Version</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Last Modified</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-center"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Status</h1></div>
+            <div className="flex-4/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">{t("documents_name")}</h1></div>
+            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">{t("documents_type")}</h1></div>
+            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">{t("documents_version")}</h1></div>
+            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">{t("documents_lastModified")}</h1></div>
+            <div className="flex-2/13 w-full flex items-center justify-center"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">{t("status")}</h1></div>
             <div className="flex-1/13 w-full flex items-center justify-start" />
           </div>
 
-          {loading && <p className="text-gray-400 text-center py-10">Loading documents...</p>}
-          {error && <p className="text-red-400 text-center py-10">Failed to load documents.</p>}
+          {loading && <p className="text-gray-400 text-center py-10">{t("loadingDocuments")}</p>}
+          {error && <p className="text-red-400 text-center py-10">{t("documents_error")}</p>}
           {!loading && !error && selectedDocList.length === 0 && (
-            <p className="text-gray-400 text-center py-10">No documents found.</p>
+            <p className="text-gray-400 text-center py-10">{t("documents_empty")}</p>
           )}
 
           <div className="flex flex-col items-center justify-center w-full gap-3">
@@ -199,7 +201,7 @@ export default function Documents() {
                   }}
                   className="flex items-center justify-center text-[#C05328] text-xl hover:underline btn-hover"
                 >
-                  View All Reports and Documents
+                  {t("documents_view_all")}
                 </button>
               </div>
             )}
@@ -212,7 +214,7 @@ export default function Documents() {
         className="fixed bottom-8 right-8 flex items-center gap-2 rounded-full bg-blue-600 dark:bg-[#73FBFD] dark:text-black transition duration-500 px-6 py-3 text-white shadow-lg hover:bg-blue-400 dark:hover:bg-[#2cc4c7] btn-hover"
       >
         <Plus size={18} />
-        New Report
+        {t("newReport")}
       </button>
 
       {showModal && (

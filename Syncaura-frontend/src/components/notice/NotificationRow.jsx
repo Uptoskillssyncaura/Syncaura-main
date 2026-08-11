@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { Eye, Download, FileText,  Calendar } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function NotificationRow({title, about, date, bgColor, docColor}) {
+  const { t } = useTranslation();
     function formatDateYYYYMMDD(isoDate) {
   const d = new Date(isoDate);
   return d.toISOString().split("T")[0];
@@ -40,13 +42,13 @@ export default function NotificationRow({title, about, date, bgColor, docColor})
           <div className="flex-2/5 w-full flex items-center justify-end gap-1 ">
             <div className="flex items-center justify-center bg-[#E2EBFF] dark:bg-[#1C3939] border border-[#2461E6] dark:border-[#1C3939] gap-1 px-7 py-1 ">
               <Eye className="text-[#2461E6] dark:text-[#73FBFD]  size-5" />
-              <p className="text-xs font-medium text-[#2461E6] dark:text-[#73FBFD]">View</p>
+              <p className="text-xs font-medium text-[#2461E6] dark:text-[#73FBFD]">{t("view")}</p>
             </div>
           </div>
           <div className="flex-3/5 w-full flex items-center justify-end">
             <div className="flex items-center justify-center border border-[#989696] gap-1 px-5 py-1 ">
               <Download className="size-5 text-[#989696] " />
-              <p className=" text-xs text-[#989696] font-medium">Download</p>
+              <p className=" text-xs text-[#989696] font-medium">{t("download")}</p>
             </div>
           </div>
         </div>
@@ -75,12 +77,12 @@ export default function NotificationRow({title, about, date, bgColor, docColor})
 
         <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-[#1C3939] text-blue-600 dark:text-[#73FBFD] transition btn-hover">
           <Eye size={16} />
-          <span className="hidden sm:inline ">View</span>
+          <span className="hidden sm:inline ">{t("view")}</span>
         </button>
 
         <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition btn-hover">
           <Download size={16} />
-          <span className="hidden sm:inline">Download</span>
+          <span className="hidden sm:inline">{t("download")}</span>
         </button>
       </div>
        </div>

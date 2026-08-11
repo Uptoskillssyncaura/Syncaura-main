@@ -1,4 +1,5 @@
 import { FiArrowRight } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import { AiFillHome } from "react-icons/ai";
 import ProjectListItem from "./ProjectListItem";
 import { ClipboardList, Ellipsis, MessageSquare, MessagesSquare, Phone } from "lucide-react";
