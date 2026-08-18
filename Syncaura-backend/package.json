@@ -19,7 +19,6 @@
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.2",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "exceljs": "^3.4.0",
     "express": "^5.2.1",
