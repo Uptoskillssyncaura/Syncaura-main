@@ -53,7 +53,7 @@ export default function Complaints() {
     return <CircleCheck className="size-4 text-[#29CC39] fill-[#D1FAE5]  " />;
   };
   const filteredComplaints = useMemo(() => {
-  let result = [...COMPLAINTS];
+  let result = [...filterComplaint];
 
   if (!appliedFilters && !debounceSearch) {
     return result;
@@ -89,7 +89,7 @@ export default function Complaints() {
   }
 
   return result;
-}, [appliedFilters, debounceSearch]);
+}, [filterComplaint, appliedFilters, debounceSearch]);
 
 
   const handleApplyFilters = (newFilters) => {

@@ -24,6 +24,7 @@ import Home from "./pages/Home";
 
 import { ToastContainer, Bounce } from "react-toastify";
 import { refreshAccessToken } from "./redux/features/authThunks";
+import { setAuthCheckingComplete } from "./redux/slices/authSlice";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import ProtectRoute from "./RouteProtection/ProtectRoute";
@@ -36,7 +37,12 @@ export default function App() {
   const authChecking = useSelector((state) => state.auth.authChecking);
 
   useEffect(() => {
-    dispatch(refreshAccessToken());
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (refreshToken) {
+      dispatch(refreshAccessToken());
+    } else {
+      dispatch(setAuthCheckingComplete());
+    }
   }, [dispatch]);
   console.log({ user, authChecking });
 

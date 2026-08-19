@@ -2,8 +2,10 @@ import { AnimatePresence, motion } from "framer-motion"
 import { FileText, X } from "lucide-react"
 import MotionSelect from "../projects/Model/MotionSelect"
 import { Controller, useForm } from "react-hook-form"
+import { useSelector } from "react-redux"
 
 const LeaveModel = ({ onClose, setHistory }) => {
+    const user = useSelector((state) => state.auth.user);
 
     const leaveTypes = [
         "Casual",
@@ -36,11 +38,14 @@ const LeaveModel = ({ onClose, setHistory }) => {
 
     const onSubmit = (data) => {
         const currData = {
+            id: Date.now().toString(),
             startDate: new Date(`${data["startDate"]}T00:00:00Z`).toISOString(),
             endDate: new Date(`${data["endDate"]}T00:00:00Z`).toISOString(),
             type: data["leaveType"],
             reason: data["reason"],
-            status: "Pending"
+            status: "Pending",
+            appliedBy: user?.name || "User",
+            userRole: user?.role || "User"
         }
         setHistory((prev)=>[currData, ...prev])
 

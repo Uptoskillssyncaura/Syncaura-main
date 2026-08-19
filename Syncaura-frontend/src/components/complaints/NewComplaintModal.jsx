@@ -17,7 +17,11 @@ export default function NewComplaintModal({ onClose, addComplaint }) {
     const category=data.category;
     const date=new Date().toISOString();
     const status='In progress';
-    addComplaint((prev)=>[{id, subject, category, date, status}, ...prev])
+    const attachments = data.attachments ? Array.from(data.attachments).map(file => ({
+      name: file.name,
+      url: URL.createObjectURL(file)
+    })) : [];
+    addComplaint((prev)=>[{id, subject, category, date, status, attachments}, ...prev])
     onClose()
   };
   const onError = (formErrors) => {

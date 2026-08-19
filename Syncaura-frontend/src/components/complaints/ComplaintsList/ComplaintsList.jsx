@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Clock, Eye } from "lucide-react";
+import { CircleAlert, CircleCheck, Clock, Eye, FileText } from "lucide-react";
 import { FaClock } from "react-icons/fa";
 import { motion } from "framer-motion";
 
@@ -58,17 +58,20 @@ export default function ComplaintsList({
   return (
     <>
       <div className="hidden md:flex flex-col gap-2 h-[calc(100vh-180px)]">
-        <div className="grid grid-cols-11 place-items-center px-5 xl:px-15 2xl:px-20 py-4
+        <div className="grid grid-cols-12 place-items-center px-5 xl:px-15 2xl:px-20 py-4
           border border-[#8a858560] dark:border-[#575757] gap-x-2 sticky top-0
           bg-white dark:bg-[#2E2F2F] transition-colors duration-500 z-10">
           <div className="text-sm xl:text-lg font-semibold uppercase col-span-2 text-[#000000] dark:text-[#FFFFFF]">
             complaint id
           </div>
-          <div className="text-sm flex items-center justify-start w-full xl:text-lg font-semibold uppercase col-span-4 text-[#000000] dark:text-[#FFFFFF]">
+          <div className="text-sm flex items-center justify-start w-full xl:text-lg font-semibold uppercase col-span-3 text-[#000000] dark:text-[#FFFFFF]">
             subject/category
           </div>
           <div className="text-sm xl:text-lg font-semibold uppercase col-span-2 text-[#000000] dark:text-[#FFFFFF]">
             date
+          </div>
+          <div className="text-sm xl:text-lg font-semibold uppercase col-span-2 text-[#000000] dark:text-[#FFFFFF]">
+            document
           </div>
           <div className="text-sm xl:text-lg font-semibold uppercase col-span-2 text-[#000000] dark:text-[#FFFFFF]">
             status
@@ -86,13 +89,13 @@ export default function ComplaintsList({
           key={COMPLAINTS.length}
         >
 
-          {COMPLAINTS.map(({ id, subject, status, category, date }, idx) => (
+          {COMPLAINTS.map(({ id, subject, status, category, date, attachments }, idx) => (
             <motion.div
               variants={itemVariants}
               onClick={() => setActiveId(id)}
               key={id}
 
-              className={`relative grid py-5 grid-cols-11 px-5 xl:px-15 2xl:px-20 gap-x-2 place-items-center
+              className={`relative grid py-5 grid-cols-12 px-5 xl:px-15 2xl:px-20 gap-x-2 place-items-center
                 transition-all duration-300
                 ${
                   activeId === id
@@ -113,7 +116,7 @@ export default function ComplaintsList({
                 {id}
               </div>
 
-              <div className="text-sm w-full flex items-center col-span-4 text-[#000000] dark:text-[#FFFFFF]">
+              <div className="text-sm w-full flex items-center col-span-3 text-[#000000] dark:text-[#FFFFFF]">
                 <div className="flex flex-col items-start justify-start">
                   <span className="uppercase font-semibold">{subject}</span>
                   <span className="text-xs">{category}</span>
@@ -122,6 +125,26 @@ export default function ComplaintsList({
 
               <div className="text-sm flex items-center justify-center w-full font-semibold uppercase col-span-2 text-[#000000] dark:text-[#FFFFFF]">
                 {formatDate(date)}
+              </div>
+
+              {/* Document Column */}
+              <div className="text-sm flex items-center justify-center w-full font-semibold col-span-2 text-[#000000] dark:text-[#FFFFFF]">
+                {attachments && attachments.length > 0 ? (
+                  <a
+                    href={attachments[0].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1.5 text-blue-600 dark:text-[#73FBFD] hover:underline max-w-full"
+                  >
+                    <FileText className="size-4 shrink-0" />
+                    <span className="truncate max-w-[120px] text-xs" title={attachments[0].name}>
+                      {attachments[0].name}
+                    </span>
+                  </a>
+                ) : (
+                  <span className="text-gray-400 dark:text-gray-600">—</span>
+                )}
               </div>
 
               <div className="text-xs flex items-center justify-center w-full font-semibold col-span-2 text-[#000000] dark:text-[#FFFFFF]">
@@ -161,13 +184,13 @@ export default function ComplaintsList({
     mt-5
   "
       >
-        {COMPLAINTS.map(({ id, subject, category, status, date }, idx) => (
+        {COMPLAINTS.map(({ id, subject, category, status, date, attachments }, idx) => (
           <div
             key={COMPLAINTS.length + idx}
               onClick={() => setActiveId(id)}
             className="flex flex-col gap-2 bg-[#FFFFFF] dark:bg-[#2E2F2F]  px-5 py-2 shadow-[0_0_10px_3px_#D2D2D233]
               dark:shadow-[0_0_10px_3px_#D2D2D233]
-              transition-shadow duration-200 rounded-2xl relative h-33"
+              transition-shadow duration-200 rounded-2xl relative min-h-[145px]"
           >
             <div className="flex w-full items-center justify-between ">
               <div className="flex items-center justify-start ">
@@ -188,9 +211,26 @@ export default function ComplaintsList({
               <h1 className="text-base font-bold text-[#000000] dark:text-[#FFFFFF]" >{subject}</h1>
               <h2 className="text-sm font-light text-[#000000] dark:text-white" >{category}</h2>
             </div>
-            <div className="flex items-center justify-start gap-2 ">
-              <FaClock className="size-5 text-white dark:text-[#2E2F2F] fill-black dark:fill-gray-400"  />
-              <h1 className="text-[#000000] dark:text-[#FFFFFF] font-light text-xs" >{formatDate(date)}</h1>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-start gap-2 ">
+                <FaClock className="size-4 text-white dark:text-[#2E2F2F] fill-black dark:fill-gray-400"  />
+                <h1 className="text-[#000000] dark:text-[#FFFFFF] font-light text-xs" >{formatDate(date)}</h1>
+              </div>
+              {attachments && attachments.length > 0 && (
+                <div className="flex items-center justify-start gap-2">
+                  <FileText className="size-4 text-blue-600 dark:text-[#73FBFD]" />
+                  <a
+                    href={attachments[0].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs text-blue-600 dark:text-[#73FBFD] hover:underline truncate max-w-[180px]"
+                    title={attachments[0].name}
+                  >
+                    {attachments[0].name}
+                  </a>
+                </div>
+              )}
             </div>
             <div className="absolute bottom-5 right-5 ">
               <Eye className="size-6 text-gray-700 dark:text-gray-300" />
