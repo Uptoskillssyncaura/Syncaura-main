@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AttendanceCard from "../components/AttendanceLeave/AttendanceCard";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AttendanceList from "../components/AttendanceLeave/AttendanceList";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
@@ -82,6 +82,9 @@ const AttendanceLeave = () => {
   const attendanceStateRef = useRef(getInitialAttendanceState());
   const attendanceStorageKey = `${ATTENDANCE_STORAGE_PREFIX}${user?.id || user?.email || "current-user"}`;
   const leaveStorageKey = `${LEAVE_STORAGE_PREFIX}${user?.id || user?.email || "current-user"}`;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Load leave data from localStorage (persists across refreshes)
   const [leaveData, setLeaveData] = useState(() => {
@@ -211,15 +214,9 @@ const AttendanceLeave = () => {
       setIsSubmitting(false);
       setShowPopup(false);
     }, 1000);
-  }
-};
+  };
 
-
-
-
-
-
-const fetchLeaves = useCallback(async () => {
+  const fetchLeaves = useCallback(async () => {
   try {
     const token = localStorage.getItem("accessToken");
 
@@ -433,26 +430,8 @@ useEffect(() => {
         {attendanceStats.map((item, index) => (
           <AttendanceCard key={index} {...item} />
         ))}
-<div className="relative w-full flex justify-center">
-  <motion.div
-    onClick={() => setShowPopup((prev) => !prev)}
-    ref={triggerRef}
-    whileTap={{ scale: 0.97 }}
-    className="cursor-pointer w-[220px] min-h-[90px] px-4 rounded-2xl shadow-[0_0_10px_1px_#EDEDED] dark:shadow-[0_0_10px_1px_#171717] bg-[#FFFFFF] dark:bg-[#2E2F2F] flex flex-col justify-center"
-  >
-    <h1 className={`font-medium text-lg ${checkInTime ? 'text-[#29CC39]' : 'text-[#FF0000]'}`}>
-      {checkInTime ? 'Presence Marked' : 'Mark the Presence'}
-    </h1>
 
-    <div className="flex items-center justify-between mt-1">
-      <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
-        In: {checkInTime || '-'}
-      </p>
-
-      <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
-        Out: {checkOutTime || '-'}
-      </p>
-    </div>
+        <div className="relative">
           <motion.div
             onClick={() => setShowPopup((prev) => !prev)}
             ref={triggerRef}
@@ -467,7 +446,6 @@ useEffect(() => {
               <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
                 In: {checkInTime || '-'}
               </p>
-
               <p className="text-[#000000] dark:text-[#F8F8F8] text-sm">
                 Out: {checkOutTime || '-'}
               </p>
@@ -478,22 +456,10 @@ useEffect(() => {
           <AnimatePresence>
             {showPopup && (
               <motion.div
-                // initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                // animate={{ opacity: 1, y: 8, scale: 1 }}
-                // exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                
                 initial={{ opacity: 0, x: 10, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 10, scale: 0.95 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
-                // className="
-                //     absolute 
-                //     right-0 sm:right-auto xl:right-0
-                //     top-full
-                //     mt-2
-                //     z-50
-                //     w-[90vw] sm:w-[380px] md:w-[400px] 
-                //   "
                 className="
                     absolute 
                     left-0
