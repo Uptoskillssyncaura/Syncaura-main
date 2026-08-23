@@ -26,7 +26,17 @@ const Projects = () => {
   const [direction, setDirection] = useState(0);
 
   const handleAddProject = (newProject) => {
-    setProjectsList((prev) => [newProject, ...prev]);
+    const project = {
+      id: Date.now(),
+      title: newProject.projectName,
+      department: newProject.team || "",
+      priority: newProject.status || "Not Started",
+      progress: 0,
+      dueDate: newProject.endDate || "",
+      avatars: [],
+    };
+
+    setProjectsList((prev) => [project, ...prev]);
   };
 
   // Sorting state
@@ -116,6 +126,10 @@ const Projects = () => {
 
   // Handle actions triggered from ProjectCard action menu
   const handleProjectAction = (actionType, projectData, targetStatus = null) => {
+    if (!isAdmin && actionType !== "view") {
+      toast.warn("You don't have permission to modify projects.");
+      return;
+    }
     if (actionType === "view") {
       setSelectedProject(projectData);
       setActiveModal("view");

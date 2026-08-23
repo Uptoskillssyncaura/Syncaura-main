@@ -29,7 +29,8 @@ const ProjectCard = ({
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
-
+  const userRole = useSelector((state) => state.auth?.user?.role);
+  const isAdmin = userRole === "admin" || userRole === "co-admin";
   const [showStatusSubmenu, setShowStatusSubmenu] = useState(false);
 
   useEffect(() => {
@@ -145,15 +146,6 @@ const ProjectCard = ({
                   >
                     <Eye className="size-4 text-blue-500" />
                     <span>View Details</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAction("edit")}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors text-left cursor-pointer"
-                  >
-                    <Edit3 className="size-4 text-emerald-500" />
-                    <span>Edit Project</span>
                   </button>
 
                   <button

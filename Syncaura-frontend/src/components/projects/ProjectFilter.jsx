@@ -16,7 +16,7 @@ export default function ProjectFilter({ onClose, onApply }) {
   const [team, setTeam] = useState(t("projectFilter_allMembers", "All Members"));
   const [date, setDate] = useState("");
 
-  const items = ["Low", "Medium", "High", "Critical"];
+  //const items = ["Low", "Medium", "High", "Critical"];
 
   const applyFilter = (changes = {}) => {
     onApply({
