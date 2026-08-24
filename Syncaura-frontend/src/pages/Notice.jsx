@@ -26,8 +26,8 @@ const Notice = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    setNoticeData(notices);
-  }, [notices]);
+  setNoticeData(Array.isArray(notices) ? notices : []);
+}, [notices]);
 
   useEffect(() => {
     const timer = setTimeout(
@@ -36,10 +36,8 @@ const Notice = () => {
     );
     return () => clearTimeout(timer);
   }, [search]);
-
-  const filteredNotice = useMemo(() => {
-    let result = [...noticeData];
-
+const filteredNotice = useMemo(() => {
+    let result = Array.isArray(noticeData) ? [...noticeData] : [];
     if (debouncedValue) {
       result = result.filter(
         (item) =>
@@ -60,10 +58,11 @@ const Notice = () => {
     return result;
   }, [noticeData, debouncedValue, appliedFilters]);
 
-  useEffect(() => {
-    setFewNotification(filteredNotice.slice(0, 7));
+ useEffect(() => {
+    setFewNotification(
+      Array.isArray(filteredNotice) ? filteredNotice.slice(0, 7) : []
+    );
   }, [filteredNotice]);
-
   const handleApplyFilters = (newFilters) => {
     setAppliedFilters(newFilters);
   };

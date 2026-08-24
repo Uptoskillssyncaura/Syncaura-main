@@ -1,38 +1,62 @@
-import { X, Upload, ChevronDown } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import MotionSelect from "../projects/Model/MotionSelect";
 
 export default function NewNoticeModal({ onClose, addNotice }) {
-  const { register, handleSubmit,control, setValue, watch, formState: { errors }, } = useForm();
-  const [category, setCategory] = useState("");
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm();
   const [isDragging, setIsDragging] = useState(false);
   const noticeCategories = [
-  "ALL",
-  "GENERAL",
-  "ACADEMIC",
-  "IT",
-  "FACILITY",
-  "EVENT",
-  "EXAM",
-];
-
+    "ALL",
+    "GENERAL",
+    "ACADEMIC",
+    "IT",
+    "FACILITY",
+    "EVENT",
+    "EXAM",
+  ];
 
   const files = watch("attachments");
   const fileRef = useRef(null);
 
   const onSubmit = (data) => {
-    const id= `#${Date.now().toString().slice(0, 4)}`;
-    const category=data.category;
-    const title=data.description
-    const date=new Date(data.date).toISOString();
-    addNotice((prev)=>[{id, category, date, title }, ...prev])
-    onClose()
+    // Correct Payload format for API Dispatch
+    const payload = {
+      title: data.title || data.description?.slice(0, 30) || "Notice Update",
+      description: data.description,
+      category: data.category || "GENERAL",
+      date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+    };
+
+    // If file attachments exist, handle FormData upload
+    if (data.attachments && data.attachments.length > 0) {
+      const formData = new FormData();
+      formData.append("title", payload.title);
+      formData.append("description", payload.description);
+      formData.append("category", payload.category);
+      formData.append("date", payload.date);
+      Array.from(data.attachments).forEach((file) => {
+        formData.append("attachments", file);
+      });
+      addNotice(formData);
+    } else {
+      addNotice(payload);
+    }
+
+    onClose();
   };
+
   const onError = (formErrors) => {
-  console.log("Form Errors:", formErrors);
-};
+    console.log("Form Errors:", formErrors);
+  };
 
   const handleFileClick = () => {
     fileRef.current?.click();
@@ -63,7 +87,7 @@ export default function NewNoticeModal({ onClose, addNotice }) {
         {/* Backdrop */}
         <motion.div
           onClick={onClose}
-          className="absolute inset-0 bg-black/40 dark:bg-white/10 backdrop-blur-xs "
+          className="absolute inset-0 bg-black/40 dark:bg-white/10 backdrop-blur-xs"
         />
 
         {/* Modal */}
@@ -72,16 +96,12 @@ export default function NewNoticeModal({ onClose, addNotice }) {
           animate={{ scale: 1, y: 0, opacity: 1 }}
           exit={{ scale: 0.9, y: 30, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="
-            relative w-full max-w-md sm:max-w-lg
-            rounded-2xl
-            bg-[#f0f0f0] dark:bg-black
-            p-6 shadow-2xl
-          "
+          className="relative w-full max-w-md sm:max-w-lg rounded-2xl bg-[#f0f0f0] dark:bg-black p-6 shadow-2xl"
         >
           {/* Close */}
           <button
             onClick={onClose}
+            type="button"
             className="absolute right-4 top-4 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
           >
             <X size={18} />
@@ -94,45 +114,52 @@ export default function NewNoticeModal({ onClose, addNotice }) {
 
             {/* Category */}
             <div>
-
               <div className="relative mt-1">
-               <h1 className="text-base font-medium w-full text-[#000000] dark:text-[#F8F8F8]">
-                                Category
-                            </h1>
-                            <div className="flex w-full rounded-xl px-1 md:px-3 py-1 dark:bg-[#2E2F2F] ">
-                                <Controller
-                                    name="category"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <MotionSelect {...field} startVal="All" options={noticeCategories} />
-                                    )}
-                                />
-                            </div>
-
-               
+                <h1 className="text-base font-medium w-full text-[#000000] dark:text-[#F8F8F8] mb-1">
+                  Category
+                </h1>
+                <div className="flex w-full rounded-xl px-1 md:px-3 py-1 dark:bg-[#2E2F2F]">
+                  <Controller
+                    name="category"
+                    control={control}
+                    defaultValue="GENERAL"
+                    render={({ field }) => (
+                      <MotionSelect
+                        {...field}
+                        startVal="GENERAL"
+                        options={noticeCategories}
+                      />
+                    )}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Subject */}
+            {/* Title */}
+            <div>
+              <label className="text-sm font-medium text-black dark:text-white">
+                Title
+              </label>
+              <input
+                {...register("title", { required: true })}
+                placeholder="Enter notice title"
+                className="mt-1 w-full rounded-full px-4 py-2 text-sm outline-none bg-white dark:bg-[#1f1f1f] text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:border-blue-500 transition-all"
+              />
+            </div>
+
+            {/* Date */}
             <div>
               <label className="text-sm font-medium text-black dark:text-white">
                 Date
               </label>
               <input
+                type="date"
                 {...register("date", { required: true })}
-                placeholder="Notice issued on"
-                className="
-                  mt-1 w-full rounded-full px-4 py-2 text-sm outline-none
-                  bg-white dark:bg-[#1f1f1f]
-                  text-black dark:text-white 
-                  border border-gray-300 dark:border-gray-600
-                  focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40
-                  transition-all
-                "
+                className="mt-1 w-full rounded-full px-4 py-2 text-sm outline-none bg-white dark:bg-[#1f1f1f] text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:border-blue-500 transition-all"
               />
             </div>
 
+            {/* Description */}
             <div>
               <label className="text-sm font-medium text-black dark:text-white">
                 Description
@@ -141,23 +168,15 @@ export default function NewNoticeModal({ onClose, addNotice }) {
                 {...register("description", { required: true })}
                 rows={3}
                 placeholder="Describe the issue in detail..."
-                className="
-                  mt-1 w-full rounded-xl px-4 py-2 text-sm resize-none outline-none
-                  bg-white dark:bg-[#1f1f1f]
-                  text-black dark:text-white
-                  border border-gray-300 dark:border-gray-600
-                  focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40
-                  transition-all
-                "
+                className="mt-1 w-full rounded-xl px-4 py-2 text-sm resize-none outline-none bg-white dark:bg-[#1f1f1f] text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:border-blue-500 transition-all"
               />
             </div>
 
-            {/* Attachment */}
+            {/* Attachments */}
             <div>
               <label className="text-sm font-medium text-black dark:text-white">
                 Attachments
               </label>
-
               <motion.div
                 onClick={handleFileClick}
                 whileHover={{ scale: 1.02 }}
@@ -167,18 +186,11 @@ export default function NewNoticeModal({ onClose, addNotice }) {
                 }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
-                className={`
-      mt-1 h-24 rounded-xl border-2 border-dashed
-      ${
-        isDragging
-          ? "border-blue-500 bg-blue-50/20"
-          : "border-gray-300 dark:border-gray-600"
-      }
-      flex flex-col items-center justify-center gap-1
-      text-sm text-gray-600 dark:text-gray-400
-      cursor-pointer
-      transition-colors
-    `}
+                className={`mt-1 h-24 rounded-xl border-2 border-dashed ${
+                  isDragging
+                    ? "border-blue-500 bg-blue-50/20"
+                    : "border-gray-300 dark:border-gray-600"
+                } flex flex-col items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400 cursor-pointer transition-colors`}
               >
                 <Upload size={18} />
                 <span>Click to upload or drag & drop</span>
@@ -193,13 +205,7 @@ export default function NewNoticeModal({ onClose, addNotice }) {
               />
 
               {files?.length > 0 && (
-                <div
-                  className="
-      mt-2 max-h-20 overflow-y-auto
-      text-xs text-gray-600 dark:text-gray-400
-      scrollbar-hide
-    "
-                >
+                <div className="mt-2 max-h-20 overflow-y-auto text-xs text-gray-600 dark:text-gray-400 scrollbar-hide">
                   {Array.from(files).map((file, idx) => (
                     <div key={idx} className="truncate">
                       {file.name}
@@ -213,15 +219,7 @@ export default function NewNoticeModal({ onClose, addNotice }) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="
-                mt-5 mx-auto
-                dark:bg-[#73FBFD] px-5 py-2 dark:text-black
-                rounded-full dark:hover:bg-[#08e0e4]
-                bg-blue-600 hover:bg-blue-700
-                text-[13px] font-medium text-white
-                transition-colors
-                flex items-center justify-center
-              "
+              className="mt-5 mx-auto dark:bg-[#73FBFD] px-5 py-2 dark:text-black rounded-full dark:hover:bg-[#08e0e4] bg-blue-600 hover:bg-blue-700 text-[13px] font-medium text-white transition-colors flex items-center justify-center"
             >
               Submit Notice
             </motion.button>
