@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   Plus, Search, LayoutGrid, List, Flag, Calendar,
-  CheckCircle2, Circle, Clock, Trash2, User, ChevronUp, ChevronDown, Loader2,
+  CheckCircle2, Circle, Clock, Trash2, User, ChevronUp, ChevronDown, Loader2, AlertTriangle,
 } from "lucide-react";
 import { fetchTasks, createTask, deleteTask } from "../redux/features/taskThunks";
 import KanbanColumn from "../components/tasks/KanbanColumn";
@@ -223,14 +223,29 @@ const Tasks = () => {
               Manage and track your team's tasks
             </p>
           </div>
-          <button
-            id="create-task-btn"
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#2457C5] dark:bg-[#73FBFD] text-white dark:text-black text-sm font-semibold rounded-2xl hover:bg-blue-700 dark:hover:bg-[#5af4f5] transition-colors shadow-sm btn-hover"
-          >
-            <Plus className="w-4 h-4" />
-            New Task
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              id="report-issue-btn"
+              onClick={() =>
+                toast.info("Issue reporting functionality will be available soon.", {
+                  position: "top-right",
+                  autoClose: 3000,
+                })
+              }
+              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 dark:bg-red-500 text-white text-sm font-semibold rounded-2xl hover:bg-red-700 dark:hover:bg-red-600 transition-colors shadow-sm btn-hover"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              Report Issue
+            </button>
+            <button
+              id="create-task-btn"
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#2457C5] dark:bg-[#73FBFD] text-white dark:text-black text-sm font-semibold rounded-2xl hover:bg-blue-700 dark:hover:bg-[#5af4f5] transition-colors shadow-sm btn-hover"
+            >
+              <Plus className="w-4 h-4" />
+              New Task
+            </button>
+          </div>
         </div>
 
         {/* ── Stat Cards ───────────────────────────────────────────── */}
