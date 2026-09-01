@@ -1,13 +1,15 @@
 import { motion } from "framer-motion";
-
-const filters = [
-  { key: "all", label: "All" },
-  { key: "ongoing", label: "Ongoing" },
-  { key: "upcoming", label: "Upcoming" },
-  { key: "past", label: "Past" },
-];
+import { useTranslation } from "react-i18next";
 
 export default function FilterTabs({ activeFilter, setActiveFilter }) {
+  const { t } = useTranslation();
+  
+  const filters = [
+    { key: "all", label: t('filter_all', 'All') },
+    { key: "ongoing", label: t('filter_ongoing', 'Ongoing') },
+    { key: "upcoming", label: t('filter_upcoming', 'Upcoming') },
+    { key: "past", label: t('filter_past', 'Past') },
+  ];
   return (
     <div className="w-full overflow-x-auto scrollbar-hide">
   

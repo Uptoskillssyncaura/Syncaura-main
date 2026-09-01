@@ -2,8 +2,10 @@ import { X } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import FileUploadBox from "../FileHandle/FileUploadBox";
+import { useTranslation } from "react-i18next";
 
 export default function ScheduleMeetingModal({ onClose, onSave }) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -43,7 +45,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
     today.setHours(0, 0, 0, 0);
 
     if (selectedDate < today) {
-      alert("Date must be today or a future date");
+      alert(t('schedule_date_error', 'Date must be today or a future date'));
       return;
     }
 
@@ -52,27 +54,34 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
 
     if (selectedDate.getTime() === today.getTime()) {
       if (startDateTime <= now) {
-        alert("Start time must be later than current time");
+        alert(t('schedule_start_error', 'Start time must be later than current time'));
         return;
       }
     }
 
     if (endDateTime <= startDateTime) {
-      alert("End time must be after start time");
+      alert(t('schedule_end_error', 'End time must be after start time'));
       return;
     }
 
-    onSave({
-      id: Date.now(),
-      platform: data.platform,
-      title: data.title,
-      startTime: startDateTime.toISOString(),
-      endTime: endDateTime.toISOString(),
-      avatarCount: data.participants
-        ? data.participants.split(",").length
-        : 1,
-      isDoc: data.isDoc,
-    });
+    // Build ISO strings without UTC offset conversion
+// Build a plain ISO-formatted string WITHOUT converting to UTC
+const startTimeStr = `${data.date}T${data.start}:00+05:30`;
+const endTimeStr = data.end 
+  ? `${data.date}T${data.end}:00+05:30` 
+  : `${data.date}T${data.start}:00+05:30`;
+
+onSave({
+  id: Date.now(),
+  platform: data.platform,
+  title: data.title,
+  startTime: startTimeStr,
+  start_time: startTimeStr,
+  endTime: endTimeStr,
+  end_time: endTimeStr,
+  avatarCount: data.participants ? data.participants.split(",").length : 1,
+  isDoc: data.isDoc,
+});
 
     onClose();
   };
@@ -106,7 +115,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
           </button>
 
           <h2 className="text-xl sm:text-[28px] font-semibold mb-4 text-black dark:text-white">
-            Schedule New Meeting
+            {t('schedule_title', 'Schedule New Meeting')}
           </h2>
 
           <div className="w-full h-px bg-[#C7C5C5] dark:bg-[#616161]" />
@@ -117,11 +126,11 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
               {/* Title */}
               <div>
                 <label className="block text-sm sm:text-lg font-medium mb-2 text-black dark:text-white">
-                  Meeting Title
+                  {t('schedule_meeting_title_label', 'Meeting Title')}
                 </label>
                 <input
                   {...register("title", { required: true })}
-                  placeholder="eg: my first meeting"
+                  placeholder={t('schedule_meeting_title_placeholder', 'eg: my first meeting')}
                   className="w-full h-11 rounded-full px-4
                   bg-white text-[#898888] dark:bg-[#2E2F2F]
                   dark:text-gray-200 outline-none"
@@ -131,9 +140,9 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
               {/* Date & Time */}
               <div className="flex flex-col sm:flex-row gap-4">
                 {[
-                  { type: "date", name: "date", label: "Date" },
-                  { type: "time", name: "start", label: "Start Time" },
-                  { type: "time", name: "end", label: "End Time" },
+                  { type: "date", name: "date", label: t('schedule_date_label', 'Date') },
+                  { type: "time", name: "start", label: t('schedule_start_time_label', 'Start Time') },
+                  { type: "time", name: "end", label: t('schedule_end_time_label', 'End Time') },
                 ].map((item, i) => (
                   <div key={i} className="flex-1 flex flex-col gap-1">
                     <label className="text-sm font-medium text-black dark:text-white">
@@ -158,7 +167,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
               <div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-2">
                   <label className="text-sm font-medium text-black dark:text-white">
-                    Platform
+                    {t('schedule_platform_label', 'Platform')}
                   </label>
 
                   <label className="flex items-center gap-2 cursor-pointer text-xs">
@@ -188,7 +197,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
                       )}
                     </span>
                     <span className="text-black dark:text-white">
-                      Auto-generate meeting link
+                      {t('schedule_auto_link_label', 'Auto-generate meeting link')}
                     </span>
                   </label>
                 </div>
@@ -213,11 +222,11 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
               {/* Participants */}
               <div>
                 <label className="text-sm font-medium text-black dark:text-white mb-2 block">
-                  Participants
+                  {t('schedule_participants_label', 'Participants')}
                 </label>
                 <input
                   {...register("participants")}
-                  placeholder="Enter emails separated by commas"
+                  placeholder={t('schedule_participants_placeholder', 'Enter emails separated by commas')}
                   className="w-full h-11 rounded-full px-4
                   bg-white dark:bg-[#2E2F2F]
                   text-[#898888] dark:text-gray-200 outline-none"
@@ -250,7 +259,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
                     )}
                   </span>
                   <span className="text-black dark:text-white">
-                    Auto add default members
+                    {t('schedule_auto_members_label', 'Auto add default members')}
                   </span>
                 </label>
               </div>
@@ -258,7 +267,7 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
               {/* Notes */}
               <div>
                 <label className="text-sm font-medium text-black dark:text-white mb-2 block">
-                  Initial Notes
+                  {t('schedule_initial_notes_label', 'Initial Notes')}
                 </label>
                 <FileUploadBox
                   register={register}
@@ -271,17 +280,18 @@ export default function ScheduleMeetingModal({ onClose, onSave }) {
             {/* Footer */}
             <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
               <button
+                type="button"
                 onClick={onClose}
                 className="text-sm text-black dark:text-white btn-hover"
               >
-                Cancel
+                {t('schedule_cancel_button', 'Cancel')}
               </button>
 
               <button
                 type="submit"
                 className="w-full sm:w-40 h-10 rounded-full bg-[#2461E6] dark:bg-[#73FBFD] text-white dark:text-black text-sm font-semibold btn-hover"
               >
-                Schedule Meeting
+                {t('schedule_submit_button', 'Schedule Meeting')}
               </button>
             </div>
           </form>

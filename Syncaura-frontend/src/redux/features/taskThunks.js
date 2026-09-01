@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../config/axios";
-
+ 
 export const fetchTasks = createAsyncThunk(
   "tasks/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -12,7 +12,7 @@ export const fetchTasks = createAsyncThunk(
     }
   }
 );
-
+ 
 export const createTask = createAsyncThunk(
   "tasks/create",
   async (taskData, { rejectWithValue }) => {
@@ -24,7 +24,7 @@ export const createTask = createAsyncThunk(
     }
   }
 );
-
+ 
 export const updateTask = createAsyncThunk(
   "tasks/update",
   async ({ id, data }, { rejectWithValue }) => {
@@ -36,7 +36,7 @@ export const updateTask = createAsyncThunk(
     }
   }
 );
-
+ 
 export const deleteTask = createAsyncThunk(
   "tasks/delete",
   async (id, { rejectWithValue }) => {
@@ -48,7 +48,7 @@ export const deleteTask = createAsyncThunk(
     }
   }
 );
-
+ 
 export const updateTaskStatus = createAsyncThunk(
   "tasks/updateStatus",
   async ({ id, status }, { rejectWithValue }) => {
@@ -60,7 +60,7 @@ export const updateTaskStatus = createAsyncThunk(
     }
   }
 );
-
+ 
 export const addSubtask = createAsyncThunk(
   "tasks/addSubtask",
   async ({ taskId, title }, { rejectWithValue }) => {
@@ -69,6 +69,18 @@ export const addSubtask = createAsyncThunk(
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to add subtask");
+    }
+  }
+);
+ 
+export const toggleSubtaskStatus = createAsyncThunk(
+  "tasks/toggleSubtaskStatus",
+  async ({ taskId, subtaskId, status }, { rejectWithValue }) => {
+    try {
+      const res = await api.patch(`/tasks/${taskId}/subtasks/${subtaskId}/status`, { status });
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to update subtask");
     }
   }
 );

@@ -1,15 +1,40 @@
 import { toast } from "react-toastify";
 import EmojiPicker from "emoji-picker-react";
-import { Paperclip, Smile } from "lucide-react";
+import { Paperclip, Smile, Send } from "lucide-react";
 import { useRef, useState } from "react";
 import { FaMicrophone } from "react-icons/fa";
 import api from "../../config/axios";
 
-export default function ChatInput() {
+export default function ChatInput({ sendMessageText, sendTyping }) {
   const [text, setText] = useState("");
   const fileRef = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const typingTimeoutRef = useRef(null);
+
+  const handleChange = (e) => {
+    setText(e.target.value);
+    if (sendTyping) {
+      sendTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => sendTyping(false), 2000);
+    }
+  };
+
+  const handleSend = () => {
+    if (text.trim() && sendMessageText) {
+      sendMessageText(text);
+      setText("");
+      if (sendTyping) sendTyping(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   const handleFileOpen = () => {
     if (!uploading) fileRef.current.click();
@@ -86,7 +111,7 @@ export default function ChatInput() {
   };
 
   return (
-    <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 relative bottom-2 left-0">
+    <div className="flex-shrink-0 bg-[#F0F2F5] dark:bg-[#202C33] flex items-center gap-2 px-2 md:px-4 py-3 relative">
       {/* Emoji Picker */}
       {showEmoji && (
         <div className="absolute bottom-16 left-2 md:left-4 z-50">
@@ -94,25 +119,14 @@ export default function ChatInput() {
         </div>
       )}
 
-      <div className="bg-[#FFFFFF] dark:bg-[#000000] grid grid-cols-20 border border-[#989696] dark:border-[#535353] rounded-2xl px-3 py-2 w-full">
+      <div className="bg-[#FFFFFF] dark:bg-[#2A3942] flex flex-1 items-center rounded-full px-3 py-1 md:py-2">
         {/* Emoji Button */}
-        <div className="flex items-center justify-center col-span-1 cursor-pointer">
+        <button className="flex-shrink-0 p-2 cursor-pointer btn-hover rounded-full">
           <Smile
-            className="size-6 text-gray-500 dark:text-gray-400"
+            className="size-6 text-[#54656F] dark:text-[#8696A0]"
             onClick={() => setShowEmoji((prev) => !prev)}
           />
-        </div>
-
-        {/* Input */}
-        <div className="flex items-center justify-center col-span-18">
-          <input
-            value={text}
-            onClick={() => setShowEmoji(false)}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Message"
-            className="w-full text-[#656464] placeholder:text-[#656464] dark:text-gray-200 dark:placeholder:text-gray-200 rounded-full px-2 md:px-4 py-2 outline-none text-sm bg-transparent"
-          />
-        </div>
+        </button>
 
         {/* Hidden File Input */}
         <input
@@ -123,29 +137,55 @@ export default function ChatInput() {
         />
 
         {/* Upload Button */}
-        <div className="flex items-center justify-center col-span-1 cursor-pointer">
+        <button
+          className="flex-shrink-0 p-2 cursor-pointer btn-hover rounded-full"
+          disabled={uploading}
+        >
           <Paperclip
             className={`size-6 ${
               uploading
                 ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-500 dark:text-gray-400"
+                : "text-[#54656F] dark:text-[#8696A0]"
             }`}
             onClick={handleFileOpen}
           />
-        </div>
+        </button>
+
+        {/* Input */}
+        <input
+          value={text}
+          onClick={() => setShowEmoji(false)}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a message"
+          className="w-full text-[#111B21] placeholder:text-[#8696A0] dark:text-[#E9EDEF] dark:placeholder:text-[#8696A0] px-2 outline-none text-[15px] bg-transparent"
+        />
       </div>
 
-      {/* Mic Button */}
-      <button
-        className="bg-blue-600 dark:bg-[#73FBFD] p-3 md:p-4 rounded-full btn-hover"
-        disabled={uploading}
-      >
-        {uploading ? (
-          <span className="text-white text-sm">...</span>
-        ) : (
-          <FaMicrophone className="size-5 md:size-6 dark:fill-black fill-white" />
-        )}
-      </button>
+      {/* Action Buttons */}
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        {/* Send Button */}
+        <button
+          onMouseDown={(e) => { e.preventDefault(); handleSend(); }}
+          onTouchStart={(e) => { e.preventDefault(); handleSend(); }}
+          className="bg-[#007AFF] p-3 md:p-3.5 rounded-full btn-hover flex items-center justify-center cursor-pointer transition-transform hover:scale-105"
+          disabled={uploading || !text.trim()}
+        >
+          <Send className="size-5 text-white ml-0.5" />
+        </button>
+
+        {/* Mic Button */}
+        <button
+          className="bg-[#007AFF] p-3 md:p-3.5 rounded-full btn-hover flex items-center justify-center cursor-pointer transition-transform hover:scale-105"
+          disabled={uploading}
+        >
+          {uploading ? (
+            <span className="text-white text-sm">...</span>
+          ) : (
+            <FaMicrophone className="size-5 fill-white" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }

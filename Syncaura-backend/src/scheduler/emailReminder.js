@@ -6,6 +6,18 @@ import { sendEmail } from "../services/emailService.js"; // Change if your funct
  */
 export const sendNotificationEmails = async () => {
 
+    const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER || "";
+    const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS || "";
+    const hasPlaceholders =
+      !emailUser ||
+      emailUser === "your_ethereal_username" ||
+      !emailPass ||
+      emailPass === "your_ethereal_password";
+
+    if (process.env.EMAIL_ENABLED === "false" || hasPlaceholders) {
+        return;
+    }
+
     try {
 
         const result = await pool.query(`

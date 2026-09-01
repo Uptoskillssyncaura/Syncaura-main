@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../config/axios';
 
 /**
  * Task: User profile fetch after login
@@ -6,24 +6,15 @@ import axios from 'axios';
  */
 export const fetchUserProfile = async () => {
   try {
-    
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token'); 
     
     if (!token) {
       console.warn("No token found. Waiting for user to login.");
       return null;
     }
 
-    // 2. Call the backend server endpoint provided by the team leader
-    const response = await axios.get('http://localhost:5000/api/auth/me', {
-      headers: {
-        Authorization: `Bearer ${token}` 
-      }
-    });
-
-    // 3. Return the user profile data payload
+    const response = await api.get('/auth/me');
     return response.data;
-
   } catch (error) {
     console.error("Error fetching user profile:", error);
     throw error;

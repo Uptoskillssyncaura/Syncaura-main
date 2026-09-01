@@ -2,8 +2,9 @@ import { Video, Camera, Monitor, ArrowRight } from "lucide-react";
 import { TbBrandGoogleDrive, TbBrandTeams } from "react-icons/tb";
 import { useSelector } from "react-redux";
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 
-function getMeetingStatus(startTime, endTime) {
+function getMeetingStatus(startTime, endTime, t) {
   const now = new Date();
   const start = new Date(startTime);
   const end = endTime ? new Date(endTime) : null;
@@ -19,7 +20,7 @@ function getMeetingStatus(startTime, endTime) {
 
   if (isPast) {
     return {
-      label: "COMPLETED",
+      label: t('meeting_status_completed', 'COMPLETED'),
       textColor: "text-gray-500",
       bgColor: "bg-gray-100",
       dotColor: "bg-gray-400",
@@ -28,7 +29,7 @@ function getMeetingStatus(startTime, endTime) {
 
   if (isLive) {
     return {
-      label: "LIVE NOW",
+      label: t('meeting_status_live', 'LIVE NOW'),
       textColor: "text-[#C71212]",
       bgColor: "bg-[#FBB7B7]",
       dotColor: "bg-[#F35353]",
@@ -37,7 +38,7 @@ function getMeetingStatus(startTime, endTime) {
 
   if (isToday) {
     return {
-      label: "TODAY",
+      label: t('meeting_status_today', 'TODAY'),
       textColor: "text-[#2461E6]",
       bgColor: "bg-[#D5F7F7]",
       dotColor: "bg-[#2461E6]",
@@ -46,7 +47,7 @@ function getMeetingStatus(startTime, endTime) {
 
   if (start.toDateString() === tomorrow.toDateString()) {
     return {
-      label: "TOMORROW",
+      label: t('meeting_status_tomorrow', 'TOMORROW'),
       textColor: "text-[#2461E6]",
       bgColor: "bg-[#D5F7F7]",
       dotColor: "bg-[#2461E6]",
@@ -65,20 +66,46 @@ function getMeetingStatus(startTime, endTime) {
   };
 }
 
+// function formatMeetingTime(startTime, endTime) {
+//   const start = new Date(startTime);
+//   const end = endTime ? new Date(endTime) : null;
+
+//   const format = (date) =>
+//     date.toLocaleTimeString([], {
+//       hour: "2-digit",
+//       minute: "2-digit",
+//     });
+
+//   if (!end) return format(start);
+
+//   return `${format(start)} - ${format(end)}`;
+// }
+
 function formatMeetingTime(startTime, endTime) {
   const start = new Date(startTime);
   const end = endTime ? new Date(endTime) : null;
 
-  const format = (date) =>
-    date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
 
-  if (!end) return format(start);
+  const formatTime = (date) =>
+    date.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
-  return `${format(start)} - ${format(end)}`;
+  if (!end) {
+    return `${formatDate(start)} • ${formatTime(start)}`;
+  }
+
+  return `${formatDate(start)} • ${formatTime(start)} - ${formatTime(end)}`;
 }
+
 
 const MeetingCard = memo(function MeetingCard({
   platform,
@@ -88,8 +115,19 @@ const MeetingCard = memo(function MeetingCard({
   avatarCount,
   isDoc
 }) {
+  const { t } = useTranslation();
   const isDark = useSelector((state) => state.theme.isDark);
-  const status = getMeetingStatus(startTime, endTime);
+
+  console.log("Meeting time received by MeetingCard:", {
+    startTime,
+    endTime,
+    parsedStart: new Date(startTime),
+    parsedEnd: new Date(endTime),
+    localStart: new Date(startTime).toLocaleString("en-IN"),
+    localEnd: new Date(endTime).toLocaleString("en-IN"),
+  });
+
+  const status = getMeetingStatus(startTime, endTime, t);
 
   const MAX_VISIBLE = 3;
   const visibleAvatars = Math.min(avatarCount, MAX_VISIBLE);
@@ -124,7 +162,7 @@ const MeetingCard = memo(function MeetingCard({
             ) : (
               <TbBrandTeams className="size-3.5" />
             )}
-            {platform === "Google Meet" ? "Meet" : platform}
+            {platform === "Google Meet" ? t('meeting_platform_meet', 'Meet') : platform}
           </div>
 
           {/* Status moved to RIGHT (MOBILE ONLY) */}
@@ -230,13 +268,13 @@ const MeetingCard = memo(function MeetingCard({
                 } `}
             >
               {isCompleted
-                ? "Completed"
+                ? t('meeting_completed', 'Completed')
                 : isUpcoming
                   ? <div className="flex items-center justify-center gap-1">
                     <ArrowRight className="size-3 dark:text-[#73FBFD]" />
-                    <span className="whitespace-nowrap">Details</span>
+                    <span className="whitespace-nowrap">{t('meeting_details', 'Details')}</span>
                   </div>
-                  : "Join Now"}
+                  : t('meeting_join_now', 'Join Now')}
             </button>
           </div>
         </div>
@@ -279,7 +317,7 @@ dark:shadow-[0_0_25px_rgba(115,251,253,0.18)]
       ) : (
         <TbBrandTeams className="size-4" />
       )}
-      <span>{platform === "Google Meet" ? "Meet" : platform}</span>
+      <span>{platform === "Google Meet" ? t('meeting_platform_meet', 'Meet') : platform}</span>
     </div>
   </div>
 
@@ -344,16 +382,16 @@ dark:shadow-[0_0_25px_rgba(115,251,253,0.18)]
         } `}
     >
       {isCompleted ? (
-        "Completed"
+        t('meeting_completed', 'Completed')
       ) : isUpcoming ? (
         <>
           <ArrowRight className="size-4 text-[#4B5563] dark:text-[#73FBFD]" />
           <span className="text-[#4B5563] dark:text-[#73FBFD]">
-            Details
+            {t('meeting_details', 'Details')}
           </span>
         </>
       ) : (
-        "Join Now"
+        t('meeting_join_now', 'Join Now')
       )}
     </button>
 

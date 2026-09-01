@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function FileRow() {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -41,11 +43,11 @@ export default function FileRow() {
         <span className="px-3 py-1 text-xs font-medium rounded-full 
           bg-green-100 text-green-700 
           dark:bg-green-900/30 dark:text-green-400">
-          Final
+          {t("status_final", "Final")}
         </span>
 
         <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium btn-hover">
-          Edit
+          {t("edit", "Edit")}
         </button>
       </div>
     </motion.div>

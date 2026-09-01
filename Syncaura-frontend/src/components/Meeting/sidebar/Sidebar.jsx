@@ -1,6 +1,8 @@
 import { X, Settings, Menu, LogOut } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 // Exact icons matching Figma design - using outlined style
 const GridIcon = () => (
@@ -117,31 +119,35 @@ const ClockIcon = () => (
 
 const SettingsIcon = () => <Settings className="w-5 h-5" />;
 
-const menuItems = [
-  { icon: GridIcon, label: "Dashboard", path: "/user-dashboard", badge: null },
-  { icon: FolderIcon, label: "Projects", path: "/projects", badge: null },
-  { icon: ChatIcon, label: "Chat", path: "/chat", badge: 10 },
-  { icon: CalendarIcon, label: "Meetings", path: "/meetings", badge: 2 },
-  {
-    icon: DocumentIcon,
-    label: "Documents And Report",
-    path: "/documents",
-    badge: null,
-  },
-  { icon: WarningIcon, label: "Complaints", path: "/complaints", badge: null },
-  { icon: MegaphoneIcon, label: "Notice", path: "/notice", badge: 3 },
-  {
-    icon: ClockIcon,
-    label: "Attendance And Leave",
-    path: "/attendance-leave",
-    badge: null,
-  },
-  { icon: SettingsIcon, label: "Settings", path: "/settings", badge: null },
-];
-
 export default function Sidebar({ open, setOpen }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { channels } = useSelector((state) => state.chat || { channels: [] });
+  const totalUnreadChats = channels?.reduce((acc, chat) => acc + (chat.unread || 0), 0) || 0;
+
+  const menuItems = [
+    { icon: GridIcon, label: t('sidebar_dashboard', 'Dashboard'), path: "/user-dashboard", badge: null },
+    { icon: FolderIcon, label: t('sidebar_projects', 'Projects'), path: "/projects", badge: null },
+    { icon: ChatIcon, label: t('sidebar_chat', 'Chat'), path: "/chat", badge: totalUnreadChats > 0 ? totalUnreadChats : null },
+    { icon: CalendarIcon, label: t('sidebar_meetings', 'Meetings'), path: "/meetings", badge: 2 },
+    {
+      icon: DocumentIcon,
+      label: t('sidebar_documents', 'Documents And Report'),
+      path: "/documents",
+      badge: null,
+    },
+    { icon: WarningIcon, label: t('sidebar_complaints', 'Complaints'), path: "/complaints", badge: null },
+    { icon: MegaphoneIcon, label: t('sidebar_notice', 'Notice'), path: "/notice", badge: 3 },
+    {
+      icon: ClockIcon,
+      label: t('sidebar_attendance', 'Attendance And Leave'),
+      path: "/attendance-leave",
+      badge: null,
+    },
+    { icon: SettingsIcon, label: t('sidebar_settings', 'Settings'), path: "/settings", badge: null },
+  ];
 
   useEffect(() => {
     if (open) {
@@ -272,7 +278,7 @@ export default function Sidebar({ open, setOpen }) {
   >
     <LogOut className="w-5 h-5 text-[#EF4444]" />
     <span className="text-[#EF4444] font-semibold text-base">
-      Log Out
+      {t('sidebar_logout', 'Log Out')}
     </span>
   </button>
 </div>

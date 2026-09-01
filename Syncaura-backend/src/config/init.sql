@@ -23,6 +23,30 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+  
+
+  --new changes , sharad
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS first_name VARCHAR(80),
+ADD COLUMN IF NOT EXISTS last_name VARCHAR(80),
+ADD COLUMN IF NOT EXISTS phone VARCHAR(20),
+ADD COLUMN IF NOT EXISTS profile_pic TEXT,
+ADD COLUMN IF NOT EXISTS language VARCHAR(10) DEFAULT 'en';
+
+  ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS co_admin_id UUID
+  REFERENCES users(id)
+  ON DELETE SET NULL;
+
+  ALTER TABLE users
+ADD CONSTRAINT users_role_check
+CHECK (role IN ('admin', 'co-admin', 'user'));
+
+ALTER TABLE public.users
+ADD COLUMN IF NOT EXISTS invitation_token_hash TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS invitation_token_expires_at TIMESTAMP DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS invited_at TIMESTAMP DEFAULT NULL;
+
 
 -- Projects
 CREATE TABLE IF NOT EXISTS projects (
@@ -34,6 +58,7 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Tasks
 CREATE TABLE IF NOT EXISTS tasks (
@@ -132,6 +157,7 @@ CREATE TABLE IF NOT EXISTS channels (
   max_members INTEGER DEFAULT 5,
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   is_public BOOLEAN DEFAULT true,
+  profile_pic TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -196,6 +222,7 @@ CREATE TABLE IF NOT EXISTS leaves (
   from_date TIMESTAMP NOT NULL,
   to_date TIMESTAMP NOT NULL,
   reason TEXT NOT NULL,
+  leave_type VARCHAR(100) DEFAULT 'Casual Leave',
   status VARCHAR(50) DEFAULT 'pending',
   reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
   reviewed_at TIMESTAMP DEFAULT NULL,
@@ -256,14 +283,18 @@ CREATE TABLE IF NOT EXISTS attachments (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- Attendance
+CREATE TABLE IF NOT EXISTS attendance (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  check_in_time VARCHAR(20),
+  check_out_time VARCHAR(20),
+  working_hours NUMERIC(4, 2) DEFAULT 0,
+  status VARCHAR(20) NOT NULL CHECK (status IN ('Present', 'Absent', 'Late', 'Leave')),
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, date)
+);
 
--- -- Canva Export Files
--- CREATE TABLE IF NOT EXISTS canva_export_files (
---   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
---   template_id VARCHAR(255) NOT NULL,
---   format VARCHAR(50) NOT NULL,
---   filename VARCHAR(255) NOT NULL,
---   canva_url TEXT,
---   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--- );

@@ -1,5 +1,81 @@
 import pool from "../config/db.js";
-import { createCalendarEvent , updateCalendarEvent, deleteCalendarEvent} from "../services/googleCalendar.js";
+import {
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+  listCalendarEvents,
+} from "../services/googleCalendar.js";
+
+// Helper: Formats string strictly to local time without double-shifting UTC offsets
+const parseToLocalString = (dateInput) => {
+  if (!dateInput) return null;
+  // If string contains time (T), extract YYYY-MM-DDTHH:mm:ss directly
+  if (typeof dateInput === 'string' && dateInput.includes('T')) {
+    return dateInput.substring(0, 19);
+  }
+  return `${dateInput}T00:00:00`;
+};
+
+// Helper: Ensures string sent to Google Calendar explicitly includes IST (+05:30)
+const formatForGoogle = (dateStr) => {
+  if (!dateStr) return null;
+  if (dateStr.includes('+') || dateStr.endsWith('Z')) return dateStr;
+  return `${dateStr}+05:30`;
+};
+
+// 🟢 Sync Google Calendar
+export const syncCalendar = async (req, res) => {
+  try {
+    const tokens = req.user?.googleTokens;
+    if (!tokens || (!tokens.access_token && !tokens.refresh_token)) {
+      return res.status(400).json({
+        success: false,
+        message: "Google Calendar not connected. Please connect your Google account first.",
+      });
+    }
+
+    const userId = req.user?.id;
+    const googleEvents = await listCalendarEvents({ tokens, userId });
+    let importedCount = 0;
+
+    for (const gEvent of googleEvents) {
+      const title = gEvent.summary || "Google Calendar Event";
+      const description = gEvent.description || "";
+      const startTime = parseToLocalString(gEvent.start?.dateTime || gEvent.start?.date);
+      const endTime = parseToLocalString(gEvent.end?.dateTime || gEvent.end?.date);
+      const meetLink = gEvent.hangoutLink || gEvent.htmlLink || null;
+
+      if (!startTime || !endTime) continue;
+
+      importedCount++;
+    }
+
+    const meetingsResult = await pool.query("SELECT * FROM meetings WHERE user_id = $1", [userId]);
+    const meetings = meetingsResult.rows || [];
+
+    for (const meeting of meetings) {
+      const participantsResult = await pool.query(
+        "SELECT email FROM meeting_participants WHERE meeting_id = $1",
+        [meeting.id]
+      );
+      meeting.participants = participantsResult.rows.map((r) => r.email);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Calendar sync completed! Synced ${importedCount} items.`,
+      syncedCount: importedCount,
+      meetings,
+    });
+  } catch (error) {
+    console.error("Error in syncCalendar:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to sync calendar",
+      error: error.message,
+    });
+  }
+};
 
 // ✅ Create meeting
 export const createMeeting = async (req, res) => {
@@ -7,51 +83,43 @@ export const createMeeting = async (req, res) => {
     const { title, description, startTime, endTime, participants } = req.body;
 
     if (!title || !startTime || !endTime) {
-  return res.status(400).json({ message: "Required fields missing" });
-}
+      return res.status(400).json({ message: "Required fields missing" });
+    }
 
-const start = new Date(startTime);
-const end = new Date(endTime);
-
-if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-  return res.status(400).json({ message: "Invalid date format for startTime or endTime" });
-}
-
-if (end <= start) {
-  return res.status(400).json({ message: "endTime must be after startTime" });
-}
+    // Pass explicit timezone offset (+05:30) to Google Calendar API
+    const formattedStart = formatForGoogle(startTime);
+    const formattedEnd = formatForGoogle(endTime);
 
     let calendarEvent = null;
 
-    try {
-      calendarEvent = await createCalendarEvent({
-  tokens: req.googleTokens,
-  title,
-  description,
-  startTime,
-  endTime,
-});
-    } catch (err) {
-      console.warn("Calendar sync failed:", err.message);
+    if (
+      req.googleTokens &&
+      (req.googleTokens.access_token || req.googleTokens.refresh_token)
+    ) {
+      try {
+        calendarEvent = await createCalendarEvent({
+          tokens: req.googleTokens,
+          userId: req.user?.id,
+          title,
+          description,
+          startTime: formattedStart,
+          endTime: formattedEnd,
+        });
+      } catch (err) {
+        console.error("Calendar sync failed:", err);
+      }
     }
 
+    const cleanStartTime = parseToLocalString(startTime);
+
     const result = await pool.query(
-      `INSERT INTO meetings (title, description, start_time, end_time, google_event_id, google_meet_link, created_by) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [
-        title,
-        description,
-        startTime,
-        endTime,
-        calendarEvent?.id || null,
-        calendarEvent?.hangoutLink || null,
-        req.user?.id || null
-      ]
+      `INSERT INTO meetings (title, description, start_time) 
+       VALUES ($1, $2, $3) RETURNING *`,
+      [title, description, cleanStartTime]
     );
 
     const meeting = result.rows[0];
 
-    // Handle participants
     if (participants && Array.isArray(participants)) {
       for (const email of participants) {
         await pool.query(
@@ -65,8 +133,8 @@ if (end <= start) {
     res.status(201).json({
       message: "Meeting created successfully",
       meeting,
+      google_synced: !!calendarEvent?.id,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -76,7 +144,9 @@ if (end <= start) {
 // ✅ Get all meetings
 export const getMeetings = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM meetings ORDER BY start_time DESC");
+    const result = await pool.query(
+      "SELECT * FROM meetings ORDER BY start_time DESC"
+    );
     const meetings = result.rows;
 
     for (const meeting of meetings) {
@@ -84,7 +154,7 @@ export const getMeetings = async (req, res) => {
         "SELECT email FROM meeting_participants WHERE meeting_id = $1",
         [meeting.id]
       );
-      meeting.participants = participantsResult.rows.map(r => r.email);
+      meeting.participants = participantsResult.rows.map((r) => r.email);
     }
 
     res.json(meetings);
@@ -97,18 +167,21 @@ export const getMeetings = async (req, res) => {
 export const getMeetingById = async (req, res) => {
   try {
     const { id } = req.params;
-    const meetingResult = await pool.query("SELECT * FROM meetings WHERE id = $1", [id]);
+    const meetingResult = await pool.query(
+      "SELECT * FROM meetings WHERE id = $1",
+      [id]
+    );
 
-    if (meetingResult.rowCount === 0) return res.status(404).json({ message: "Meeting not found" });
+    if (meetingResult.rowCount === 0)
+      return res.status(404).json({ message: "Meeting not found" });
 
     const meeting = meetingResult.rows[0];
 
-    // Get participants
     const participantsResult = await pool.query(
       "SELECT email FROM meeting_participants WHERE meeting_id = $1",
       [id]
     );
-    meeting.participants = participantsResult.rows.map(r => r.email);
+    meeting.participants = participantsResult.rows.map((r) => r.email);
 
     res.json(meeting);
   } catch (err) {
@@ -122,7 +195,6 @@ export const updateMeeting = async (req, res) => {
     const { id } = req.params;
     const { title, description, startTime, endTime } = req.body;
 
-    // Fetch existing meeting
     const existing = await pool.query(
       "SELECT * FROM meetings WHERE id = $1",
       [id]
@@ -134,23 +206,24 @@ export const updateMeeting = async (req, res) => {
 
     const meeting = existing.rows[0];
 
-    // Sync update to Google Calendar
-    if (meeting.google_event_id) {
+    if (meeting.google_event_id && req.googleTokens) {
       try {
-       await updateCalendarEvent(meeting.google_event_id, {
-  tokens: req.googleTokens,
-  title: title || meeting.title,
-  description: description || meeting.description,
-  startTime: startTime || meeting.start_time,
-  endTime: endTime || meeting.end_time,
-});
+        await updateCalendarEvent(meeting.google_event_id, {
+          tokens: req.googleTokens,
+          userId: req.user?.id,
+          title: title || meeting.title,
+          description: description || meeting.description,
+          startTime: formatForGoogle(startTime || meeting.start_time),
+          endTime: formatForGoogle(endTime || meeting.end_time),
+        });
       } catch (err) {
         console.warn("Google Calendar update failed:", err.message);
-        // Continue updating the database even if Google sync fails
       }
     }
 
-    // Update database
+    const cleanStartTime = parseToLocalString(startTime);
+    const cleanEndTime = parseToLocalString(endTime);
+
     const result = await pool.query(
       `UPDATE meetings SET
         title = COALESCE($1, title),
@@ -160,11 +233,10 @@ export const updateMeeting = async (req, res) => {
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $5
       RETURNING *`,
-      [title, description, startTime, endTime, id]
+      [title, description, cleanStartTime, cleanEndTime, id]
     );
 
     res.json(result.rows[0]);
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -175,7 +247,6 @@ export const deleteMeeting = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Step 1: Get Google event id before deleting
     const existing = await pool.query(
       "SELECT google_event_id FROM meetings WHERE id = $1",
       [id]
@@ -187,24 +258,21 @@ export const deleteMeeting = async (req, res) => {
 
     const googleEventId = existing.rows[0].google_event_id;
 
-    // Step 2: Delete from Google Calendar first
-    if (googleEventId) {
+    if (googleEventId && req.googleTokens) {
       try {
         await deleteCalendarEvent(
-  meeting.google_event_id,
-  req.googleTokens
-);
+          googleEventId,
+          req.googleTokens,
+          req.user?.id
+        );
       } catch (err) {
         console.warn("Google Calendar delete failed:", err.message);
-        // continue even if Google fails
       }
     }
 
-    // Step 3: Delete from DB
     await pool.query("DELETE FROM meetings WHERE id = $1", [id]);
 
     res.json({ message: "Meeting deleted successfully" });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -2,12 +2,31 @@ import { motion } from "framer-motion";
 import FilterDropdown from "../common/FilterDropdown";
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function ComplaintFilters({ onClose, onApply }) {
-  const [status, setStatus] = useState("Resolved");
-  const [order, setOrder] = useState("Ascending");
+  const { t } = useTranslation();
+  const items = [
+    t("complaintFilters_statusResolved", "Resolved"),
+    t("complaintFilters_statusInProgress", "In Progress"),
+    t("complaintFilters_statusOpen", "Open")
+  ];
+  const orderOptions = [
+    t("complaintFilters_orderAscending", "Ascending"),
+    t("complaintFilters_orderDescending", "Descending")
+  ];
+  const [status, setStatus] = useState(items[0]);
+  const [order, setOrder] = useState(orderOptions[0]);
   const [date, setDate] = useState("");
-  const items = ["Resolved", "In Progress", "Open"];
+  useEffect(() => {
+  onApply({
+    status,
+    order,
+    date,
+  });
+}, [status, order, date, onApply]);
+
+  const statusItems = ["Resolved", "In Progress", "Open"];
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-10">
@@ -17,28 +36,13 @@ export default function ComplaintFilters({ onClose, onApply }) {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full bg-white dark:bg-black rounded-2xl shadow-[0_0_10px_1px_#ACACAC33] p-4 sm:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center lg:items-center"
       >
-        <motion.button
-          initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
-          whileHover={{ scale: 1.15, rotate: 90 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          className="fixed top-4 right-10 md:right-15 z-100"
-          onClick={() => {
-            onApply(null);
-            onClose();
-          }}
-        >
-          <X className="text-black dark:text-white size-5" />
-        </motion.button>
 
         {/* Complaint ID Order */}
         <div className="flex flex-col gap-2 w-full lg:w-1/4">
           <FilterDropdown
-            options={["Ascending", "Descending"]}
+            options={orderOptions}
             startVal={order}
-            label="Complaint Id Order"
+            label={t("complaintFilters_complaintIdOrder", "Complaint Id Order")}
             onChange={setOrder}
           />
         </div>
@@ -46,7 +50,7 @@ export default function ComplaintFilters({ onClose, onApply }) {
         {/* Date Range */}
         <div className="flex flex-col items-center justify-center gap-2 w-full lg:w-1/4">
           <label className="text-sm font-semibold w-full text-gray-700 dark:text-gray-300">
-            Date Range
+            {t("complaintFilters_dateRange", "Date Range")}
           </label>
           <input
             type="date"
@@ -61,7 +65,7 @@ export default function ComplaintFilters({ onClose, onApply }) {
         {/* Status */}
         <div className="flex flex-col gap-2 w-full lg:w-1/4">
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Status
+            {t("complaintFilters_status", "Status")}
           </label>
           <div className="flex flex-wrap gap-2">
             {items.map((item) => (
@@ -91,7 +95,7 @@ export default function ComplaintFilters({ onClose, onApply }) {
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
             className="w-full lg:w-auto bg-blue-600 dark:bg-[#73FBFD] dark:text-black text-white font-medium px-5 py-3 rounded-full shadow-sm text-sm"
           >
-            Apply Filters
+            {t("complaintFilters_applyFilters", "Apply Filters")}
           </motion.button>
         </div>
       </motion.div>

@@ -2,9 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Layers, MessageSquare, BarChart3, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const features = [
   {
+    key: 'project',
     icon: Layers,
     label: 'Project Management',
     desc: 'Plan, track & deliver projects on time with full visibility.',
@@ -13,6 +15,7 @@ const features = [
     grad: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.08))',
   },
   {
+    key: 'chat',
     icon: MessageSquare,
     label: 'Team Chat',
     desc: 'Real-time messaging, threads & file sharing in one place.',
@@ -21,6 +24,7 @@ const features = [
     grad: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.08))',
   },
   {
+    key: 'sched',
     icon: Calendar,
     label: 'Smart Scheduling',
     desc: 'AI-assisted scheduling that keeps your entire team in sync.',
@@ -29,6 +33,7 @@ const features = [
     grad: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.08))',
   },
   {
+    key: 'analytics',
     icon: BarChart3,
     label: 'Performance Analytics',
     desc: 'Live dashboards & insights to drive smarter decisions.',
@@ -38,7 +43,22 @@ const features = [
   },
 ];
 
+const checklistItems = [
+  { key: 'workflow_checklist_1', text: 'Unified inbox for tasks, chats & meetings' },
+  { key: 'workflow_checklist_2', text: 'Real-time collaboration across all tools' },
+  { key: 'workflow_checklist_3', text: 'AI-powered performance insights' },
+  { key: 'workflow_checklist_4', text: 'Zero setup — ready in under 2 minutes' },
+];
+
+const statsItems = [
+  { key: 'uptime', val: '98%',  label: 'Uptime SLA',       color: '#22c55e', bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.22)'  },
+  { key: 'speed',  val: '3×',   label: 'Faster Delivery',  color: '#3b82f6', bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.22)' },
+  { key: 'teams',  val: '50K+', label: 'Teams Worldwide',  color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.22)' },
+  { key: 'setup',  val: '<2min',label: 'Setup Time',       color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.22)' },
+];
+
 const WorkflowSection = () => {
+  const { t } = useTranslation();
   const scrollToFeatures = (e) => {
     e.preventDefault();
     const element = document.getElementById('features');
@@ -50,11 +70,6 @@ const WorkflowSection = () => {
       className="w-full py-16 md:py-24 relative overflow-hidden"
       style={{ backgroundColor: 'var(--bg-primary)', borderTop: '1px solid var(--border-color)' }}
     >
-      {/* 
-        BACKGROUND GLOW ORBS
-        These are large, blurred, animated circles that move in the background 
-        to create a subtle, premium glowing effect.
-      */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.06, 0.12, 0.06] }}
@@ -71,10 +86,6 @@ const WorkflowSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
 
-          {/* 
-            LEFT COLUMN: HEADING & 3D FEATURE CARDS
-            This side contains the main text and the interactive 2x2 grid of feature cards.
-          */}
           <div className="space-y-8">
 
             {/* Glowing "Workflow" Badge */}
@@ -91,7 +102,7 @@ const WorkflowSection = () => {
               }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              Workflow
+              {t('workflow_badge', 'Workflow')}
             </motion.div>
 
             {/* Headline */}
@@ -103,25 +114,20 @@ const WorkflowSection = () => {
               className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight"
               style={{ color: 'var(--text-primary)' }}
             >
-              Work smarter,{' '}
+              {t('workflow_title_1', 'Work smarter,')}{' '}
               <span
                 className="text-transparent bg-clip-text"
                 style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%)' }}
               >
-                collaborate
+                {t('workflow_title_2', 'collaborate')}
               </span>
-              <br />faster.
+              <br />{t('workflow_title_3', 'faster.')}
             </motion.h2>
 
-            {/* 
-              3D FEATURE CARDS GRID
-              Maps over the 'features' array and displays a 2x2 grid of interactive cards.
-              The 'perspective' and 'rotate' properties create the 3D tilt effect on hover.
-            */}
             <div className="grid grid-cols-2 gap-4">
-              {features.map(({ icon: Icon, label, desc, color, glow, grad }, i) => (
+              {features.map(({ key, icon: Icon, label, desc, color, glow, grad }, i) => (
                 <motion.div
-                  key={label}
+                  key={key}
                   initial={{ opacity: 0, y: 24, rotateX: 8 }}
                   whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                   viewport={{ once: true }}
@@ -137,13 +143,11 @@ const WorkflowSection = () => {
                   }}
                   className="relative flex flex-col gap-3 p-5 rounded-2xl overflow-hidden group transition-all duration-300"
                 >
-                  {/* Corner glow accent */}
                   <div
                     className="absolute -top-4 -right-4 w-16 h-16 rounded-full blur-xl opacity-40 pointer-events-none"
                     style={{ backgroundColor: color }}
                   />
 
-                  {/* Icon bubble */}
                   <div
                     className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{
@@ -155,13 +159,15 @@ const WorkflowSection = () => {
                     <Icon size={20} style={{ color }} />
                   </div>
 
-                  {/* Text */}
                   <div>
-                    <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-primary)' }}>{label}</p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.75 }}>{desc}</p>
+                    <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                      {t(`workflow_feat_${key}_label`, label)}
+                    </p>
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.75 }}>
+                      {t(`workflow_feat_${key}_desc`, desc)}
+                    </p>
                   </div>
 
-                  {/* Bottom accent line */}
                   <div
                     className="absolute bottom-0 left-4 right-4 h-[1.5px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
@@ -170,10 +176,6 @@ const WorkflowSection = () => {
               ))}
             </div>
 
-            {/* 
-              CALL TO ACTION BUTTONS
-              Buttons that navigate the user to sign up or scroll to the features section.
-            */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -192,7 +194,7 @@ const WorkflowSection = () => {
                   }}
                 >
                   <span className="absolute inset-0 bg-white/20 -translate-x-[150%] skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-700" />
-                  Start for free
+                  {t('workflow_startFreeBtn', 'Start for free')}
                   <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </motion.button>
               </Link>
@@ -206,17 +208,12 @@ const WorkflowSection = () => {
                   border: '1px solid var(--border-color)'
                 }}
               >
-                Explore features
+                {t('workflow_exploreBtn', 'Explore features')}
                 <ArrowRight size={14} className="opacity-60" />
               </motion.button>
             </motion.div>
           </div>
 
-          {/* 
-            RIGHT COLUMN: DESCRIPTION CARD & STATS GRID
-            A large glassmorphic card on the right containing a descriptive paragraph, 
-            a checklist, and a 2x2 grid of small statistics boxes.
-          */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -224,7 +221,6 @@ const WorkflowSection = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="relative"
           >
-            {/* Glow behind card */}
             <div
               className="absolute -inset-4 rounded-3xl blur-2xl opacity-20 pointer-events-none"
               style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
@@ -238,7 +234,6 @@ const WorkflowSection = () => {
                 boxShadow: '0 24px 64px rgba(0,0,0,0.08)',
               }}
             >
-              {/* Top gradient accent line */}
               <div
                 className="absolute top-0 left-8 right-8 h-[2px] rounded-full"
                 style={{ background: 'linear-gradient(90deg, transparent, #3b82f6, #6366f1, transparent)' }}
@@ -248,25 +243,19 @@ const WorkflowSection = () => {
                 className="text-base md:text-lg leading-relaxed font-medium"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                From planning to execution, everything happens in one place. No more switching between tools. No more lost messages.{' '}
+                {t('workflow_desc_p1', 'From planning to execution, everything happens in one place. No more switching between tools. No more lost messages.')}{' '}
                 <span
                   className="font-bold text-transparent bg-clip-text"
                   style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
                 >
-                  Just pure productivity.
+                  {t('workflow_desc_highlight', 'Just pure productivity.')}
                 </span>
               </p>
 
-              {/* Checklist */}
               <ul className="space-y-3.5">
-                {[
-                  'Unified inbox for tasks, chats & meetings',
-                  'Real-time collaboration across all tools',
-                  'AI-powered performance insights',
-                  'Zero setup — ready in under 2 minutes',
-                ].map((item, i) => (
+                {checklistItems.map((item, i) => (
                   <motion.li
-                    key={i}
+                    key={item.key}
                     initial={{ opacity: 0, x: 16 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
@@ -275,24 +264,15 @@ const WorkflowSection = () => {
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     <CheckCircle2 size={16} style={{ color: '#22c55e', flexShrink: 0, marginTop: 1 }} />
-                    {item}
+                    {t(item.key, item.text)}
                   </motion.li>
                 ))}
               </ul>
 
-              {/* 
-                4-BOX STATISTIC GRID
-                A small 2x2 grid of colorful rectangles highlighting key numbers (e.g., Uptime, Teams).
-              */}
               <div className="grid grid-cols-2 gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                {[
-                  { val: '98%',  label: 'Uptime SLA',       color: '#22c55e', bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.22)'  },
-                  { val: '3×',   label: 'Faster Delivery',  color: '#3b82f6', bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.22)' },
-                  { val: '50K+', label: 'Teams Worldwide',  color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.22)' },
-                  { val: '<2min',label: 'Setup Time',       color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.22)' },
-                ].map(({ val, label, color, bg, border }) => (
+                {statsItems.map(({ key, val, label, color, bg, border }) => (
                   <motion.div
-                    key={label}
+                    key={key}
                     whileHover={{ y: -3, scale: 1.03 }}
                     className="relative flex flex-col items-center justify-center py-4 px-3 rounded-xl text-center overflow-hidden group cursor-default"
                     style={{
@@ -302,7 +282,6 @@ const WorkflowSection = () => {
                       transition: 'all 0.25s ease',
                     }}
                   >
-                    {/* Corner glow */}
                     <div
                       className="absolute -top-3 -right-3 w-10 h-10 rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-opacity pointer-events-none"
                       style={{ backgroundColor: color }}
@@ -311,15 +290,14 @@ const WorkflowSection = () => {
                       className="text-2xl font-black text-transparent bg-clip-text leading-none"
                       style={{ backgroundImage: `linear-gradient(135deg, ${color}, ${color}bb)` }}
                     >
-                      {val}
+                      {t(`workflow_stat_${key}_val`, val)}
                     </p>
                     <p
                       className="text-[10px] font-bold mt-1.5 uppercase tracking-widest"
                       style={{ color: 'var(--text-secondary)', opacity: 0.65 }}
                     >
-                      {label}
+                      {t(`workflow_stat_${key}_label`, label)}
                     </p>
-                    {/* Bottom accent */}
                     <div
                       className="absolute bottom-0 left-3 right-3 h-[1.5px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}

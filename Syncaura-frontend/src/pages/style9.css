@@ -1,13 +1,84 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap');
 
+:root {
+  --bg-page: radial-gradient(circle at 50% 5%, #f0f4f8 0, #e2e8f0 53%, #cbd5e1 100%);
+  --text-main: #1e293b;
+  --auth-card-bg: #ffffff;
+  --auth-card-border: #e2e8f0;
+  --auth-card-shadow: 0 22px 55px rgba(0, 0, 0, 0.05);
+  --art-bg: #f8fafc;
+  --form-pane-bg: #ffffff;
+  --eyebrow: #3b82f6;
+  --heading-em: #2563eb;
+  --lead-text: #64748b;
+  --field-bg: #f8fafc;
+  --field-border: #cbd5e1;
+  --field-text: #0f172a;
+  --field-icon: #3b82f6;
+  --field-focus-border: #2563eb;
+  --field-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  --field-placeholder: #94a3b8;
+  --reveal-color: #64748b;
+  --check-text: #475569;
+  --check-border: #94a3b8;
+  --check-checked-bg: #2563eb;
+  --check-checked-border: #2563eb;
+  --link-color: #2563eb;
+  --message-color: #2563eb;
+  --divider-text: #94a3b8;
+  --divider-line: #e2e8f0;
+  --social-bg: #f8fafc;
+  --social-border: #e2e8f0;
+  --social-text: #1e293b;
+  --social-hover-bg: #f1f5f9;
+  --social-hover-border: #cbd5e1;
+  --switch-text: #64748b;
+}
+
+.dark {
+  --bg-page: radial-gradient(circle at 50% 5%, #0b1c36 0, #061321 53%, #04101d 100%);
+  --text-main: #f6f9ff;
+  --auth-card-bg: #08111e;
+  --auth-card-border: #253449;
+  --auth-card-shadow: 0 22px 55px rgba(2, 8, 18, 0.6);
+  --art-bg: #03112a;
+  --form-pane-bg: #080f19;
+  --eyebrow: #1675ff;
+  --heading-em: #0876ff;
+  --lead-text: #9ab0cd;
+  --field-bg: #101925;
+  --field-border: #28394e;
+  --field-text: #eff6ff;
+  --field-icon: #1478ff;
+  --field-focus-border: #2180ff;
+  --field-focus-shadow: 0 0 0 3px rgba(22, 116, 255, 0.12);
+  --field-placeholder: #899bb7;
+  --reveal-color: #8ea4c4;
+  --check-text: #a4b4cc;
+  --check-border: #607896;
+  --check-checked-bg: #147bff;
+  --check-checked-border: #147bff;
+  --link-color: #1680ff;
+  --message-color: #62bbff;
+  --divider-text: #91a2bc;
+  --divider-line: #2a394c;
+  --social-bg: #091321;
+  --social-border: #1d558c;
+  --social-text: #f8fbff;
+  --social-hover-bg: #0c1e35;
+  --social-hover-border: #1884ff;
+  --switch-text: #a6b8d1;
+}
+
 .page {
     min-height: 100vh;
     display: grid;
     place-items: center;
     padding: 24px;
-    background: radial-gradient(circle at 50% 5%, #0b1c36 0, #061321 53%, #04101d 100%);
-    color: #f6f9ff;
+    background: var(--bg-page);
+    color: var(--text-main);
     font-family: 'DM Sans', Arial, sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .page * {
@@ -20,16 +91,17 @@
     display: grid;
     grid-template-columns: 43% 57%;
     overflow: hidden;
-    border: 1px solid #253449;
+    border: 1px solid var(--auth-card-border);
     border-radius: 21px;
-    background: #08111e;
-    box-shadow: 0 22px 55px #02081299
+    background: var(--auth-card-bg);
+    box-shadow: var(--auth-card-shadow);
+    transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .art {
     position: relative;
     overflow: hidden;
-    background: #03112a
+    background: var(--art-bg);
 }
 
 .art img {
@@ -37,7 +109,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center
+    object-position: center;
 }
 
 .form-pane {
@@ -45,58 +117,60 @@
     align-items: center;
     justify-content: center;
     padding: 45px 68px;
-    background: #080f19
+    background: var(--form-pane-bg);
+    transition: background 0.3s ease;
 }
 
 .form-pane form {
-    width: min(517px, 100%)
+    width: min(517px, 100%);
 }
 
 .eyebrow {
-    color: #1675ff;
+    color: var(--eyebrow);
     font-size: 10px;
     letter-spacing: 2px;
     font-weight: 700;
-    margin: 0 0 10px
+    margin: 0 0 10px;
 }
 
 .page h1 {
     font: 800 38px/1.1 Manrope, sans-serif;
     letter-spacing: -2px;
-    margin: 0
+    margin: 0;
 }
 
 .page h1 em {
-    color: #0876ff;
-    font-style: normal
+    color: var(--heading-em);
+    font-style: normal;
 }
 
 .lead {
     margin: 8px 0 25px;
-    color: #9ab0cd;
-    font-size: 16px
+    color: var(--lead-text);
+    font-size: 16px;
 }
 
 .fields {
     display: grid;
-    gap: 11px
+    gap: 11px;
 }
 
 .field {
     height: 64px;
-    border: 1px solid #28394e;
+    border: 1px solid var(--field-border);
     border-radius: 10px;
-    background: #101925;
+    background: var(--field-bg);
     display: flex;
     align-items: center;
     padding: 0 16px;
     gap: 15px;
-    color: #1478ff
+    color: var(--field-icon);
+    transition: all 0.2s ease;
 }
 
 .field:focus-within {
-    border-color: #2180ff;
-    box-shadow: 0 0 0 3px #1674ff1f
+    border-color: var(--field-focus-border);
+    box-shadow: var(--field-focus-shadow);
 }
 
 .field input {
@@ -105,31 +179,31 @@
     border: 0;
     outline: 0;
     background: transparent;
-    color: #eff6ff;
-    font: 400 15px 'DM Sans'
+    color: var(--field-text);
+    font: 400 15px 'DM Sans';
 }
 
 .field input::placeholder {
-    color: #899bb7
+    color: var(--field-placeholder);
 }
 
 .reveal {
-    color: #8ea4c4;
+    color: var(--reveal-color);
     border: 0;
     background: transparent;
     display: grid;
     place-items: center;
     padding: 2px;
-    cursor: pointer
+    cursor: pointer;
 }
 
 .check {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #a4b4cc;
+    color: var(--check-text);
     font-size: 12px;
-    margin: 12px 0
+    margin: 12px 0;
 }
 
 .check input {
@@ -137,15 +211,16 @@
     width: 16px;
     height: 16px;
     margin: 0;
-    border: 1px solid #607896;
+    border: 1px solid var(--check-border);
     border-radius: 3px;
     display: grid;
-    place-content: center
+    place-content: center;
+    background: transparent;
 }
 
 .check input:checked {
-    background: #147bff;
-    border-color: #147bff
+    background: var(--check-checked-bg);
+    border-color: var(--check-checked-border);
 }
 
 .check input:checked:after {
@@ -153,23 +228,23 @@
     color: #fff;
     font-size: 13px;
     font-weight: bold;
-    line-height: 1
+    line-height: 1;
 }
 
 .check a,
 .options>a {
-    color: #1680ff;
-    text-decoration: none
+    color: var(--link-color);
+    text-decoration: none;
 }
 
 .options {
     display: flex;
     justify-content: space-between;
-    align-items: center
+    align-items: center;
 }
 
 .options>a {
-    font-size: 13px
+    font-size: 13px;
 }
 
 .submit {
@@ -186,11 +261,11 @@
     justify-content: center;
     gap: 12px;
     cursor: pointer;
-    box-shadow: 0 6px 20px #006bff44
+    box-shadow: 0 6px 20px rgba(0, 107, 255, 0.26);
 }
 
 .submit:hover {
-    filter: brightness(1.1)
+    filter: brightness(1.1);
 }
 
 .submit:disabled {
@@ -201,8 +276,8 @@
 .message {
     margin: 10px 0 -2px;
     text-align: center;
-    color: #62bbff;
-    font-size: 13px
+    color: var(--message-color);
+    font-size: 13px;
 }
 
 .divider {
@@ -210,86 +285,87 @@
     align-items: center;
     gap: 14px;
     margin: 24px 0 20px;
-    color: #91a2bc;
+    color: var(--divider-text);
     font-size: 10px;
-    letter-spacing: 1px
+    letter-spacing: 1px;
 }
 
 .divider:before,
 .divider:after {
     content: '';
     height: 1px;
-    background: #2a394c;
-    flex: 1
+    background: var(--divider-line);
+    flex: 1;
 }
 
 .socials {
     display: flex;
     justify-content: center;
-    gap: 25px
+    gap: 25px;
 }
 
 .socials button {
     width: 48px;
     height: 48px;
-    border: 1px solid #1d558c;
+    border: 1px solid var(--social-border);
     border-radius: 50%;
-    background: #091321;
-    color: #f8fbff;
+    background: var(--social-bg);
+    color: var(--social-text);
     display: grid;
     place-items: center;
-    cursor: pointer
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .socials button:hover {
-    border-color: #1884ff;
-    background: #0c1e35
+    border-color: var(--social-hover-border);
+    background: var(--social-hover-bg);
 }
 
 .facebook {
-    color: #1877f2 !important
+    color: #1877f2 !important;
 }
 
 .switch {
     text-align: center;
     margin: 17px 0 0;
     font-size: 12px;
-    color: #a6b8d1
+    color: var(--switch-text);
 }
 
 .switch button {
     border: 0;
     background: transparent;
-    color: #1680ff;
+    color: var(--link-color);
     padding: 0;
     font: inherit;
-    cursor: pointer
+    cursor: pointer;
 }
 
 @media(max-width:760px) {
     .page {
-        padding: 14px
+        padding: 14px;
     }
 
     .auth-card {
         grid-template-columns: 1fr;
-        min-height: auto
+        min-height: auto;
     }
 
     .art {
-        height: 220px
+        height: 220px;
     }
 
     .art img {
-        object-position: center 47%
+        object-position: center 47%;
     }
 
     .form-pane {
-        padding: 34px 25px 38px
+        padding: 34px 25px 38px;
     }
 
     h1 {
-        font-size: 33px
+        font-size: 33px;
     }
 }
 /* Spinner CSS */
@@ -300,3 +376,67 @@
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Role Selector Variables (Light) */
+:root {
+  --role-btn-bg: #ffffff;
+  --role-btn-border: #e2e8f0;
+  --role-btn-text: #334155;
+  --role-btn-sub: #64748b;
+  --role-btn-active-bg: #2563eb;
+  --role-btn-active-border: #2563eb;
+  --role-btn-active-text: #ffffff;
+  --role-btn-active-sub: #bfdbfe;
+}
+
+/* Role Selector Variables (Dark) */
+.dark {
+  --role-btn-bg: #101925;
+  --role-btn-border: #28394e;
+  --role-btn-text: #e2e8f0;
+  --role-btn-sub: #94a3b8;
+  --role-btn-active-bg: #1d4ed8;
+  --role-btn-active-border: #1d4ed8;
+  --role-btn-active-text: #ffffff;
+  --role-btn-active-sub: #bfdbfe;
+}
+
+/* Role Selector Styles */
+.role-label-text {
+    color: var(--text-main);
+}
+.role-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--role-btn-border);
+    background: var(--role-btn-bg);
+    color: var(--role-btn-text);
+    text-align: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.role-btn:hover {
+    filter: brightness(1.05);
+}
+.role-btn.active {
+    background: var(--role-btn-active-bg);
+    border-color: var(--role-btn-active-border);
+    color: var(--role-btn-active-text);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.role-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+.role-sub {
+    font-size: 10px;
+    margin-top: 2px;
+    color: var(--role-btn-sub);
+}
+.role-btn.active .role-sub {
+    color: var(--role-btn-active-sub);
+}

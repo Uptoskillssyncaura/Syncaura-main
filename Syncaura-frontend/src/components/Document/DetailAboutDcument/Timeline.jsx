@@ -1,31 +1,34 @@
 import { motion, useMotionValue, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import TimelineItem from "./TimelineItem";
-
-const versions = [
-  {
-    version: "v3.2",
-    status: "current",
-    date: "Dec 12, 2025",
-    editor: "Alice Smith",
-    title: "Final approval adjustments",
-    current: true,
-  },
-  {
-    version: "v3.1",
-    date: "Dec 11, 2025",
-    editor: "Bob Jones",
-    title: "Updated revenue projections",
-  },
-  {
-    version: "v3.0",
-    date: "Dec 10, 2025",
-    editor: "Alice Smith",
-    title: "Initial draft for Q4",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const Timeline = () => {
+  const { t } = useTranslation();
+  
+  const versions = [
+    {
+      version: "v3.2",
+      status: "current",
+      date: t("dec_12_2025", "Dec 12, 2025"),
+      editor: "Alice Smith",
+      title: t("timeline_v32_title", "Final approval adjustments"),
+      current: true,
+    },
+    {
+      version: "v3.1",
+      date: t("dec_11_2025", "Dec 11, 2025"),
+      editor: "Bob Jones",
+      title: t("timeline_v31_title", "Updated revenue projections"),
+    },
+    {
+      version: "v3.0",
+      date: t("dec_10_2025", "Dec 10, 2025"),
+      editor: "Alice Smith",
+      title: t("timeline_v30_title", "Initial draft for Q4"),
+    },
+  ];
+
   const containerRef = useRef(null);
   const [height, setHeight] = useState(0);
 

@@ -3,23 +3,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
-export default function NewComplaintModal({ onClose, addComplaint, isSubmitting }) {
-  const { register, handleSubmit, setValue, watch } = useForm();
+export default function NewComplaintModal({ onClose, addComplaint }) {
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
+    defaultValues: { category: "", title: "", description: "" },
+  });
   const [category, setCategory] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
   const files = watch("attachments");
   const fileRef = useRef(null);
 
-  const onSubmit = (data) => {
-    addComplaint({
-      title: data.title,
-      category: data.category,
-      description: data.description,
-    });
-  };
-  const onError = (formErrors) => {
-    console.log("Form Errors:", formErrors);
+  const onSubmit = async ({ title, description, category, attachments }) => {
+    const complaint = new FormData();
+    complaint.append("title", title.trim());
+    complaint.append("description", description.trim());
+    complaint.append("category", category);
+    Array.from(attachments || []).forEach((file) => complaint.append("attachments", file));
+    await addComplaint(complaint);
   };
 
   const handleFileClick = () => {
@@ -76,7 +76,7 @@ export default function NewComplaintModal({ onClose, addComplaint, isSubmitting 
           </button>
 
           <form
-            onSubmit={handleSubmit(onSubmit, onError)}
+            onSubmit={handleSubmit(onSubmit)}
             className="space-y-4"
           >
             <h2 className="text-lg font-semibold text-black dark:text-white">
@@ -91,10 +91,12 @@ export default function NewComplaintModal({ onClose, addComplaint, isSubmitting 
 
               <div className="relative mt-1">
                 <select
-                  {...register("category", {
-                    required: true,
-                    onChange: (e) => setCategory(e.target.value),
-                  })}
+                  {...register("category", { required: "Please select a category." })}
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    setValue("category", e.target.value);
+                  }}
                   className={`
                     w-full appearance-none rounded-full px-4 py-3 text-sm outline-none
                     transition-all duration-300
@@ -120,6 +122,7 @@ export default function NewComplaintModal({ onClose, addComplaint, isSubmitting 
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                 />
               </div>
+              {errors.category && <p className="mt-1 text-xs text-red-600">{errors.category.message}</p>}
             </div>
 
             {/* Subject */}
@@ -128,7 +131,10 @@ export default function NewComplaintModal({ onClose, addComplaint, isSubmitting 
                 Subject
               </label>
               <input
-                {...register("title", { required: true })}
+                {...register("title", {
+                  required: "Please enter a subject.",
+                  validate: (value) => value.trim().length > 0 || "Please enter a subject.",
+                })}
                 placeholder="Brief title of the issue"
                 className="
                   mt-1 w-full rounded-full px-4 py-2 text-sm outline-none
@@ -139,6 +145,7 @@ export default function NewComplaintModal({ onClose, addComplaint, isSubmitting 
                   transition-all
                 "
               />
+              {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>}
             </div>
 
             {/* Description */}
@@ -147,7 +154,10 @@ export default function NewComplaintModal({ onClose, addComplaint, isSubmitting 
                 Description
               </label>
               <textarea
-                {...register("description", { required: true })}
+                {...register("description", {
+                  required: "Please describe the issue.",
+                  validate: (value) => value.trim().length > 0 || "Please describe the issue.",
+                })}
                 rows={3}
                 placeholder="Describe the issue in detail..."
                 className="
@@ -159,6 +169,7 @@ export default function NewComplaintModal({ onClose, addComplaint, isSubmitting 
                   transition-all
                 "
               />
+              {errors.description && <p className="mt-1 text-xs text-red-600">{errors.description.message}</p>}
             </div>
 
             {/* Attachment */}

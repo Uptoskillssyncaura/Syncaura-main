@@ -1,23 +1,40 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-export default function FilterDropdown({ startVal, options, label, onChange }) {
-
+export default function FilterDropdown({ startVal, options = [], label, onChange }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(startVal);
+  const dropdownRef = useRef(null);
 
- 
+  // Keep internal state in sync if parent component updates startVal
+  useEffect(() => {
+    setValue(startVal);
+  }, [startVal]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <div className="flex flex-col gap-2  relative">
+    <div ref={dropdownRef} className="flex flex-col gap-2 relative">
       {/* Label */}
-      <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-        {label}
-      </label>
+      {label && (
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          {label}
+        </label>
+      )}
 
       {/* Trigger Button */}
       <motion.button
+        type="button"
         whileTap={{ scale: 0.94 }}
         transition={{ type: "spring", stiffness: 500, damping: 22 }}
         onClick={() => setOpen((p) => !p)}
@@ -53,29 +70,33 @@ export default function FilterDropdown({ startVal, options, label, onChange }) {
               rounded-2xl overflow-hidden
               border border-gray-200 dark:border-[#3A3A3A]
               bg-white dark:bg-[#121212]
-              shadow-lg
+              shadow-lg max-h-60 overflow-y-auto
             "
           >
-            {options.map((item) => (
-              <motion.button
-                key={item}
-                whileHover={{ backgroundColor: "rgba(36,97,230,0.08)" }}
-                whileTap={{ scale: 0.97 }}
-               onClick={() => {
-  setValue(item);
-  onChange?.(item);  
-  setOpen(false);
-}}
-
-                className={`
-                  w-full text-left px-4 py-2 text-sm
-                  text-gray-700 dark:text-gray-200
-                  ${value === item ? "font-semibold text-[#2461E6] dark:text-[#73FBFD]" : ""}
-                `}
-              >
-                {item}
-              </motion.button>
-            ))}
+            {options && options.length > 0 ? (
+              options.map((item) => (
+                <motion.button
+                  key={item}
+                  type="button"
+                  whileHover={{ backgroundColor: "rgba(36,97,230,0.08)" }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setValue(item);
+                    onChange?.(item);
+                    setOpen(false);
+                  }}
+                  className={`
+                    w-full text-left px-4 py-2 text-sm
+                    text-gray-700 dark:text-gray-200
+                    ${value === item ? "font-semibold text-[#2461E6] dark:text-[#73FBFD]" : ""}
+                  `}
+                >
+                  {item}
+                </motion.button>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-400">No options</div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

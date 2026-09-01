@@ -1,19 +1,43 @@
 import ToggleSwitch from "../../dashboard/Header/ToggleSwitch";
 import { useSelector } from "react-redux";
 import { Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import AvatarManager from "../../common/AvatarManager";
 
-const Header = ({ setOpen }) => {
+import { useState } from "react";
+import MyProfileModal from "../../profile/MyProfileModal";
+
+const Header = ({ setOpen, open }) => {
+  const { t, i18n } = useTranslation();
   const user = useSelector((state) => state.auth.user);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  const getRoleName = () => {
+    switch (user?.role?.toLowerCase()) {
+      case "admin":
+        return "Admin";
+
+      case "co-admin":
+      case "co_admin":
+        return "Co-Admin";
+
+      case "user":
+        return "User";
+
+      default:
+        return "User";
+    }
+  };
 
   const today = new Date();
 
-  const formattedDate = today.toLocaleDateString("en-US", {
+  const formattedDate = today.toLocaleDateString(i18n.language || "en", {
     month: "short",
     day: "2-digit",
     year: "numeric",
   });
 
-  const dayName = today.toLocaleDateString("en-US", {
+  const dayName = today.toLocaleDateString(i18n.language || "en", {
     weekday: "long",
   });
 
@@ -22,16 +46,26 @@ const Header = ({ setOpen }) => {
       <div className="w-full flex items-center justify-between px-3 sm:px-4 lg:px-6">
         {/* LEFT SECTION */}
         <div className="flex items-center gap-3 sm:gap-5">
-          {/* Mobile Menu Button */}
-          <button className="lg:hidden" onClick={() => setOpen(true)}>
-            <Menu size={28} className="text-black dark:text-white" />
-          </button>
+          {/* Menu Button - Only shown when sidebar is closed */}
+          {!open && (
+            <button
+              type="button"
+              onClick={() => setOpen?.(true)}
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors btn-hover cursor-pointer"
+              aria-label="Open menu"
+            >
+              <Menu size={26} className="text-black dark:text-white" />
+            </button>
+          )}
 
           {/* Profile Section */}
-          <div className="flex gap-2 items-center">
+          <div 
+            className="flex gap-2 items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 p-1.5 rounded-xl transition-colors"
+            onClick={() => setShowProfileModal(true)}
+          >
             {/* Avatar */}
             <div className="size-10 sm:size-12 rounded-full bg-gradient-to-b from-red-600 to-red-900 text-white flex items-center justify-center font-semibold text-lg sm:text-xl">
-              J
+              {(user?.first_name || user?.name || "U").charAt(0).toUpperCase()}
             </div>
 
             {/* Profile Text */}
@@ -39,12 +73,16 @@ const Header = ({ setOpen }) => {
               <div className="flex gap-1 items-center text-black dark:text-white">
                 <h1 className="font-light text-base sm:text-lg">Hello!</h1>
                 <h1 className="font-semibold text-base sm:text-lg">
-                  {user?.name || "John Doe"}
+                  {/* {user?.name || "User"} */}
+
+                  {user?.first_name
+                    ? `${user.first_name} ${user.last_name || ""}`
+                    : user?.name || "John Doe"}
                 </h1>
               </div>
 
-              <div className="text-[#989696] font-semibold text-xs sm:text-sm -mt-1">
-                Employee
+              <div className="text-[#989696] dark:text-gray-400 font-semibold text-xs sm:text-sm mt-1 truncate">
+                {getRoleName()}
               </div>
             </div>
           </div>
@@ -65,17 +103,20 @@ const Header = ({ setOpen }) => {
           {/* Mobile controls */}
           <div className="flex sm:hidden items-center gap-2">
             <ToggleSwitch />
-            <button
-              type="button"
-              onClick={() => setOpen?.(true)}
-              className="inline-flex items-center justify-center rounded-full p-2 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
-              aria-label="Open sidebar"
-            >
-              <Menu size={22} />
-            </button>
+            {!open && (
+              <button
+                type="button"
+                onClick={() => setOpen?.(true)}
+                className="inline-flex items-center justify-center rounded-full p-2 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
+                aria-label="Open sidebar"
+              >
+                <Menu size={22} />
+              </button>
+            )}
           </div>
         </div>
       </div>
+      <MyProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
     </div>
   );
 };

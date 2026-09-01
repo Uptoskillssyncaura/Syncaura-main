@@ -1,10 +1,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, Share2, X } from "lucide-react";
 import Timeline from "./Timeline";
+import { useTranslation } from "react-i18next";
 
 const HEADER_HEIGHT = "4.4rem";
 
 const VersionHistoryDrawer = ({ open, onClose }) => {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {open && (
@@ -49,17 +51,17 @@ const VersionHistoryDrawer = ({ open, onClose }) => {
             <div className="flex border-b mt-1 border-[#E0DDDD] pb-4 px-6 items-center justify-center gap-3 flex-shrink-0">
               <div className="flex items-center justify-center border rounded-md text-[#989696] border-[#989696] gap-3 py-2 px-7">
                 <Share2 className="size-5 fill-[#989696]" />
-                <p className="text-sm font-medium">Share</p>
+                <p className="text-sm font-medium">{t("share", "Share")}</p>
               </div>
               <div className="flex items-center justify-center border rounded-md text-[#989696] border-[#989696] gap-3 py-2 px-7">
                 <Download className="size-5" />
-                <p className="text-sm font-medium">Download</p>
+                <p className="text-sm font-medium">{t("download", "Download")}</p>
               </div>
             </div>
 
   
             <div className="flex items-center justify-start w-full px-6 mt-4 shrink-0">
-              <p className="text-lg text-[#989696] uppercase">VERSION HISTORY</p>
+              <p className="text-lg text-[#989696] uppercase">{t("versionHistory", "VERSION HISTORY")}</p>
             </div>
 
         
@@ -68,7 +70,7 @@ const VersionHistoryDrawer = ({ open, onClose }) => {
             </div>
             <div className="flex items-center justify-center w-full px-5 ">
               <div className="flex items-center w-full justify-center border dark:border-[#73FBFD] border-[#2461E6] py-2 rounded-md px-8  ">
-                <p className="dark:text-[#73FBFD] text-[#2461E6] text-lg" >Open Editor</p>
+                <p className="dark:text-[#73FBFD] text-[#2461E6] text-lg" >{t("openEditor", "Open Editor")}</p>
               </div>
             </div>
           </motion.div>

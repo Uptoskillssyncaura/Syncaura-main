@@ -1,19 +1,22 @@
-import { ArrowLeft, MoreVertical, Phone, Search } from "lucide-react";
+import { ArrowLeft, MoreVertical, Phone, Search, Edit2, FileImage } from "lucide-react";
 import { toast } from "react-toastify";
 import Avatar from "../Avatar";
 import { useState, useRef, useEffect } from "react";
+import MediaDocsModal from "../MediaDocsModal";
+import EditGroupModal from "../EditGroupModal";
 
 export default function ChatHeader({ chat, onBack, setOpen }) {
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef(null);
+  const [showMediaModal, setShowMediaModal] = useState(false);
+  const [showEditGroupModal, setShowEditGroupModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -34,7 +37,7 @@ export default function ChatHeader({ chat, onBack, setOpen }) {
 
   const handleMoreClick = (e) => {
     e.stopPropagation();
-    setShowMenu(!showMenu);
+    setShowDropdown(!showDropdown);
   };
 
   const handleBackClick = (e) => {
@@ -42,35 +45,10 @@ export default function ChatHeader({ chat, onBack, setOpen }) {
     onBack();
   };
 
-  const handleMenuAction = (action) => {
-    setShowMenu(false);
-
-    switch (action) {
-      case "viewProfile":
-        setOpen(true);
-        break;
-      case "muteNotifications":
-        toast.info("Mute Notifications feature is not implemented yet.");
-        // Add mute logic
-        break;
-      case "clearChat":
-        toast.info("Clear Chat feature is not implemented yet.");
-        // Add clear chat logic
-        break;
-      case "deleteChat":
-        toast.info("Delete Chat feature is not implemented yet.");
-        // Add delete chat logic
-        break;
-      case "blockUser":
-        toast.info("Block User feature is not implemented yet.");
-
-        // Add block user logic
-        break;
-    }
-  };
+  const isGroup = chat?.max_members > 2;
 
   return (
-    <div className="h-14 md:h-16 flex items-center justify-between px-3 md:px-4 border-b bg-[#FFFFFF] dark:bg-[#2E2F2F]">
+    <div className="flex-shrink-0 h-14 md:h-16 flex items-center justify-between px-3 md:px-4 border-b bg-[#FFFFFF] dark:bg-[#2E2F2F]">
       {/* Profile section */}
       <div
         onClick={handleProfileClick}
@@ -81,14 +59,14 @@ export default function ChatHeader({ chat, onBack, setOpen }) {
           <ArrowLeft size={20} className="text-black dark:text-gray-300" />
         </button>
 
-        <Avatar label={chat.avatar} gradient={chat.gradient} />
+        <Avatar label={chat.avatar || chat.name?.charAt(0)} gradient={chat.gradient} src={chat.profilePic || chat.profile_pic} />
 
         <div className="min-w-0">
           <p className="font-semibold text-base md:text-lg text-black dark:text-white truncate">
             {chat.name}
           </p>
-          <p className="text-sm text-black dark:text-white">
-            Last seen yesterday
+          <p className="text-sm text-black dark:text-white capitalize">
+            {isGroup ? "Group Chat" : (chat?.other_user_role || "User")}
           </p>
         </div>
       </div>
@@ -99,71 +77,53 @@ export default function ChatHeader({ chat, onBack, setOpen }) {
         <Search onClick={handleSearchClick} className="cursor-pointer" />
 
         {/* Three dot menu */}
-        <div ref={menuRef}>
+        <div className="relative" ref={dropdownRef}>
           <MoreVertical
-  size={20}
-  onClick={handleMoreClick}
-  className="cursor-pointer"
-/>
+            size={20}
+            onClick={handleMoreClick}
+            className="cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+          />
 
-          {/* Dropdown Menu */}
-          {showMenu && (
-            <div className="absolute right-0 top-10 w-56 bg-white dark:bg-[#2E2F2F] border border-[#E0DDDD] dark:border-[#575757] rounded-lg shadow-lg py-2 z-50">
+          {showDropdown && (
+            <div className="absolute right-0 top-8 w-48 bg-white dark:bg-[#2E2F2F] border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-50">
+              {isGroup && (
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setShowEditGroupModal(true);
+                  }}
+                  className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white text-sm flex items-center gap-3 transition-colors"
+                >
+                  <Edit2 size={16} />
+                  Edit Group
+                </button>
+              )}
               <button
-                onClick={() => handleMenuAction("viewProfile")}
-                className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white text-base flex items-center gap-3 btn-hover"
+                onClick={() => {
+                  setShowDropdown(false);
+                  setShowMediaModal(true);
+                }}
+                className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white text-sm flex items-center gap-3 transition-colors"
               >
-                <span className="size-5 flex items-center justify-center">
-                  👤
-                </span>
-                View Profile
-              </button>
-
-              <button
-                onClick={() => handleMenuAction("muteNotifications")}
-                className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white text-base flex items-center gap-3 btn-hover"
-              >
-                <span className="size-5 flex items-center justify-center">
-                  🔕
-                </span>
-                Mute Notifications
-              </button>
-
-              <button
-                onClick={() => handleMenuAction("clearChat")}
-                className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white text-base flex items-center gap-3 btn-hover"
-              >
-                <span className="size-5 flex items-center justify-center">
-                  🗑️
-                </span>
-                Clear Chat
-              </button>
-
-              <button
-                onClick={() => handleMenuAction("deleteChat")}
-                className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 text-base flex items-center gap-3 btn-hover"
-              >
-                <span className="size-5 flex items-center justify-center">
-                  ❌
-                </span>
-                Delete Chat
-              </button>
-
-              <div className="h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
-
-              <button
-                onClick={() => handleMenuAction("blockUser")}
-                className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 text-base flex items-center gap-3 btn-hover"
-              >
-                <span className="size-5 flex items-center justify-center">
-                  🚫
-                </span>
-                Block User
+                <FileImage size={16} />
+                Media, Links, and Docs
               </button>
             </div>
           )}
         </div>
       </div>
+      
+      <MediaDocsModal 
+        isOpen={showMediaModal} 
+        onClose={() => setShowMediaModal(false)} 
+        files={chat?.files || []} 
+      />
+
+      <EditGroupModal
+        isOpen={showEditGroupModal}
+        onClose={() => setShowEditGroupModal(false)}
+        chat={chat}
+      />
     </div>
   );
 }

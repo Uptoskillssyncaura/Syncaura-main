@@ -6,7 +6,18 @@ export const createMeeting = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await api.post("/meetings/",data);
-      return res.data;
+      const meeting = res.data.meeting;
+
+      return {
+        ...res.data,
+        meeting: {
+          ...meeting,
+          startTime: meeting.start_time,
+          endTime: meeting.end_time,
+          googleEventId: meeting.google_event_id,
+          googleMeetLink: meeting.google_meet_link,
+        },
+      };
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || " failed to create meeting",
@@ -15,15 +26,36 @@ export const createMeeting = createAsyncThunk(
   },
 );
 
+// export const getMeetings = createAsyncThunk(
+//   "meeting/getMeetings",
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const res = await api.get("/meetings/");
+//       return res.data;
+//     } catch (err) {
+//       return rejectWithValue(
+//         err.response?.data?.message || " failed to fetch all meetings",
+//       );
+//     }
+//   },
+// );
+
 export const getMeetings = createAsyncThunk(
   "meeting/getMeetings",
   async (_, { rejectWithValue }) => {
     try {
       const res = await api.get("/meetings/");
-      return res.data;
+
+      return res.data.map((meeting) => ({
+        ...meeting,
+        startTime: meeting.start_time,
+        endTime: meeting.end_time,
+        googleEventId: meeting.google_event_id,
+        googleMeetLink: meeting.google_meet_link,
+      }));
     } catch (err) {
       return rejectWithValue(
-        err.response?.data?.message || " failed to fetch all meetings",
+        err.response?.data?.message || "Failed to fetch all meetings",
       );
     }
   },
@@ -72,4 +104,19 @@ export const deleteMeetingById = createAsyncThunk(
     }
   },
 );
+
+export const syncCalendarEvents = createAsyncThunk(
+  "meeting/syncCalendarEvents",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/meetings/sync-calendar");
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to sync calendar",
+      );
+    }
+  },
+);
+
 

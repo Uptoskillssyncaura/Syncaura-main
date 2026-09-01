@@ -1,7 +1,9 @@
 import { useRef, useState, useEffect } from "react";
 import { motion,useTransform } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const TimelineItem = ({ item, index, lineProgress }) => {
+  const { t } = useTranslation();
   const dotRef = useRef(null);
   const [dotY, setDotY] = useState(0);
   const [active, setActive] = useState(false);
@@ -63,7 +65,7 @@ const TimelineItem = ({ item, index, lineProgress }) => {
               <p className="text-[#000000] dark:text-[#FFFFFF] text-sm">{item.version}</p>
               {item.status && (
                 <div className="bg-[#DFFFE9] px-5 py-1 rounded-2xl">
-                  <p className="text-[#00990F] text-sm">{item.status}</p>
+                  <p className="text-[#00990F] text-sm">{t(`status_${item.status.toLowerCase()}`, item.status)}</p>
                 </div>
               )}
             </div>
@@ -72,7 +74,7 @@ const TimelineItem = ({ item, index, lineProgress }) => {
             </div>
           </div>
           <div className="flex items-center justify-start w-full">
-            <p className="text-lg text-[#000000] dark:text-[#FFFFFF]">Edited by {item.editor}</p>
+            <p className="text-lg text-[#000000] dark:text-[#FFFFFF]">{t("edited_by", "Edited by")} {item.editor}</p>
           </div>
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center justify-center w-full bg-[#F8F8F8] dark:bg-[#575757] py-2 rounded-xl border border-[#E0DDDD] dark:border-[#575757]">
@@ -81,8 +83,8 @@ const TimelineItem = ({ item, index, lineProgress }) => {
           </div>
           <div className="flex items-center justify-start w-full">
             <div className="flex items-center justify-center gap-3">
-              <p className="text-[#2461E6] dark:text-[#73FBFD] cursor-pointer hover:underline text-base">View</p>
-              <p className="text-[#000000] dark:text-[#FFFFFF] cursor-pointer hover:underline text-base">Restore</p>
+              <p className="text-[#2461E6] dark:text-[#73FBFD] cursor-pointer hover:underline text-base">{t("view", "View")}</p>
+              <p className="text-[#000000] dark:text-[#FFFFFF] cursor-pointer hover:underline text-base">{t("restore", "Restore")}</p>
             </div>
           </div>
         </div>

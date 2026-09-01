@@ -8,8 +8,8 @@ export const auth = async (req, res, next) => {
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.split(' ')[1];
-    } else if (req.cookies && req.cookies.accessToken) {
-      token = req.cookies.accessToken;
+    } else if (req.query.token) {
+      token = req.query.token;
     }
 
     if (!token) return res.status(401).json({ message: 'Unauthorized' });
@@ -36,7 +36,8 @@ export const auth = async (req, res, next) => {
       token_type: user.google_token_type,
       expiry_date: user.google_expiry_date
     };
-
+    console.log("Google Tokens:", req.googleTokens);
+    
     next();
   } catch (err) {
     console.error('Auth error:', err);
@@ -46,6 +47,18 @@ export const auth = async (req, res, next) => {
   });
   }
 }
+
+export const requireRoles = (...allowedRoles) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (!allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+
+  return next();
+};
 
 export const requireAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {

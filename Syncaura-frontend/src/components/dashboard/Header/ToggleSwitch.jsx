@@ -2,17 +2,21 @@
 import { FaMoon } from "react-icons/fa";
 import { IoIosSunny } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import {toggleThemeMethod} from "../../../redux/slices/themeSlice"
+import { setTheme as setUiTheme } from "../../../redux/uiSlice";
+import { setTheme as setBoolTheme } from "../../../redux/slices/themeSlice";
 
-const ToggleSwitch = () => {
-  const isDark  = useSelector((state)=>state.theme.isDark)
-  const dispatch= useDispatch()
-  
+  const ToggleSwitch = () => {
+  const theme = useSelector((state) => state.ui?.theme || "light");
+  const isDark = theme === "dark";
+
+  const dispatch = useDispatch();
   // const { isDark, toggleTheme } = useThemeStore();
-  const toggleTheme=()=>{
-   dispatch(toggleThemeMethod())
-  }
+  const toggleTheme = () => {
+  const newTheme = isDark ? "light" : "dark";
 
+  dispatch(setUiTheme(newTheme));
+  dispatch(setBoolTheme(newTheme === "dark"));
+};
   return (
     <div
       onClick={toggleTheme}

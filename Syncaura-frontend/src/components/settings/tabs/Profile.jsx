@@ -8,6 +8,7 @@ import {
   fetchUserProfile,
   updateUserProfile,
 } from "../../../redux/features/authThunks";
+import { number } from "framer-motion";
 
 const languageNames = {
   en: "English",
@@ -37,7 +38,7 @@ const Profile = () => {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phone : "",
     language: (localStorage.getItem("app_language") || "en").substring(0, 2),
   });
 
@@ -50,8 +51,8 @@ const Profile = () => {
     const [firstName = "", ...lastNameParts] = fullName.trim().split(" ");
 
     return {
-      firstName: profile?.firstName || firstName,
-      lastName: profile?.lastName || lastNameParts.join(" "),
+      firstName: profile?.first_name || firstName,
+      lastName: profile?.last_name || lastNameParts.join(" "),
     };
   };
 
@@ -112,8 +113,8 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
   const buildProfilePayload = () => ({
-    firstName: formData.firstName.trim(),
-    lastName: formData.lastName.trim(),
+    first_name: formData.firstName.trim(),
+    last_name: formData.lastName.trim(),
     name: `${formData.firstName} ${formData.lastName}`.trim(),
     email: formData.email.trim(),
     phone: formData.phone.trim(),
@@ -167,75 +168,79 @@ const Profile = () => {
   );
 
   return (
-    <div className="w-full">
-      {/* Title */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
-          {t("profile")}
-        </h2>
-        <p className="text-sm text-black dark:text-gray-400 mb-7">
-          {t("manageProfileSettings")}
-        </p>
-      </div>
+    <div className="w-full flex justify-center pb-10">
+      <div className="w-full max-w-3xl bg-white dark:bg-[#0B0B0B] border border-gray-200 dark:border-[#2A2A2A] rounded-2xl shadow-sm">
+        
+        {/* Card Header */}
+        <div className="flex flex-col items-center justify-center border-b border-gray-200 dark:border-[#2A2A2A] py-6 px-6">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+            {t("profile")}
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("manageProfileSettings")}
+          </p>
+        </div>
 
-      <div className="w-full max-w-[700px] mx-auto">
-        <div className="flex flex-col items-center gap-[28px]">
-          {fieldRow("firstName")}
-          {fieldRow("lastName")}
-          {fieldRow("email", "email")}
-          {fieldRow("phone", "tel")}
+        {/* Card Body */}
+        <div className="px-6 py-10">
+          <div className="flex flex-col items-center gap-[28px]">
+            {fieldRow("firstName")}
+            {fieldRow("lastName")}
+            {fieldRow("email", "email")}
+            {fieldRow("phone", "tel")}
 
-          {/* Language */}
-          <div className="flex items-center">
-            <label className="w-[120px] text-[16px] font-normal text-gray-900 dark:text-white text-left mr-[2px]">
-              {t("language")}
-            </label>
+            {/* Language */}
+            <div className="flex items-center">
+              <label className="w-[120px] text-[16px] font-normal text-gray-900 dark:text-white text-left mr-[2px]">
+                {t("language")}
+              </label>
 
-            <div className="w-[385px] relative mr-[28px]">
-              {isEditing.language ? (
-                <>
-                  <select
-                    value={formData.language}
-                    onChange={(e) => handleChange("language", e.target.value)}
-                    className="w-full h-[54px] px-5 border border-gray-300 dark:border-[#2A2A2A] rounded-xl text-base text-gray-900 dark:text-white bg-white dark:bg-[#0B0B0B]
-                    focus:outline-none focus:border-[#2461E6] dark:focus:border-[#73FBFD] focus:ring-2 focus:ring-[#2461E6]/10 dark:focus:ring-[#73FBFD]/10
-                    appearance-none transition-all duration-200"
-                  >
-                    {Object.entries(languageNames).map(([code, name]) => (
-                      <option key={code} value={code}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
+              <div className="w-[385px] relative mr-[28px]">
+                {isEditing.language ? (
+                  <>
+                    <select
+                      value={formData.language}
+                      onChange={(e) => handleChange("language", e.target.value)}
+                      className="w-full h-[54px] px-5 border border-gray-300 dark:border-[#2A2A2A] rounded-xl text-base text-gray-900 dark:text-white bg-white dark:bg-[#111]
+                      focus:outline-none focus:border-[#2461E6] dark:focus:border-[#73FBFD] focus:ring-2 focus:ring-[#2461E6]/10 dark:focus:ring-[#73FBFD]/10
+                      appearance-none transition-all duration-200"
+                    >
+                      {Object.entries(languageNames).map(([code, name]) => (
+                        <option key={code} value={code}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
 
-                  <ChevronDown className="absolute right-[20px] top-1/2 -translate-y-1/2 w-5 h-5 text-black dark:text-white pointer-events-none" />
-                </>
-              ) : (
-                <input
-                  type="text"
-                  value={languageNames[currentLanguageDisplay] || "English"}
-                  disabled
-                  className="w-full h-[54px] px-5 border border-gray-300 dark:border-[#2A2A2A] rounded-xl text-base text-gray-900 dark:text-white bg-white dark:bg-[#0B0B0B]
-                  disabled:bg-gray-50 dark:disabled:bg-[#111] disabled:text-gray-700 dark:disabled:text-gray-400"
-                />
-              )}
+                    <ChevronDown className="absolute right-[20px] top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                  </>
+                ) : (
+                  <input
+                    type="text"
+                    value={languageNames[currentLanguageDisplay] || "English"}
+                    disabled
+                    className="w-full h-[54px] px-5 border border-gray-300 dark:border-[#2A2A2A] rounded-xl text-base text-gray-900 dark:text-white bg-white dark:bg-[#111]
+                    disabled:bg-gray-50 dark:disabled:bg-[#1A1A1A] disabled:text-gray-700 dark:disabled:text-gray-400"
+                  />
+                )}
+              </div>
+
+              <button
+                disabled={savingField === "language" || profileLoading}
+                onClick={() =>
+                  isEditing.language
+                    ? handleSave("language")
+                    : handleEdit("language")
+                }
+                className="w-[72px] px-0 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-normal flex items-center justify-center hover:bg-blue-50 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm btn-hover"
+              >
+                {savingField === "language"
+                  ? "..."
+                  : isEditing.language
+                    ? t("save")
+                    : t("edit")}
+              </button>
             </div>
-
-            <button
-              disabled={savingField === "language" || profileLoading}
-              onClick={() =>
-                isEditing.language
-                  ? handleSave("language")
-                  : handleEdit("language")
-              }
-              className="w-[72px] px-0 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-normal flex items-center justify-center hover:bg-blue-50 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm btn-hover"
-            >
-              {savingField === "language"
-                ? "..."
-                : isEditing.language
-                  ? t("save")
-                  : t("edit")}
-            </button>
           </div>
         </div>
       </div>

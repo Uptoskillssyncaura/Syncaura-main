@@ -1,5 +1,12 @@
 import { motion } from "framer-motion";
-import { Calendar, CheckSquare, ChevronRight, Clock, Flag, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  CheckSquare,
+  ChevronRight,
+  Clock,
+  Flag,
+  Trash2,
+} from "lucide-react";
 
 const PRIORITY_CONFIG = {
   high: {
@@ -9,12 +16,14 @@ const PRIORITY_CONFIG = {
   },
   medium: {
     label: "Medium",
-    className: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+    className:
+      "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
     dot: "bg-amber-500",
   },
   low: {
     label: "Low",
-    className: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+    className:
+      "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
     dot: "bg-emerald-500",
   },
 };
@@ -30,9 +39,10 @@ const isOverdue = (dateStr) => {
   return new Date(dateStr) < new Date();
 };
 
-const TaskCard = ({ task, onOpen, onDelete }) => {
+const TaskCard = ({ task, onOpen, onDelete, canDelete }) => {
   const priority = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
-  const completedSubtasks = task.subtasks?.filter((s) => s.status === "DONE").length || 0;
+  const completedSubtasks =
+    task.subtasks?.filter((s) => s.status === "DONE").length || 0;
   const totalSubtasks = task.subtasks?.length || 0;
   const deadline = task.deadline;
   const overdue = isOverdue(deadline) && task.status !== "DONE";
@@ -50,20 +60,24 @@ const TaskCard = ({ task, onOpen, onDelete }) => {
     >
       {/* Priority + Delete */}
       <div className="flex items-center justify-between mb-3">
-        <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${priority.className}`}>
+        <span
+          className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${priority.className}`}
+        >
           <span className={`w-1.5 h-1.5 rounded-full ${priority.dot}`} />
           {priority.label}
         </span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(task.id);
-          }}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 btn-hover"
-          aria-label="Delete task"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+        {canDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(task.id);
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 btn-hover"
+            aria-label="Delete task"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Title */}
@@ -91,7 +105,9 @@ const TaskCard = ({ task, onOpen, onDelete }) => {
             <motion.div
               className="h-full bg-blue-500 dark:bg-[#73FBFD] rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: `${totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0}%` }}
+              animate={{
+                width: `${totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0}%`,
+              }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             />
           </div>
@@ -100,10 +116,29 @@ const TaskCard = ({ task, onOpen, onDelete }) => {
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-2">
+        {(task.assignedTo || task.assigned_to || task.assigned_user_name) ? (
+          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+            {task.assignedTo || task.assigned_to || task.assigned_user_name}
+          </span>
+        ) : <span />}
         {deadline ? (
-          <span className={`flex items-center gap-1 text-xs font-medium ${overdue ? "text-red-500 dark:text-red-400" : "text-gray-500 dark:text-gray-400"}`}>
-            {overdue ? <Clock className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}
-            {overdue ? "Overdue · " : ""}{formatDate(deadline)}
+          <span
+            className={`flex items-center gap-1 text-xs font-medium ${overdue ? "text-red-500 dark:text-red-400" : "text-gray-500 dark:text-gray-400"}`}
+          >
+            {overdue ? (
+              <Clock className="w-3 h-3" />
+            ) : (
+              <Calendar className="w-3 h-3" />
+            )}
+            {overdue ? "Overdue · " : (() => {
+              const now = new Date();
+              now.setHours(0, 0, 0, 0);
+              const dDate = new Date(deadline);
+              dDate.setHours(0, 0, 0, 0);
+              const diff = Math.ceil((dDate - now) / (1000 * 60 * 60 * 24));
+              return diff >= 0 ? `${diff}d left · ` : "";
+            })()}
+            {formatDate(deadline)}
           </span>
         ) : (
           <span />

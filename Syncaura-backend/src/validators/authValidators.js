@@ -6,7 +6,9 @@ export const registerValidator = [
   body('password').isStrongPassword({
     minLength: 8, minSymbols: 0
   }),
-  body('roles').optional().isArray().custom((arr) => arr.every(r => ['user','admin','co-admin'].includes(r)))
+  body('role')
+  .isIn(['user', 'admin', 'co-admin'])
+  .withMessage('Invalid registration role')
 ];
 
 export const loginValidator = [

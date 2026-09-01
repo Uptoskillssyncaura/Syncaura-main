@@ -4,7 +4,7 @@ import MotionSelect from "./MotionSelect";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
-const CreateNewProject = ({ onClose }) => {
+const CreateNewProject = ({ onClose, onAddProject }) => {
   const teams = ["Design", "Development", "Marketing", "HR", "Sales"];
 
   const projectStatus = [
@@ -43,12 +43,49 @@ const CreateNewProject = ({ onClose }) => {
   } = useForm({
     defaultValues: {
       priority: "Low",
+      members: [],
     },
   });
   const startDate = watch("startDate");
   const today = new Date().toISOString().split("T")[0];
 
+  const avatarMap = {
+    Alex: "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg",
+    Jordan: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg",
+    Taylor: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg",
+    Morgan: "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg",
+    Casey: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
+    Riley: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
+    Jamie: "https://images.pexels.com/photos/1043473/pexels-photo-1043473.jpeg",
+    Avery: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg",
+  };
+
   const onSubmit = (data) => {
+    const selectedMembers = Array.isArray(data.members) ? data.members : [data.members].filter(Boolean);
+    const memberAvatars = selectedMembers.map((name) => avatarMap[name] || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg");
+
+    let finalPriority = "Ongoing";
+    if (data.status === "Completed") {
+      finalPriority = "Completed";
+    } else if (data.status === "On Hold") {
+      finalPriority = "On Hold";
+    } else if (data.priority === "Critical") {
+      finalPriority = "Critical";
+    }
+
+    const newProject = {
+      id: Date.now(),
+      title: data.projectName,
+      department: data.team,
+      priority: finalPriority,
+      progress: data.status === "Completed" ? 100 : 0,
+      dueDate: data.endDate,
+      avatars: memberAvatars,
+    };
+
+    if (onAddProject) {
+      onAddProject(newProject);
+    }
     onClose();
   };
 
@@ -239,7 +276,7 @@ const CreateNewProject = ({ onClose }) => {
                                             control={control}
                                             rules={{ required: true }}
                                             render={({ field }) => (
-                                                <MotionSelect {...field} startVal="Select Members.." options={members} />
+                                                <MotionSelect {...field} startVal="Select Members.." options={members} searchable multiple />
                                             )}
                                         />
                                     </div>
@@ -254,7 +291,7 @@ const CreateNewProject = ({ onClose }) => {
                                             control={control}
                                             rules={{ required: true }}
                                             render={({ field }) => (
-                                                <MotionSelect {...field} startVal="Select owner.." options={owners} />
+                                                <MotionSelect {...field} startVal="Select owner.." options={owners} searchable/>
                                             )}
                                         />
                                     </div>

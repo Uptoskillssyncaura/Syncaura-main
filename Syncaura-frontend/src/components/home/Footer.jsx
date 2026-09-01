@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from "react-i18next";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Facebook, Instagram, Linkedin, Youtube,
   Twitter, Send, Zap, ArrowRight,
@@ -9,7 +11,7 @@ import {
 /* ── Social links with brand colors ── */
 const socials = [
   { icon: Facebook,  label: 'Facebook',  href: '#', color: '#1877f2' },
-  { icon: Twitter,   label: 'X / Twitter', href: '#', color: '#000000' },
+  { icon: Twitter,   label: 'X / Twitter', href: '#', color: '#1DA1F2' },
   { icon: Instagram, label: 'Instagram', href: '#', color: '#e1306c' },
   { icon: Linkedin,  label: 'LinkedIn',  href: '#', color: '#0a66c2' },
   { icon: Youtube,   label: 'YouTube',   href: '#', color: '#ff0000' },
@@ -27,46 +29,66 @@ const ColHeading = ({ children }) => (
   </div>
 );
 
-const NavLink = ({ children, href, onClick }) => (
+const NavLink = ({ children, href, to, onClick }) => (
   <li>
-    <a href={href} onClick={onClick}>
-      <motion.span
-        whileHover={{ x: 4 }}
-        className="flex items-center gap-1.5 text-sm cursor-pointer group transition-colors duration-200"
-        style={{ color: 'var(--text-secondary)' }}
-      >
-        <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6366f1' }} />
-        <span className="group-hover:text-indigo-400 transition-colors">{children}</span>
-      </motion.span>
-    </a>
+    {to ? (
+      <Link to={to} onClick={onClick}>
+        <motion.span
+          whileHover={{ x: 4 }}
+          className="flex items-center gap-1.5 text-sm cursor-pointer group transition-colors duration-200"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6366f1' }} />
+          <span className="group-hover:text-indigo-400 transition-colors">{children}</span>
+        </motion.span>
+      </Link>
+    ) : (
+      <a href={href} onClick={onClick}>
+        <motion.span
+          whileHover={{ x: 4 }}
+          className="flex items-center gap-1.5 text-sm cursor-pointer group transition-colors duration-200"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6366f1' }} />
+          <span className="group-hover:text-indigo-400 transition-colors">{children}</span>
+        </motion.span>
+      </a>
+    )}
   </li>
 );
 
 const Footer = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [email, setEmail] = useState(''); // Stores the user's email input
   const [status, setStatus] = useState(''); // Stores success or error messages
 
   const scrollToSection = (e, sectionId) => {
     if (!sectionId) return;
     e.preventDefault();
-    const element = document.getElementById(sectionId);
-    if (element) {
-      window.scrollTo({
-        top: element.offsetTop - 80,
-        behavior: 'smooth',
-      });
+    if (location.pathname !== "/") {
+      navigate(`/#${sectionId}`);
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        window.scrollTo({
+          top: element.offsetTop - 80,
+          behavior: 'smooth',
+        });
+      }
     }
   };
 
   // Handles the newsletter form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email) return setStatus('Enter an email address.');
+    if (!email) return setStatus(t("newsletter_errorEmpty"));
     
     // Basic regex to check for valid email format (contains @ and .)
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setStatus('Invalid email address.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setStatus(t("newsletter_errorInvalid"));
     
-    setStatus('✓ Subscribed successfully!');
+    setStatus(`✓ ${t("newsletter_success")}`);
     setEmail('');
     
     // Clear the success message after 3 seconds
@@ -75,6 +97,7 @@ const Footer = () => {
 
   return (
     <footer
+    id="contact"
       className="w-full relative overflow-hidden"
       style={{ backgroundColor: 'var(--bg-primary)', borderTop: '1px solid var(--border-color)' }}
     >
@@ -124,7 +147,7 @@ const Footer = () => {
             </div>
 
             <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'var(--text-secondary)' }}>
-              The all-in-one platform that unifies your team's projects, chats, meetings, and performance — so you can focus on what matters.
+              {t("footer_tagline")}
             </p>
 
             {/* Contact info */}
@@ -144,12 +167,12 @@ const Footer = () => {
             {/* Newsletter */}
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
-                Stay in the loop
+                {t("newsletter_title")}
               </p>
               <form onSubmit={handleSubmit} className="flex gap-2">
                 <input
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder={t("footer_emailPlaceholder")}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   className="flex-1 h-10 px-4 rounded-xl text-sm focus:outline-none"
@@ -175,21 +198,21 @@ const Footer = () => {
                 </p>
               )}
               <p className="text-[11px]" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>
-                No spam. Unsubscribe anytime.
+                {t("newsletter_disclaimer")}
               </p>
             </div>
           </div>
 
           {/* ── Product ── */}
           <div>
-            <ColHeading>Product</ColHeading>
+            <ColHeading>{t("footer_product")}</ColHeading>
             <ul className="space-y-3">
               {[
-                { label: 'Features', id: 'features' },
-                { label: 'Security' },
-                { label: 'Roadmap' },
-                { label: 'Changelog' },
-                { label: 'Status' }
+                { label: t("footer_features"), id: 'features' },
+                { label: t("footer_security") },
+                { label: t("footer_roadmap") },
+                { label: t("footer_blog") },
+                { label: t("footer_contact") }
               ].map(item => (
                 <NavLink 
                   key={item.label} 
@@ -204,17 +227,30 @@ const Footer = () => {
 
           {/* ── Company ── */}
           <div>
-            <ColHeading>Company</ColHeading>
+            <ColHeading>{t("footer_company")}</ColHeading>
             <ul className="space-y-3">
-              {['About us', 'Blog', 'Careers', 'Press kit', 'Contact', 'Partners'].map(item => (
-                <NavLink key={item}>{item}</NavLink>
+              <NavLink to="/about-us">{t("footer_about")}</NavLink>
+              <NavLink to="/learn-more">Learn More</NavLink>
+              {[
+                { label: t("footer_blog") },
+                { label: t("footer_careers") },
+                { label: t("footer_contact"), id: 'contact' },
+                { label: t("footer_social") }
+              ].map(item => (
+                <NavLink 
+                  key={item.label} 
+                  href={item.id ? `#${item.id}` : undefined}
+                  onClick={item.id ? (e) => scrollToSection(e, item.id) : undefined}
+                >
+                  {item.label}
+                </NavLink>
               ))}
             </ul>
           </div>
 
           {/* ── Follow Us ── */}
           <div>
-            <ColHeading>Follow Us</ColHeading>
+            <ColHeading>{t("footer_followUs")}</ColHeading>
             <div className="space-y-3">
               {socials.map(({ icon: Icon, label, href, color }) => (
                 <motion.a
@@ -253,14 +289,14 @@ const Footer = () => {
         >
           {/* Copyright */}
           <p className="text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>
-            © 2025{' '}
+            © 2026{' '}
             <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>FlowBit, Inc.</span>
-            {' '}All rights reserved.
+            {' '}{t("footer_copyright")}
           </p>
 
           {/* Legal links */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>
-            {['Privacy Policy', 'Terms of Service', 'Cookie Settings', 'Accessibility'].map((link, i, arr) => (
+            {[t("footer_privacyPolicy"), t("footer_termsOfService"), t("footer_cookiesSettings"), t("footer_accessibility")].map((link, i, arr) => (
               <React.Fragment key={link}>
                 <span className="hover:text-indigo-400 cursor-pointer transition-colors">{link}</span>
                 {i < arr.length - 1 && <span className="opacity-30">·</span>}

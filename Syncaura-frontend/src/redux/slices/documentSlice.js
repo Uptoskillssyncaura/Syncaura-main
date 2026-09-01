@@ -26,22 +26,31 @@ const documentSlice = createSlice({
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
         state.loading = false;
-        state.documents = action.payload;
+        state.documents = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = typeof action.payload === "string" ? action.payload : action.payload?.message || "Failed to fetch documents";
       })
 
       // Create
+      .addCase(createDocument.pending, (state) => {
+        state.error = null;
+      })
       .addCase(createDocument.fulfilled, (state, action) => {
-        state.documents.unshift(action.payload);
+        const newDoc = action.payload?.document || action.payload;
+        if (newDoc && typeof newDoc === "object") {
+          state.documents.unshift(newDoc);
+        }
+      })
+      .addCase(createDocument.rejected, (state, action) => {
+        state.error = typeof action.payload === "string" ? action.payload : action.payload?.message || "Failed to create document";
       })
 
       // Delete
       .addCase(deleteDocument.fulfilled, (state, action) => {
         state.documents = state.documents.filter(
-          (doc) => doc.id !== action.payload
+          (doc) => (doc.id || doc._id) !== action.payload
         );
       });
   },

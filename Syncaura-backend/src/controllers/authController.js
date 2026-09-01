@@ -32,8 +32,18 @@ export const register = async (req, res, next) => {
     if (existingRes.rowCount > 0) return res.status(409).json({ message: 'Email already registered' });
 
     const passwordHash = await hashPassword(password);
+    // const allowedRoles = Object.values(ROLES);
+    // const finalRole = allowedRoles.includes(role) ? role : ROLES.USER;
+    // const finalRole = ROLES.USER;
     const allowedRoles = Object.values(ROLES);
-    const finalRole = allowedRoles.includes(role) ? role : ROLES.USER;
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        message: 'Invalid registration role'
+      });
+    }
+
+    const finalRole = role;
 
     const insertRes = await pool.query(
       'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role',
@@ -60,6 +70,12 @@ export const register = async (req, res, next) => {
       console.error("Welcome email failed:", err);
     }
 
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
     res.status(201).json({
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
@@ -77,7 +93,7 @@ export const login = async (req, res, next) => {
     if (userRes.rowCount === 0) return res.status(401).json({ message: 'Invalid credentials' });
 
     const user = userRes.rows[0];
-  
+
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
 
@@ -87,17 +103,32 @@ export const login = async (req, res, next) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user, rid);
 
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
     res.json({
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
       tokens: { accessToken, refreshToken }
     });
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    return res.status(500).json({
+      message: err.message,
+      stack: err.stack,
+    });
+  }
 };
 
 export const refresh = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).json({ message: 'Missing refreshToken' });
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Missing refreshToken' });
+    }
 
     const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const userId = payload.sub;
@@ -111,12 +142,60 @@ export const refresh = async (req, res, next) => {
     }
 
     const accessToken = generateAccessToken(user);
-    res.json({ accessToken });
+    res.json({
+      accessToken,
+      refreshToken,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired refresh token' });
   }
 };
 
+export const getProfile = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: 'Unauthorized'
+      });
+    }
+
+    const userRes = await pool.query(
+      `SELECT 
+        id,
+        name,
+        email,
+        role,
+        first_name,
+        last_name,
+        phone,
+        language,
+        is_active,
+        created_at,
+        updated_at
+       FROM users
+       WHERE id = $1`,
+      [userId]
+    );
+
+    if (userRes.rowCount === 0) {
+      return res.status(404).json({
+        message: 'User not found'
+      });
+    }
+
+    const user = userRes.rows[0];
+
+    res.status(200).json({
+      user
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const requestPasswordOtp = async (req, res, next) => {
   try {
@@ -212,9 +291,23 @@ export const forgotPassword = async (req, res, next) => {
       'UPDATE users SET reset_token_hash = $1, reset_token_expires_at = $2 WHERE id = $3',
       [tokenHash, expiresAt, user.id]
     );
+    console.log(user.email);
 
+    try {
+      await sendResetEmail({
+        to: user.email,
+        name: user.name,
+        token
+      });
 
-    res.json({ message: 'If that email exists, a reset link has been sent' });
+      console.log("Reset email sent");
+    } catch (err) {
+      console.error("Reset email failed:", err.message);
+    }
+
+    res.json({
+      message: 'If that email exists, a reset link has been sent'
+    });
   } catch (err) { next(err); }
 };
 
@@ -279,4 +372,14 @@ export const changePassword = async (req, res, next) => {
 
 export const adminOnly = async (req, res) => {
   res.json({ message: 'Hello Admin!' });
+};
+
+//new changes,
+
+export const logout = async (req, res) => {
+  res.clearCookie("refreshToken");
+
+  res.json({
+    message: "Logged out successfully"
+  });
 };

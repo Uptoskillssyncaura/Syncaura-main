@@ -1,18 +1,35 @@
 import { Check, CircleAlert, ClipboardListIcon, EllipsisIcon } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import api from '../../../config/axios'
 import TopCard from '../TopCard'
 import CircularProgress from '../CircularProgress'
 import TaskStatusDistribution from '../TaskGraph/TaskStatusDistribution'
-import { ANALYTICS_TASK_STATUS } from '../../../constant/constant'
 import TasksTable from './Analytics/TasksTable'
 
 const Analytics = () => {
+  const [report, setReport] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    api.get('/reports/tasks')
+      .then(({ data }) => setReport(data))
+      .catch((requestError) => setError(requestError.response?.data?.message || 'Unable to load analytics'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const tasks = report?.tasks || []
+  const totalTasks = report?.totalTasks || 0
+  const completedTasks = report?.completedTasks || 0
+  const inProgressTasks = report?.inProgressTasks || 0
+  const blockedTasks = tasks.filter((task) => task.status === 'BLOCKED').length
+  const completionPercentage = report?.progressPercent ? Math.round(report.progressPercent) : 0
   const cardData = [
-    { title: "Total Tasks", count: 24, iconData: <ClipboardListIcon className='text-white dark:text-gray-900 fill-blue-600 size-10' /> },
-    { title: "Completed", count: 12, iconData: <div className="flex items-center justify-center size-9 rounded-full bg-[#E9B000]" /> },
-    { title: "in Progress", count: 8, iconData: <div className="flex items-center justify-center p-1 rounded-full bg-[#137FEC]"><EllipsisIcon className='size-7 text-white dark:text-gray-900' /></div> },
-    { title: "Blocked", count: 3, iconData: <CircleAlert className='size-10 text-white dark:text-gray-900 fill-[#EF4444]' /> },
-    { title: "Done", count: 19, iconData: <div className="flex items-center justify-center p-2 rounded-full bg-[#1BC963]"><Check className='size-5 text-white dark:text-gray-900' /></div> },
+    { title: "Total Tasks", count: loading ? '...' : totalTasks, iconData: <ClipboardListIcon className='text-white dark:text-gray-900 fill-blue-600 size-10' /> },
+    { title: "Completed", count: loading ? '...' : completedTasks, iconData: <div className="flex items-center justify-center size-9 rounded-full bg-[#E9B000]" /> },
+    { title: "in Progress", count: loading ? '...' : inProgressTasks, iconData: <div className="flex items-center justify-center p-1 rounded-full bg-[#137FEC]"><EllipsisIcon className='size-7 text-white dark:text-gray-900' /></div> },
+    { title: "Blocked", count: loading ? '...' : blockedTasks, iconData: <CircleAlert className='size-10 text-white dark:text-gray-900 fill-[#EF4444]' /> },
+    { title: "Done", count: loading ? '...' : completedTasks, iconData: <div className="flex items-center justify-center p-2 rounded-full bg-[#1BC963]"><Check className='size-5 text-white dark:text-gray-900' /></div> },
   ]
 
   return (
@@ -46,12 +63,12 @@ const Analytics = () => {
           
           <div className="text-black dark:text-white">
             <CircularProgress
-              percentage={(19 / 25) * 100}
+              percentage={completionPercentage}
               size={180}
               progressColor="#127FEC" 
               trackColor="#E5E7EB"
               label="FINISHED"
-              data="75%"
+              data={loading ? '...' : `${completionPercentage}%`}
               textColor="currentColor"
               labelColor="#94A3B8"
               innerBg="bg-white dark:bg-[#1E1E1E]"
@@ -59,7 +76,7 @@ const Analytics = () => {
           </div>
           
           <h1 className='text-[#636679] dark:text-gray-400 font-bold text-xl'>
-            You’ve completed <span className='text-[#127FEC]'>19</span> of <span className='text-[#127FEC]'>25</span> tasks this sprint
+            {loading ? 'Loading completion data...' : error || `You have completed ${completedTasks} of ${totalTasks} assigned tasks`}
           </h1>
         </div>
       </div>
@@ -67,7 +84,12 @@ const Analytics = () => {
       {/* Task Breakdown Section */}
       <div className="w-full">
         <TaskStatusDistribution 
-          task={ANALYTICS_TASK_STATUS} 
+          task={[
+            { id: 'done', label: 'Done', count: totalTasks ? `${Math.round((completedTasks / totalTasks) * 100)}%` : '0%', color: '#1BC963' },
+            { id: 'in-progress', label: 'In Progress', count: totalTasks ? `${Math.round((inProgressTasks / totalTasks) * 100)}%` : '0%', color: '#137FEC' },
+            { id: 'todo', label: 'To Do', count: totalTasks ? `${Math.round(((report?.todoTasks || 0) / totalTasks) * 100)}%` : '0%', color: '#FBB309' },
+            { id: 'blocked', label: 'Blocked', count: totalTasks ? `${Math.round((blockedTasks / totalTasks) * 100)}%` : '0%', color: '#EF4444' },
+          ]}
           percentage={true} 
           showTotal={false} 
           title="Task Status Breakdown" 
@@ -77,7 +99,7 @@ const Analytics = () => {
       
       {/* Table Section */}
       <div className="w-full">
-        <TasksTable />
+        <TasksTable tasks={tasks} loading={loading} error={error} />
       </div>
     </div>
   );

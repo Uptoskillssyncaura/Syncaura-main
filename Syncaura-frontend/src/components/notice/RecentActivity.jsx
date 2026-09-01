@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dot } from "lucide-react";
-
-const dummyNotifications = [
-  { id: 1, text: "Complaint #1101 has been resolved", time: "2 hours ago" },
-  {
-    id: 2,
-    text: "New notice posted: Final Exam Schedule",
-    time: "5 hours ago",
-  },
-  { id: 3, text: "Admin replied to ticket #1019", time: "1 day ago" },
-  { id: 4, text: "New event added to calendar", time: "2 days ago" },
-  { id: 5, text: "Profile updated successfully", time: "3 days ago" },
-];
+import { useTranslation } from "react-i18next";
 
 export default function RecentActivity() {
+  const { t } = useTranslation();
+  const dummyNotifications = [
+    { id: 1, text: t("complaint_1101_resolved", "Complaint #1101 has been resolved"), time: t("2_hours_ago", "2 hours ago") },
+    {
+      id: 2,
+      text: t("new_notice_exam", "New notice posted: Final Exam Schedule"),
+      time: t("5_hours_ago", "5 hours ago"),
+    },
+    { id: 3, text: t("admin_replied_1019", "Admin replied to ticket #1019"), time: t("1_day_ago", "1 day ago") },
+    { id: 4, text: t("new_event_added", "New event added to calendar"), time: t("2_days_ago", "2 days ago") },
+    { id: 5, text: t("profile_updated", "Profile updated successfully"), time: t("3_days_ago", "3 days ago") },
+  ];
+
   const [showAll, setShowAll] = useState(false);
 
   const visibleItems = showAll
@@ -26,14 +28,14 @@ export default function RecentActivity() {
       <div className="bg-white dark:bg-black px-4 sm:px-6 w-full mx-auto">
         <div className="flex items-center justify-between mb-4 pr-0 sm:pr-10">
           <h2 className="font-medium text-[#000000] dark:text-white text-2xl">
-            Recent Activity
+            {t("recent_activity", "Recent Activity")}
           </h2>
 
           <button
             onClick={() => setShowAll(!showAll)}
             className="text-sm px-5 py-2 font-medium rounded-2xl text-[#E3264A] hover:underline bg-[#FEE2E2] btn-hover"
           >
-            {showAll ? "View Less" : "View All"}
+            {showAll ? t("view_less", "View Less") : t("view_all", "View All")}
           </button>
         </div>
 

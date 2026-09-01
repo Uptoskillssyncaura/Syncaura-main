@@ -14,11 +14,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  transition: font-size 0.2s ease;
 }
-
-
-
-
 
 @layer base {
   @font-face {
@@ -47,12 +45,12 @@
     color: white;
   }
   .text-stroke-red {
-    -webkit-text-stroke: 1px #9B3E3E; /* text border */
-    color: #FFFFFF; /* text color */
+    -webkit-text-stroke: 1px #9b3e3e; /* text border */
+    color: #ffffff; /* text color */
   }
   .text-stroke-green {
-    -webkit-text-stroke: 1px #54784D; /* text border */
-    color: #FFFFFF; /* text color */
+    -webkit-text-stroke: 1px #54784d; /* text border */
+    color: #ffffff; /* text color */
   }
 }
 
@@ -83,14 +81,12 @@
   font-family: var(--font-anta);
 }
 
-
-
-.header-layout{
-  @apply grid grid-cols-16 gap-4 justify-center
+.header-layout {
+  @apply grid grid-cols-16 gap-4 justify-center;
 }
 .shadow-custom {
   @apply bg-white/25 dark:bg-white/5  rounded-full   p-3 flex items-center justify-center;
-  box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes slideIn {
@@ -138,24 +134,26 @@
   }
 }
 
-
 .date-input::-webkit-calendar-picker-indicator {
-  filter: invert(0.5); 
+  filter: invert(0.5);
   cursor: pointer;
-  transform: scale(1.2); 
-
+  transform: scale(1.2);
 }
 
 .dark .date-input::-webkit-calendar-picker-indicator {
-  filter: invert(1); 
-
+  filter: invert(1);
 }
 
-
 @keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 .animate-float {
@@ -179,8 +177,30 @@
 }
 
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE & Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Custom Scrollbar for Chat */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+.dark .chat-scroll {
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
+.dark .chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
 }
 
 :root {
@@ -193,17 +213,21 @@
 }
 
 /* index.css */
-.dark .resource-bar-engineering { background-color: #00d4ff !important; }
-.dark .resource-bar-design { background-color: #bc13fe !important; }
+.dark .resource-bar-engineering {
+  background-color: #00d4ff !important;
+}
+.dark .resource-bar-design {
+  background-color: #bc13fe !important;
+}
 /* ... baaki categories ke liye bhi */
 
 @layer components {
   .btn-hover {
     @apply relative overflow-hidden cursor-pointer;
     will-change: transform, filter;
-    
+
     transition:
-      transform 250ms cubic-bezier(.22, 1, .36, 1),
+      transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
       filter 250ms ease,
       box-shadow 250ms ease;
   }
@@ -261,4 +285,4 @@
 /* Dark glow: richer */
 [data-theme="dark"] .dark-glow {
   opacity: 0.35;
-}
+}

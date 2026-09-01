@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AdminDashboard from "../components/admin/adminDashboard.jsx";
+import AdminDashboard from "../components/admin/AdminDashboard.jsx";
 import ProjectsPage from "../components/admin/adminprojectdashboard/ProjectsPage.jsx";
 import AnalyticsSection from "../components/admin/adminanalyticaldashboard/AnalyticsSection.jsx";
 

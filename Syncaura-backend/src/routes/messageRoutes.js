@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.post("/", auth, sendMessage);
 router.get("/:channelId", auth, getMessages);
+import { markAsRead } from "../controllers/messageController.js";
+router.post("/read", auth, markAsRead);
 
 import upload from "../middlewares/upload.js";
 import { sendMediaMessage } from "../controllers/messageController.js"

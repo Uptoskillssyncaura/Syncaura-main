@@ -1,4 +1,6 @@
 import { Check, CircleDot, TrendingDown, TrendingUp, TriangleAlert } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import api from '../../../config/axios'
 import TopCard from '../TopCard'
 import { MdFolderShared } from "react-icons/md";
 import { TiClipboard } from "react-icons/ti";
@@ -9,35 +11,58 @@ import OverallContextChart from './Project/OverallContextChart'
 import ActiveEngagementTable from './Project/ActiveEngagementTable'
 
 const Projects = () => {
+  const [projects, setProjects] = useState([])
+  const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    Promise.all([api.get('/projects'), api.get('/tasks')])
+      .then(([projectsResponse, tasksResponse]) => {
+        setProjects(Array.isArray(projectsResponse.data) ? projectsResponse.data : [])
+        setTasks(Array.isArray(tasksResponse.data) ? tasksResponse.data : [])
+      })
+      .catch((requestError) => setError(requestError.response?.data?.message || 'Unable to load projects'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const projectStats = projects.map((project) => {
+    const projectTasks = tasks.filter((task) => task.project_id === project.id || task.projectId === project.id)
+    const completed = projectTasks.filter((task) => task.status === 'DONE').length
+    const overdue = projectTasks.some((task) => task.status !== 'DONE' && task.deadline && new Date(task.deadline) < new Date())
+    return { ...project, total: projectTasks.length, completed, progress: projectTasks.length ? Math.round((completed / projectTasks.length) * 100) : 0, overdue }
+  })
+  const completedProjects = projectStats.filter((project) => project.status === 'COMPLETED' || project.progress === 100).length
+  const overdueProjects = projectStats.filter((project) => project.overdue).length
   const cardData = [
     {
       title: "Total Projects",
-      count: 18,
+      count: loading ? '...' : projects.length,
       iconData: <MdFolderShared className='size-8 text-[#99A7BB]' />,
       data: (
         <div className="bg-[#E7F5E9] dark:bg-[#234B1C] py-0.5 px-3 rounded-xl border border-[#C6E7C1] dark:border-none">
           <p className="text-[#2E7D32] dark:text-[#3AFF13] text-[10px] font-bold">
-            +2 from last month
+            {loading ? 'Loading...' : 'Current total'}
           </p>
         </div>
       )
     },
     {
       title: "Active",
-      count: 4,
+      count: loading ? '...' : projectStats.filter((project) => project.status !== 'COMPLETED' && project.progress < 100).length,
       iconData: <TiClipboard className='size-8 text-[#0078F5]' />,
       data: (
         <div className="bg-[#E3F2FD] dark:bg-[#1E1E1E] py-0.5 px-3 rounded-xl border border-[#BBDEFB] dark:border-none">
           <p className="text-[#1565C0] dark:text-[#006FEB] text-[10px] font-bold flex gap-2 items-center justify-center">
             <CircleDot className='size-4 text-[#1565C0] dark:text-white fill-[#1565C0] dark:fill-[#006FEB]' /> 
-            Steady pace
+            Current projects
           </p>
         </div>
       )
     },
     {
       title: "Completed",
-      count: 12,
+      count: loading ? '...' : completedProjects,
       iconData: (
         <div className="flex items-center justify-center p-2 rounded-full bg-[#1BC963]">
           <Check className='size-5 text-white dark:text-gray-900' />
@@ -47,14 +72,14 @@ const Projects = () => {
         <div className="bg-[#E7F5E9] dark:bg-[#234B1C] py-0.5 px-3 rounded-xl border border-[#C6E7C1] dark:border-none">
           <p className="text-[#2E7D32] dark:text-[#3AFF13] text-[10px] font-bold flex gap-2 items-center justify-center">
             <TrendingUp className='size-4 text-[#2E7D32] dark:text-[#00B777]' /> 
-            +5% efficiency
+            Completed projects
           </p>
         </div>
       )
     },
     {
       title: "Overdue",
-      count: 2,
+      count: loading ? '...' : overdueProjects,
       iconData: (
         <TriangleAlert className='size-10 text-white dark:text-gray-900 fill-[#EF4444]' />
       ),
@@ -62,7 +87,7 @@ const Projects = () => {
         <div className="bg-[#FFEBEE] dark:bg-[#4B1C1C] py-0.5 px-3 rounded-xl border border-[#FFCDD2] dark:border-none">
           <p className="text-[#C62828] dark:text-[#F63030] text-[10px] font-bold flex gap-2 items-center justify-center">
             <TrendingDown className='size-4 text-[#C62828] dark:text-red-600' /> 
-            Requires attention
+            Overdue projects
           </p>
         </div>
       )
@@ -97,9 +122,10 @@ const Projects = () => {
       </div>
 
       {/* Main Project Content */}
-      <ProjectContributionCard />
-      <OverallContextChart />
-      <ActiveEngagementTable />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+      <ProjectContributionCard projects={projectStats} loading={loading} />
+      <OverallContextChart projects={projectStats} loading={loading} />
+      <ActiveEngagementTable projects={projectStats} loading={loading} />
     </div>
   )
 }

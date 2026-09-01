@@ -1,5 +1,6 @@
 import { FaFileCirclePlus } from "react-icons/fa6";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const ACCEPTED_TYPES = [
   "application/pdf",
@@ -10,6 +11,7 @@ const ACCEPTED_TYPES = [
 ];
 
 const FileUploadBox = ({ register, setValue, watch }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -23,7 +25,7 @@ const FileUploadBox = ({ register, setValue, watch }) => {
     if (!file) return;
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      alert("Only PDF, PPT, DOC files are allowed");
+      alert(t('fileupload_alert', 'Only PDF, PPT, DOC files are allowed'));
       return;
     }
 
@@ -88,7 +90,7 @@ const FileUploadBox = ({ register, setValue, watch }) => {
         />
 
         <span className="text-sm text-gray-500 dark:text-gray-300 text-center">
-          {file ? file.name : "Drag & drop or click to upload"}
+          {file ? file.name : t('fileupload_drag_drop', 'Drag & drop or click to upload')}
         </span>
       </div>
     </>

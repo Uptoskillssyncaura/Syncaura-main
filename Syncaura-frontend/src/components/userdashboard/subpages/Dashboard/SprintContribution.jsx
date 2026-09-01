@@ -24,9 +24,12 @@ const SprintContribution = ({ CONTRIBUTIONS }) => {
 
       {/* Cards */}
       <div className="grid grid-cols-2 gap-6 sm:gap-10 xl:px-20">
-        {CONTRIBUTIONS.map((item) => (
+        {CONTRIBUTIONS.length > 0 && CONTRIBUTIONS.map((item) => (
           <ContributionCard key={item.id} {...item} />
         ))}
+        {CONTRIBUTIONS.length === 0 && (
+          <p className="col-span-2 text-sm text-gray-500 dark:text-gray-400">Sprint contribution data is unavailable.</p>
+        )}
       </div>
     </motion.div>
   );

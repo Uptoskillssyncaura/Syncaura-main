@@ -7,7 +7,7 @@ import {
   updateDocument,
   deleteDocument,
   getDocumentVersions,
-  exportDocumentPDF, 
+  exportDocumentPDF,
   exportDocumentExcel
 } from "../controllers/documentController.js";
 import { auth } from "../middlewares/auth.js";

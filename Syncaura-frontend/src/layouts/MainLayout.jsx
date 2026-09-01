@@ -3,7 +3,7 @@ import SupportChatbot from "../components/common/SupportChatbot";
 import { useSelector } from "react-redux";
 
 export default function MainLayout({ children, TopbarComponent, SideBar }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const isDark = useSelector((state) => state.theme.isDark);
 
   return (
@@ -15,9 +15,9 @@ export default function MainLayout({ children, TopbarComponent, SideBar }) {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
         {/* Render the Topbar passed from parent */}
-        {TopbarComponent && <TopbarComponent setOpen={setSidebarOpen} />}
+        {TopbarComponent && <TopbarComponent open={sidebarOpen} setOpen={setSidebarOpen} />}
 
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1 min-h-0">{children}</div>
       </div>
       <SupportChatbot />
     </div>

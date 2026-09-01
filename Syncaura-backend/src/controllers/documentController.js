@@ -7,14 +7,24 @@ import ExcelJS from "exceljs";
  */
 export const createDocument = async (req, res) => {
   try {
-    const { title, content, projectId } = req.body;
+    const { title, content, projectId, category, type, description } = req.body;
+
+    const docTitle = (
+      title ||
+      (category && category !== "Select category" ? `${category} - ${type || "Report"}` : null) ||
+      type ||
+      description ||
+      "New Document"
+    ).trim();
+
+    const docContent = content || description || "";
 
     const result = await pool.query(
       "INSERT INTO documents (title, content, project_id, created_by) VALUES ($1, $2, $3, $4) RETURNING *",
-      [title, content || "", projectId, req.user.id]
+      [docTitle, docContent, projectId || null, req.user.id]
     );
 
-    res.status(201).json({ message: "Document created", document: result.rows[0] });
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

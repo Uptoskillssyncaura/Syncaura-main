@@ -6,12 +6,14 @@ import {
   getMeetingById,
   updateMeetingById,
   deleteMeetingById,
+  syncCalendarEvents,
 } from "../features/meetingThunks.js";
 
 const initialState = {
   meetings: [],
   meeting: null,
   isLoading: false,
+  isSyncing: false,
   error: null,
 };
 
@@ -31,9 +33,10 @@ const meetingSlice = createSlice({
       })
       .addCase(createMeeting.fulfilled, (state, action) => {
         state.isLoading = false;
+        const newMeeting = action.payload.meeting || action.payload;
         state.meetings.unshift({
-          ...action.payload,
-          _id: action.payload._id || action.payload.eventId || Date.now(),
+          ...newMeeting,
+          _id: newMeeting.id || newMeeting._id || Date.now(),
         });
       })
       .addCase(createMeeting.rejected, (state, action) => {
@@ -78,7 +81,7 @@ const meetingSlice = createSlice({
 
         // update list also
         state.meetings = state.meetings.map((m) =>
-          m._id === action.payload._id ? action.payload : m
+          (m._id || m.id) === (action.payload._id || action.payload.id) ? action.payload : m
         );
       })
       .addCase(updateMeetingById.rejected, (state, action) => {
@@ -94,15 +97,30 @@ const meetingSlice = createSlice({
         state.isLoading = false;
 
         state.meetings = state.meetings.filter(
-          (m) => m._id !== action.payload
+          (m) => (m._id || m.id) !== action.payload
         );
 
-        if (state.meeting?._id === action.payload) {
+        if ((state.meeting?._id || state.meeting?.id) === action.payload) {
           state.meeting = null;
         }
       })
       .addCase(deleteMeetingById.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload || action.error.message;
+      })
+
+      .addCase(syncCalendarEvents.pending, (state) => {
+        state.isSyncing = true;
+        state.error = null;
+      })
+      .addCase(syncCalendarEvents.fulfilled, (state, action) => {
+        state.isSyncing = false;
+        if (action.payload?.meetings) {
+          state.meetings = action.payload.meetings;
+        }
+      })
+      .addCase(syncCalendarEvents.rejected, (state, action) => {
+        state.isSyncing = false;
         state.error = action.payload || action.error.message;
       });
   },

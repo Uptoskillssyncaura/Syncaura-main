@@ -8,16 +8,31 @@ import {
   updateUserProfile,
 } from "../features/authThunks";
 
+const getStoredUser = () => {
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 const storedToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
+const storedUser = getStoredUser();
 
 const initialState = {
-  user: null,
+  user: storedUser,
   token: storedToken,
   isLoading: false,
   error: null,
   isAuthenticated: !!storedToken,
-  authChecking: true,
+  authChecking: !!storedToken && !storedUser,
   profileLoading: false,
+  localProfilePic: localStorage.getItem("syncaura_global_photo") || null, // 👈 Independent photo state
+};
+
+const getPhotoStorageKey = (user) => {
+  return "syncaura_active_user_profile_photo";
 };
 
 const authSlice = createSlice({
@@ -32,9 +47,19 @@ const authSlice = createSlice({
       state.user = user;
       state.token = token;
       state.isAuthenticated = true;
+      if (user) {
+        try {
+          localStorage.setItem("user", JSON.stringify(user));
+        } catch {}
+      }
       if (token) {
         localStorage.setItem("accessToken", token);
         localStorage.setItem("token", token);
+      }
+      const key = getPhotoStorageKey(user);
+      if (key && state.user) {
+        const savedPhoto = localStorage.getItem(key);
+        if (savedPhoto) state.user.profilePic = savedPhoto;
       }
     },
     logout(state) {
@@ -43,11 +68,23 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.authChecking = false;
+      localStorage.removeItem("user");
       localStorage.removeItem("token");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       state.isLoading = false;
     },
+    updateFrontendProfilePhoto(state, action) {
+      if (action.payload) {
+        localStorage.setItem("syncaura_global_photo", action.payload);
+        state.localProfilePic = action.payload;
+        if (state.user) state.user.profilePic = action.payload;
+      } else {
+        localStorage.removeItem("syncaura_global_photo");
+        state.localProfilePic = null;
+        if (state.user) state.user.profilePic = null;
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -58,14 +95,32 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        const { user, tokens } = action.payload;
+        const user = action.payload?.user;
+        const token = action.payload?.token || action.payload?.tokens?.accessToken || action.payload?.accessToken;
+        const refreshToken = action.payload?.refreshToken || action.payload?.tokens?.refreshToken;
+        
         state.user = user;
-        state.token = tokens.accessToken;
+        state.token = token;
         state.isAuthenticated = true;
-        localStorage.setItem("accessToken", tokens.accessToken);
-        localStorage.setItem("refreshToken", tokens.refreshToken);
+        
+        if (user) {
+          try {
+            localStorage.setItem("user", JSON.stringify(user));
+          } catch {}
+        }
+        if (token) localStorage.setItem("accessToken", token);
+        if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+        const key = getPhotoStorageKey(user);
+        if (key && state.user) {
+          const savedPhoto = localStorage.getItem(key);
+          if (savedPhoto) {
+            state.user.profilePic = savedPhoto;
+          }
+        }
+        if (state.user && state.localProfilePic) {
+          state.user.profilePic = state.localProfilePic;
+        }
       })
-
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
@@ -78,40 +133,59 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        const { user, tokens } = action.payload;
+        const user = action.payload?.user;
+        const token = action.payload?.token || action.payload?.tokens?.accessToken || action.payload?.accessToken;
+        const refreshToken = action.payload?.refreshToken || action.payload?.tokens?.refreshToken;
+        
         state.user = user;
-        state.token = tokens.accessToken;
+        state.token = token;
         state.isAuthenticated = true;
 
-        localStorage.setItem("accessToken", tokens.accessToken);
-        localStorage.setItem("refreshToken", tokens.refreshToken);
+        if (user) {
+          try {
+            localStorage.setItem("user", JSON.stringify(user));
+          } catch {}
+        }
+        if (token) localStorage.setItem("accessToken", token);
+        if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+        const key = getPhotoStorageKey(user);
+        if (key && state.user) {
+          const savedPhoto = localStorage.getItem(key);
+          if (savedPhoto) {
+            state.user.profilePic = savedPhoto;
+          }
+        }
+        if (state.user && state.localProfilePic) {
+          state.user.profilePic = state.localProfilePic;
+        }
       })
-
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
+
+      // Refresh Token
       .addCase(refreshAccessToken.pending, (state) => {
-        state.authChecking = true;
+        state.authChecking = !state.user;
         state.isLoading = true;
       })
       .addCase(refreshAccessToken.fulfilled, (state, action) => {
         state.isLoading = false;
-        const {  accessToken } = action.payload;
-        // state.user = user;
-        state.token = accessToken;
+        state.token = action.payload.accessToken;
         state.isAuthenticated = true;
-        state.authChecking=false
-        localStorage.setItem("accessToken", accessToken);
+        if (state.user && state.localProfilePic) {
+          state.user.profilePic = state.localProfilePic;
+        }
       })
       .addCase(refreshAccessToken.rejected, (state) => {
         state.authChecking = false;
-        state.isLoading=false
-        state.isAuthenticated=false
-        state.user=null
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        localStorage.removeItem("user");
       })
 
-      // User Profile
+      // Fetch User Profile
       .addCase(fetchUserProfile.pending, (state) => {
         state.profileLoading = true;
         state.error = null;
@@ -120,11 +194,31 @@ const authSlice = createSlice({
         state.profileLoading = false;
         const profile = action.payload?.user || action.payload?.data || action.payload;
         state.user = profile;
+        state.authChecking = false;  
+        
+        if (profile) {
+          try {
+            localStorage.setItem("user", JSON.stringify(profile));
+          } catch {}
+        }
+
+        if (state.user) {
+          const key = getPhotoStorageKey(profile);
+          if (key) {
+            const savedPhoto = localStorage.getItem(key);
+            if (savedPhoto) state.user.profilePic = savedPhoto;
+          }
+        } 
+        if (state.user && state.localProfilePic) {
+          state.user.profilePic = state.localProfilePic;
+        }
       })
-      .addCase(fetchUserProfile.rejected, (state, action) => {
+      .addCase(fetchUserProfile.rejected, (state) => {
         state.profileLoading = false;
-        state.error = action.payload;
+        state.authChecking = false;
       })
+
+      // Update User Profile
       .addCase(updateUserProfile.pending, (state) => {
         state.profileLoading = true;
         state.error = null;
@@ -136,21 +230,35 @@ const authSlice = createSlice({
           ...state.user,
           ...profile,
         };
+        if (state.user) {
+          try {
+            localStorage.setItem("user", JSON.stringify(state.user));
+          } catch {}
+        }
+        const key = getPhotoStorageKey(state.user);
+        if (key && state.user) {
+          const savedPhoto = localStorage.getItem(key);
+          if (savedPhoto) state.user.profilePic = savedPhoto;
+        }
+        if (state.user && state.localProfilePic) {
+          state.user.profilePic = state.localProfilePic;
+        }
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.profileLoading = false;
         state.error = action.payload;
       })
 
-     
       // Change Password
       .addCase(changePassword.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(changePassword.fulfilled, (state, action) => {
+      .addCase(changePassword.fulfilled, (state) => {
         state.isLoading = false;
-        // Password changed successfully, no need to update user data
+        if (state.user && state.localProfilePic) {
+          state.user.profilePic = state.localProfilePic;
+        }
       })
       .addCase(changePassword.rejected, (state, action) => {
         state.isLoading = false;
@@ -159,5 +267,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthError, setCredentials, logout } = authSlice.actions;
+export const { clearAuthError, setCredentials, logout, updateFrontendProfilePhoto } = authSlice.actions;
 export default authSlice.reducer;

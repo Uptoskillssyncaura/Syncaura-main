@@ -2,7 +2,6 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Tab from "../components/settings/TabStyle";
 
-import Profile from "../components/settings/tabs/Profile";
 import AccountSecurity from "../components/settings/tabs/AccountSecurity";
 import Theme from "../components/settings/tabs/Theme";
 import Notifications from "../components/settings/tabs/Notifications";
@@ -10,11 +9,10 @@ import Subscription from "../components/settings/tabs/Subscription";
 import PrivacyData from "../components/settings/tabs/PrivacyData";
 
 const Settings = () => {
-  const [currTab, setCurrTab] = useState("Profile");
+  const [currTab, setCurrTab] = useState("Account & Security");
   const [direction, setDirection] = useState(0);
 
   const tabData = [
-    { title: "Profile" },
     { title: "Account & Security" },
     { title: "Theme" },
     { title: "Notifications" },
@@ -31,7 +29,6 @@ const Settings = () => {
   };
 
   const tabComponents = {
-    Profile,
     "Account & Security": AccountSecurity,
     Theme,
     Notifications,

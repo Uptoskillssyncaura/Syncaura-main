@@ -50,7 +50,11 @@ export const getMessages = async (req, res ,next) => {
     }
 
     const result = await pool.query(
-      `SELECT m.*, u.name as sender_name 
+      `SELECT m.*, u.name as sender_name,
+              EXISTS(
+                SELECT 1 FROM message_seen_by msb 
+                WHERE msb.message_id = m.id AND msb.user_id != m.sender_id
+              ) as is_read
        FROM messages m 
        JOIN users u ON m.sender_id = u.id 
        WHERE m.channel_id = $1 
@@ -92,3 +96,26 @@ export const sendMediaMessage = async (req, res ,next) => {
     next(error)
   }
 };
+
+// Mark Message as Read
+export const markAsRead = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { messageId } = req.body;
+
+    const checkResult = await pool.query(
+      "SELECT 1 FROM message_seen_by WHERE message_id = $1 AND user_id = $2",
+      [messageId, userId]
+    );
+
+    if (checkResult.rowCount === 0) {
+      await pool.query(
+        "INSERT INTO message_seen_by (message_id, user_id) VALUES ($1, $2)",
+        [messageId, userId]
+      );
+    }
+    res.status(200).json({ message: "Message marked as read" });
+  } catch (error) {
+    next(error);
+  }
+};

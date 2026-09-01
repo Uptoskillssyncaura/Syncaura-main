@@ -1,13 +1,6 @@
 import { motion } from "framer-motion";
 
-const contributions = [
-  { title: "Mobile App Launch", value: 75 },
-  { title: "Enterprise CRM Integration", value: 40 },
-  { title: "Internal HR Portal Update", value: 90 },
-  { title: "Marketing Website Localization", value: 15 },
-];
-
-export default function ProjectContributionCard() {
+export default function ProjectContributionCard({ projects = [], loading = false }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -22,22 +15,24 @@ export default function ProjectContributionCard() {
       </div>
 
       <div className="flex flex-col gap-8">
-        {contributions.map((item, index) => (
+        {loading && <p className="text-sm text-slate-500">Loading project progress...</p>}
+        {!loading && projects.length === 0 && <p className="text-sm text-slate-500">No project progress available.</p>}
+        {!loading && projects.map((item, index) => (
           <div key={index} className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               {/* Title: Dark slate in light, White in dark */}
               <span className="text-sm font-medium text-slate-700 dark:text-white">
-                {item.title}
+                {item.name}
               </span>
               {/* Percentage: Deep cyan in light, Neon cyan in dark */}
               <span className="text-cyan-600 dark:text-[#00D2FF] text-sm font-bold">
-                {item.value}%
+                {item.progress}%
               </span>
             </div>
             <div className="w-full h-1.5 bg-slate-100 dark:bg-[#2d2f31] rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${item.value}%` }}
+                animate={{ width: `${item.progress}%` }}
                 transition={{ duration: 1, delay: index * 0.1 }}
                 /* Bar: Solid cyan in light, Glowing neon cyan in dark */
                 className="h-full bg-cyan-500 dark:bg-[#00D2FF] rounded-full dark:shadow-[0_0_8px_rgba(0,210,255,0.4)]"

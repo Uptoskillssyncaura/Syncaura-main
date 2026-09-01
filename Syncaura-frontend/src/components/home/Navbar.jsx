@@ -1,39 +1,55 @@
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Home, Sparkles, CreditCard, Mail, LogIn, ArrowRight } from 'lucide-react';
-import { useNavigate, Link } from "react-router-dom";
+import { Sun, Moon, Home, Sparkles, CreditCard, Mail, LogIn, ArrowRight, Info, BookOpen } from 'lucide-react';
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useDarkMode } from "../../hooks/useDarkMode";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { theme, toggleTheme } = useDarkMode();
+  const location = useLocation();
+const isAboutActive = location.pathname === "/about-us";
+const isLearnMoreActive = location.pathname === "/learn-more";
   const [activeSection, setActiveSection] = useState('home');
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['home', 'features', 'contact'];
-      const scrollPosition = window.scrollY + 100;
+ useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
 
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (
-            scrollPosition >= offsetTop &&
-            scrollPosition < offsetTop + offsetHeight
-          ) {
-            setActiveSection(section);
-            break;
-          }
+    const sections = ["home", "features", "contact"];
+    const elements = sections
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (visible.length > 0) {
+          setActiveSection(visible[0].target.id);
         }
-      }
-    };
+      },
+      { threshold: [0.3, 0.5, 0.7], rootMargin: "-100px 0px -100px 0px" }
+    );
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    elements.forEach((el) => observer.observe(el));
 
+    return () => observer.disconnect();
+  }, [location.pathname]);
   const scrollToSection = (e, sectionId) => {
     e.preventDefault();
+    if (location.pathname !== "/") {
+      navigate(`/#${sectionId}`);
+      return;
+    }
+    setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -76,7 +92,7 @@ const Navbar = () => {
               }}
             >
               <Home className="w-4 h-4 transition-transform group-hover:scale-110" />
-              Home
+              {t("nav_home")}
             </a>
 
             <a
@@ -89,7 +105,7 @@ const Navbar = () => {
               }}
             >
               <Sparkles className="w-4 h-4 transition-transform group-hover:scale-110" />
-              Features
+              {t("nav_features")}
             </a>
 
             <a
@@ -102,8 +118,30 @@ const Navbar = () => {
               }}
             >
               <Mail className="w-4 h-4 transition-transform group-hover:scale-110" />
-              Contact
+              {t("nav_contact")}
             </a>
+            <Link
+              to="/about-us"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
+              style={{
+                backgroundColor: isAboutActive ? 'rgba(51, 102, 255, 0.1)' : '',
+                color: isAboutActive ? 'var(--accent-color)' : 'var(--text-secondary)',
+              }}
+            >
+              <Info className="w-4 h-4 transition-transform group-hover:scale-110" />
+              {t("nav_about")}
+            </Link>
+           <Link
+              to="/learn-more"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
+              style={{
+                backgroundColor: isLearnMoreActive ? 'rgba(51, 102, 255, 0.1)' : '',
+                color: isLearnMoreActive ? 'var(--accent-color)' : 'var(--text-secondary)',
+              }}
+            >
+              <BookOpen className="w-4 h-4 transition-transform group-hover:scale-110" />
+              {t("nav_learn_more")}
+            </Link>
           </nav>
         </div>
 
@@ -111,7 +149,7 @@ const Navbar = () => {
           <button
             onClick={toggleTheme}
             className="w-9 h-9 flex items-center justify-center rounded-md hover:opacity-70 btn-hover"
-            aria-label="Toggle theme"
+            aria-label={t("toggle_theme")}
           >
             {theme === 'light' ? (
               <Sun className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
@@ -125,7 +163,7 @@ const Navbar = () => {
             className="flex items-center gap-2 text-sm font-semibold transition-all hover:opacity-70 text-blue-600 dark:text-[#4FE6E6]"
           >
             <LogIn className="w-4 h-4" />
-            Login
+            {t("nav_login")}
           </button>
 
           <button
@@ -208,6 +246,21 @@ const Navbar = () => {
             >
               Contact
             </a>
+            <Link
+              to="/about-us"
+              className="text-sm font-medium whitespace-nowrap"
+              style={{ color: isAboutActive ? 'var(--accent-color)' : 'var(--text-secondary)' }}
+            >
+              {t("nav_about")}
+            </Link>
+
+           <Link
+              to="/learn-more"
+              className="text-sm font-medium whitespace-nowrap"
+              style={{ color: isLearnMoreActive ? 'var(--accent-color)' : 'var(--text-secondary)' }}
+            >
+              {t("nav_learn_more")}
+            </Link>
           </nav>
         </div>
       </div>

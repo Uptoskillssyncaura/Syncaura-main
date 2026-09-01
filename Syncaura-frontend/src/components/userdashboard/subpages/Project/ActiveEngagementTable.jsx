@@ -4,24 +4,9 @@ import {
   Filter,
   Download,
   Dot,
-  Smartphone,
-  Database,
-  Globe,
-  ShieldCheck,
-  LayoutDashboard,
-  CreditCard,
 } from "lucide-react";
 
 const PAGE_SIZE = 4;
-
-const projectsData = [
-  { id: 1, name: "Mobile Banking App", role: "UI LEAD", tasks: "5/8", progress: 75, sprint: "Q3 Sprint 4", status: "On Track", icon: Smartphone, roleStyles: "text-blue-600 border-blue-300 bg-blue-50 dark:text-[#00d2ff] dark:border-[#00d2ff]/50 dark:bg-[#00d2ff]/10" },
-  { id: 2, name: "CMR Integration", role: "DEV", tasks: "2/12", progress: 40, sprint: "Q3 Sprint 3", status: "Delayed", icon: Database, roleStyles: "text-purple-600 border-purple-300 bg-purple-50 dark:text-[#c084fc] dark:border-[#c084fc]/50 dark:bg-[#c084fc]/10" },
-  { id: 3, name: "Global Site Localization", role: "REVIEWER", tasks: "1/15", progress: 15, sprint: "Q4 Planning", status: "At Risk", icon: Globe, roleStyles: "text-slate-600 border-slate-300 bg-slate-50 dark:text-[#94a3b8] dark:border-[#94a3b8]/50 dark:bg-[#94a3b8]/10" },
-  { id: 4, name: "HR Security Audit", role: "CONSULTANT", tasks: "18/20", progress: 90, sprint: "Q3 Sprint 4", status: "Complete", icon: ShieldCheck, roleStyles: "text-cyan-600 border-cyan-300 bg-cyan-50 dark:text-[#38bdf8] dark:border-[#38bdf8]/50 dark:bg-[#38bdf8]/10" },
-  { id: 5, name: "Marketing Dashboard", role: "UI LEAD", tasks: "6/10", progress: 60, sprint: "Q4 Sprint 1", status: "On Track", icon: LayoutDashboard, roleStyles: "text-blue-600 border-blue-300 bg-blue-50 dark:text-[#00d2ff] dark:border-[#00d2ff]/50 dark:bg-[#00d2ff]/10" },
-  { id: 6, name: "Payment Gateway", role: "DEV", tasks: "3/14", progress: 25, sprint: "Q4 Sprint 2", status: "At Risk", icon: CreditCard, roleStyles: "text-purple-600 border-purple-300 bg-purple-50 dark:text-[#c084fc] dark:border-[#c084fc]/50 dark:bg-[#c084fc]/10" },
-];
 
 const statusStyles = {
   "On Track": "bg-green-50 text-green-700 border border-green-200 dark:bg-[#064e3b]/30 dark:text-[#4ade80] dark:border-[#064e3b]",
@@ -30,21 +15,22 @@ const statusStyles = {
   "Complete": "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#065f46]/40 dark:text-[#10b981] dark:border-[#059669]",
 };
 
-export default function ActiveEngagementTable() {
+export default function ActiveEngagementTable({ projects = [], loading = false }) {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("All");
   const [showFilter, setShowFilter] = useState(false);
 
   const filteredData = useMemo(() => {
-    if (filter === "All") return projectsData;
-    return projectsData.filter((p) => p.status === filter);
-  }, [filter]);
+    const projectRows = projects.map((project) => ({ ...project, status: project.overdue ? "At Risk" : project.progress === 100 ? "Complete" : "On Track", tasks: `${project.completed}/${project.total}` }));
+    if (filter === "All") return projectRows;
+    return projectRows.filter((project) => project.status === filter);
+  }, [filter, projects]);
 
   const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
   const paginatedData = filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleExport = () => {
-    const csv = filteredData.map((p) => [p.name, p.role, p.tasks, p.progress, p.sprint, p.status].join(",")).join("\n");
+    const csv = filteredData.map((p) => [p.name, p.tasks, p.progress, p.status].join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -118,7 +104,9 @@ export default function ActiveEngagementTable() {
 
             <tbody className="divide-y divide-slate-200 dark:divide-[#2d2f31]">
               <AnimatePresence mode="wait">
-                {paginatedData.map((item) => (
+                {loading && <tr><td colSpan="6" className="p-6 text-center text-slate-500">Loading projects...</td></tr>}
+                {!loading && paginatedData.length === 0 && <tr><td colSpan="6" className="p-6 text-center text-slate-500">No projects found.</td></tr>}
+                {!loading && paginatedData.map((item) => (
                   <motion.tr
                     key={item.id}
                     initial={{ opacity: 0 }}
@@ -129,15 +117,15 @@ export default function ActiveEngagementTable() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-slate-100 dark:bg-[#242628] border border-slate-300 dark:border-[#3e4042] rounded">
-                          <item.icon size={16} />
+                          <Dot size={16} />
                         </div>
                         {item.name}
                       </div>
                     </td>
 
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs border rounded ${item.roleStyles}`}>
-                        {item.role}
+                      <span className="px-2 py-1 text-xs border rounded text-slate-600 border-slate-300">
+                        {item.role || 'Member'}
                       </span>
                     </td>
 
@@ -158,7 +146,7 @@ export default function ActiveEngagementTable() {
                     </td>
 
                     <td className="px-6 py-4 text-slate-600 dark:text-[#94a3b8]">
-                      {item.sprint}
+                      {item.sprint || 'Not assigned'}
                     </td>
 
                     <td className="px-6 py-4">

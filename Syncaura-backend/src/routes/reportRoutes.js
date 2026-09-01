@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { getTaskReport,getProjectProgress, getDocumentSummary } from "../controllers/reportController.js";
+import { getTaskReport, getProjectProgress, getDocumentSummary } from "../controllers/reportController.js";
 import { auth } from "../middlewares/auth.js";
 
 // Protected route

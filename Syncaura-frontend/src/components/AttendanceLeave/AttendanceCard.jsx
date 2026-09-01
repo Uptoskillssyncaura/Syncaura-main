@@ -2,7 +2,7 @@ import { memo } from "react";
 
 const AttendanceCard = memo(({ title, value, borderColor, icon }) => {
   return (
-    <div className="bg-[#FFFFFF] dark:bg-[#2E2F2F] w-[220px] h-[65px] px-4 rounded-2xl shadow-[0_0_10px_1px_#EDEDED] dark:shadow-[0_0_10px_1px_#171717] flex items-center justify-between">
+    <div className="bg-[#FFFFFF] dark:bg-[#2E2F2F] w-[220px] min-h-[90px] px-4 py-4 rounded-2xl shadow-[0_0_10px_1px_#EDEDED] dark:shadow-[0_0_10px_1px_#171717] flex items-center justify-between">
       
       <div className="flex flex-col leading-[1]">
         <h1 className="text-xs font-semibold text-[#000000] dark:text-[#FFFFFF]">

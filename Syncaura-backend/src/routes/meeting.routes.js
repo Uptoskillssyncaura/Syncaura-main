@@ -1,11 +1,12 @@
 import express from "express";
 
 
-import { createMeeting ,updateMeeting,deleteMeeting, getMeetings, getMeetingById} from "../controllers/meetingController.js";
-import {auth} from "../middlewares/auth.js";
+import { createMeeting, updateMeeting, deleteMeeting, getMeetings, getMeetingById, syncCalendar } from "../controllers/meetingController.js";
+import { auth } from "../middlewares/auth.js";
 
 const router = express.Router();
-router.post("/", auth, createMeeting);
+router.post("/sync-calendar", auth, syncCalendar);
+router.post("/", createMeeting);
 router.get("/", auth, getMeetings);
 router.get("/:id", auth, getMeetingById);
 router.put("/:id", auth, updateMeeting);

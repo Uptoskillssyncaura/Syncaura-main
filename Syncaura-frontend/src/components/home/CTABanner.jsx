@@ -193,19 +193,21 @@ const CTABanner = () => {
                 </Link>
 
                 {/* Secondary */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group flex items-center gap-2 px-8 py-4 rounded-2xl text-sm md:text-base font-semibold text-white/80 hover:text-white transition-colors"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(12px)',
-                  }}
-                >
-                  Learn more
-                  <ArrowRight size={14} className="opacity-60 group-hover:opacity-100 transition-transform group-hover:translate-x-1" />
-                </motion.button>
+                <Link to="/learn-more" className="inline-block">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="group flex items-center gap-2 px-8 py-4 rounded-2xl text-sm md:text-base font-semibold text-white/80 hover:text-white transition-colors"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      backdropFilter: 'blur(12px)',
+                    }}
+                  >
+                    Learn more
+                    <ArrowRight size={14} className="opacity-60 group-hover:opacity-100 transition-transform group-hover:translate-x-1" />
+                  </motion.button>
+                </Link>
               </motion.div>
 
               {/* 
@@ -307,4 +309,4 @@ const CTABanner = () => {
   );
 };
 
-export default CTABanner;
+export default CTABanner;
