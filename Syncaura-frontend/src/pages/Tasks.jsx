@@ -26,7 +26,7 @@ import KanbanColumn from "../components/tasks/KanbanColumn";
 import CreateTaskModal from "../components/tasks/CreateTaskModal";
 import TaskDetailModal from "../components/tasks/TaskDetailModal";
 import { toast } from "react-toastify";
-
+import { motion } from 'framer-motion';
 // ── Priority config ──────────────────────────────────────────────────────────
 const PRIORITY_COLORS = {
   high: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
