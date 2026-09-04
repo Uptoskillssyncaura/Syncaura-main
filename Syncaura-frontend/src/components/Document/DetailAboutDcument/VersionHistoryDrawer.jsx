@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 const HEADER_HEIGHT = "4.4rem";
 
-const VersionHistoryDrawer = ({ open, onClose }) => {
+const VersionHistoryDrawer = ({ open, onClose, docId, document, onViewVersion, onRestoreVersion, onOpenEditor }) => {
   const { t } = useTranslation();
   return (
     <AnimatePresence>
@@ -45,33 +45,48 @@ const VersionHistoryDrawer = ({ open, onClose }) => {
             "
           >
             <button className="flex items-center justify-start px-5 md:hidden btn-hover" >
-              <X onClick={onClose}  className="text-black dark:text-gray-500 size-6" />
+              <X onClick={onClose} className="text-black dark:text-gray-500 size-6" />
             </button>
     
-            <div className="flex border-b mt-1 border-[#E0DDDD] pb-4 px-6 items-center justify-center gap-3 flex-shrink-0">
-              <div className="flex items-center justify-center border rounded-md text-[#989696] border-[#989696] gap-3 py-2 px-7">
-                <Share2 className="size-5 fill-[#989696]" />
-                <p className="text-sm font-medium">{t("share", "Share")}</p>
-              </div>
-              <div className="flex items-center justify-center border rounded-md text-[#989696] border-[#989696] gap-3 py-2 px-7">
-                <Download className="size-5" />
-                <p className="text-sm font-medium">{t("download", "Download")}</p>
+            <div className="flex border-b mt-1 border-[#E0DDDD] dark:border-gray-800 pb-4 px-6 items-center justify-between gap-3 flex-shrink-0">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
+                {document?.title || "Document"}
+              </h2>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+                >
+                  <X className="size-5" />
+                </button>
               </div>
             </div>
 
-  
             <div className="flex items-center justify-start w-full px-6 mt-4 shrink-0">
-              <p className="text-lg text-[#989696] uppercase">{t("versionHistory", "VERSION HISTORY")}</p>
+              <p className="text-sm font-bold text-[#989696] uppercase">{t("versionHistory", "VERSION HISTORY")}</p>
             </div>
 
-        
-            <div className="flex-1 px-6 mt-4 overflow-y-auto">
-              <Timeline />
+            <div className="flex-1 px-6 mt-2 overflow-y-auto">
+              <Timeline
+                docId={docId}
+                document={document}
+                onViewVersion={onViewVersion}
+                onRestoreVersion={onRestoreVersion}
+              />
             </div>
-            <div className="flex items-center justify-center w-full px-5 ">
-              <div className="flex items-center w-full justify-center border dark:border-[#73FBFD] border-[#2461E6] py-2 rounded-md px-8  ">
-                <p className="dark:text-[#73FBFD] text-[#2461E6] text-lg" >{t("openEditor", "Open Editor")}</p>
-              </div>
+
+            <div className="p-5 border-t border-gray-100 dark:border-gray-800 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenEditor?.(document);
+                }}
+                className="w-full flex items-center justify-center border-2 dark:border-[#73FBFD] border-[#2461E6] py-2.5 rounded-xl font-bold dark:text-[#73FBFD] text-[#2461E6] hover:bg-blue-50 dark:hover:bg-cyan-950/30 transition cursor-pointer btn-hover"
+              >
+                {t("openEditor", "Edit Document Details")}
+              </button>
             </div>
           </motion.div>
         </motion.div>

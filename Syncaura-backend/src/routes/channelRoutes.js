@@ -10,8 +10,17 @@ import {
   createChannel,
   joinChannel,
   leaveChannel,
-  getPublicChannels
+  getPublicChannels,
+  createPrivateChat,
+  createGroupChat,
+  updateGroupDetails,
+  addGroupMembers,
+  removeGroupMember
 } from "../controllers/channelController.js";
+import upload from "../middlewares/upload.js";
+
+router.post("/private", auth, createPrivateChat);
+router.post("/group", auth, createGroupChat);
 
 router.post(
   "/",
@@ -22,6 +31,9 @@ router.post(
 
 router.post("/:channelId/join", auth, joinChannel);
 router.post("/:channelId/leave", auth, leaveChannel);
+router.put("/:channelId", auth, upload.single("profile_pic"), updateGroupDetails);
+router.post("/:channelId/members", auth, addGroupMembers);
+router.delete("/:channelId/members/:userId", auth, removeGroupMember);
 router.get("/",auth,getChannels);
 router.get("/:id",auth,getChannelById);
 

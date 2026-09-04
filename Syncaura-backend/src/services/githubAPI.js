@@ -13,7 +13,7 @@ export const getAccessToken = async (code) => {
         client_id: process.env.GITHUB_CLIENT_ID,
         client_secret: process.env.GITHUB_CLIENT_SECRET,
         code: code,
-        redirect_uri: process.env.CLIENT_URL, // e.g., http://localhost:3000
+        redirect_uri: process.env.GITHUB_REDIRECT_URI || `${process.env.CLIENT_URL}/auth/github/callback`,
       },
       {
         headers: {

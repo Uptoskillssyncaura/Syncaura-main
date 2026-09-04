@@ -6,6 +6,9 @@ import { requireSelf } from '../middlewares/userAuth.js';
 import { getUser } from '../controllers/userController.js';
 
 const router = Router();
+import { getAllUsers } from '../controllers/userController.js';
+
+router.get('/all', auth, getAllUsers);
 
 router.get(
   '/:userId',

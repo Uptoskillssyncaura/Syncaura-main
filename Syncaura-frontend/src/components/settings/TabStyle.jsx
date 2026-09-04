@@ -1,9 +1,9 @@
-const Tab = ({ name, curr, setCurr }) => {
-  const isActive = curr === name;
+const Tab = ({ name, curr, tabKey, setCurr }) => {
+  const isActive = curr === tabKey;
 
   return (
     <div
-      onClick={() => setCurr(name)}
+      onClick={() => setCurr(tabKey)}
       className={`px-4 py-1 rounded-full cursor-pointer text-sm font-semibold transition
         ${
           isActive

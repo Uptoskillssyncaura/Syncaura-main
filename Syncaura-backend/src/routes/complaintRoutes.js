@@ -18,45 +18,37 @@ import {
 
 const router = express.Router();
 
-// All routes require authentication2
+// All routes require authentication
 router.use(auth);
 
-/**
- * Public routes (all authenticated users)
- */
-// Get complaint statistics
-router.get('/stats', permit(ROLES.ADMIN, ROLES.CO_ADMIN), getComplaintStats);
-// File a new complaint
+// Get complaint statistics (Admin / Co-Admin)
+router.get('/stats', permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), getComplaintStats);
+
+// File a new complaint (all authenticated users)
 router.post('/', upload.array('attachments', 5), createComplaint);
 
-// Get complaints filed by current user
+// Get complaints filed by current user (regular users)
 router.get('/my-complaints', getMyComplaints);
 
-// Get single complaint (with authorization check)
+// Get single complaint (filer or Admin/Co-Admin)
 router.get('/:id', getComplaintById);
 
 // Add comment to complaint
 router.post('/:id/comments', addComment);
 
-/**
- * Admin/Co-admin only routes
- */
+// Get all complaints with filters (Admin / Co-Admin only)
+router.get('/', permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), getAllComplaints);
 
-// Get all complaints with filters
-router.get('/', permit(ROLES.ADMIN, ROLES.CO_ADMIN), getAllComplaints);
+// Update complaint status (Admin / Co-Admin only)
+router.patch('/:id/status', permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), updateComplaintStatus);
 
-// Update complaint status
-router.patch('/:id/status', permit(ROLES.ADMIN, ROLES.CO_ADMIN), updateComplaintStatus);
+// Assign complaint to handler (Admin / Co-Admin only)
+router.patch('/:id/assign', permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), assignComplaint);
 
-// Assign complaint to handler
-router.patch('/:id/assign', permit(ROLES.ADMIN, ROLES.CO_ADMIN), assignComplaint);
+// Update complaint details (Admin / Co-Admin only)
+router.patch('/:id', permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), updateComplaint);
 
-// Update complaint details
-router.patch('/:id', permit(ROLES.ADMIN, ROLES.CO_ADMIN), updateComplaint);
-
-// Delete complaint
-router.delete('/:id', permit(ROLES.ADMIN, ROLES.CO_ADMIN), deleteComplaint);
-
-
+// Delete complaint (Admin / Co-Admin only)
+router.delete('/:id', permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), deleteComplaint);
 
 export default router;

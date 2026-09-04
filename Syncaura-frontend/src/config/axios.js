@@ -1,8 +1,6 @@
 import axios from "axios";
 
 const api = axios.create({
-  // Use relative URL so Vite proxy forwards /api/* to backend (no CORS issues).
-  // In production, set VITE_API_URL to your deployed backend URL.
   baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "/api",
   withCredentials: true,
 });
@@ -10,7 +8,6 @@ const api = axios.create({
 // Request interceptor: attach accessToken to headers
 api.interceptors.request.use(
   (config) => {
-    // Read accessToken first (set by authSlice), fall back to legacy "token" key
     const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -43,10 +40,11 @@ api.interceptors.response.use(
     // Skip refresh logic for auth endpoints or if request has already been retried
     if (
       error.response?.status === 401 &&
+      originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/auth/login") &&
-      !originalRequest.url.includes("/auth/register") &&
-      !originalRequest.url.includes("/auth/refresh")
+      !originalRequest.url?.includes("/auth/login") &&
+      !originalRequest.url?.includes("/auth/register") &&
+      !originalRequest.url?.includes("/auth/refresh")
     ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -68,29 +66,35 @@ api.interceptors.response.use(
           throw new Error("No refresh token found");
         }
 
-        // Call token refresh using plain axios to avoid the main interceptor
-        const res = await axios.post("http://localhost:5000/api/auth/refresh", {
-          refreshToken,
-        });
+        const refreshUrl = import.meta.env.VITE_API_URL
+          ? `${import.meta.env.VITE_API_URL}/api/auth/refresh`
+          : "/api/auth/refresh";
 
-        const { accessToken } = res.data;
-        localStorage.setItem("accessToken", accessToken);
+        const res = await axios.post(
+          refreshUrl,
+          { refreshToken },
+          { withCredentials: true }
+        );
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        const { accessToken, refreshToken: newRefreshToken } = res.data;
+        if (accessToken) {
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("token", accessToken);
+          api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        if (newRefreshToken) {
+          localStorage.setItem("refreshToken", newRefreshToken);
+        }
 
         processQueue(null, accessToken);
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        
-        // Refresh token failed -> clear auth data and redirect to login
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
-        
-        // Dispatch custom event to notify Redux/App or trigger window redirect
-        window.dispatchEvent(new Event("auth_session_expired"));
-        
+        localStorage.removeItem("user");
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -100,27 +104,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-
-
-
-// //  new changes .
-
-// const api = axios.create({
-//   baseURL: "http://localhost:5000/api",
-// });
-
-// api.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("accessToken");
-
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
 
 export default api;

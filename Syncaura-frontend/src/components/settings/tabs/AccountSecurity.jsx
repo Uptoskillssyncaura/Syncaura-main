@@ -17,7 +17,7 @@ const AccountSecurity = () => {
 
       {/* Title */}
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-7">
-        {t("Account and Security")}
+       {t("accountSecurity")}
       </h2>
 
       {/* User Row */}
@@ -54,7 +54,7 @@ const AccountSecurity = () => {
             {t("twoStepVerification")}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Two-step verification is not available until verified sign-in enforcement is implemented.
+            {t("twoStepDesc")}
           </p>
         </div>
 
@@ -72,7 +72,7 @@ const AccountSecurity = () => {
             onClick={() => setShowModal(true)}
             className="px-5 py-1 rounded-full bg-[#2461E6] text-white border border-[#2461E6] text-sm font-semibold flex items-center gap-2 hover:bg-blue-50 hover:text-[#2461E6] dark:bg-[#73FBFD] dark:text-black dark:border-[#73FBFD] dark:hover:bg-gray-800 dark:hover:text-[#73FBFD] transition-colors shadow-sm btn-hover"
           >
-            Learn more
+            {t("learnMore")}
           </button>
         </div>
       </div>

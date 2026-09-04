@@ -28,11 +28,17 @@ const complaintSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getAllComplaints.pending, (state) => { state.isLoading = true; state.error = null; })
-      .addCase(getAllComplaints.fulfilled, (state, action) => { state.isLoading = false; state.complaints = action.payload.data; })
+      .addCase(getAllComplaints.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.complaints = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
+      })
       .addCase(getAllComplaints.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
 
       .addCase(getMyComplaints.pending, (state) => { state.isLoading = true; state.error = null; })
-      .addCase(getMyComplaints.fulfilled, (state, action) => { state.isLoading = false; state.complaints = action.payload.data; })
+      .addCase(getMyComplaints.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.complaints = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
+      })
       .addCase(getMyComplaints.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
 
       .addCase(getComplaintById.pending, (state) => { state.isLoading = true; })
@@ -40,14 +46,25 @@ const complaintSlice = createSlice({
       .addCase(getComplaintById.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
 
       .addCase(createComplaint.pending, (state) => { state.isLoading = true; })
-      .addCase(createComplaint.fulfilled, (state, action) => { state.isLoading = false; state.complaints.unshift(action.payload.data); })
+      .addCase(createComplaint.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const newComplaint = action.payload?.data || action.payload;
+        if (newComplaint) state.complaints.unshift(newComplaint);
+      })
       .addCase(createComplaint.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
 
       .addCase(updateComplaintStatus.pending, (state) => { state.isLoading = true; })
       .addCase(updateComplaintStatus.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.complaints = state.complaints.map((c) => c._id === action.payload.data._id ? action.payload.data : c);
-        if (state.complaint?._id === action.payload.data._id) state.complaint = action.payload.data;
+        const updated = action.payload?.data || action.payload;
+        if (updated) {
+          state.complaints = state.complaints.map((c) =>
+            (c.id && c.id === updated.id) || (c._id && c._id === updated._id) ? updated : c
+          );
+          if ((state.complaint?.id && state.complaint.id === updated.id) || (state.complaint?._id && state.complaint._id === updated._id)) {
+            state.complaint = updated;
+          }
+        }
       })
       .addCase(updateComplaintStatus.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
 
@@ -58,8 +75,10 @@ const complaintSlice = createSlice({
       .addCase(deleteComplaint.pending, (state) => { state.isLoading = true; })
       .addCase(deleteComplaint.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.complaints = state.complaints.filter((c) => c._id !== action.meta.arg);
-        if (state.complaint?._id === action.meta.arg) state.complaint = null;
+        state.complaints = state.complaints.filter((c) => (c.id || c._id) !== action.meta.arg);
+        if (state.complaint && (state.complaint.id === action.meta.arg || state.complaint._id === action.meta.arg)) {
+          state.complaint = null;
+        }
       })
       .addCase(deleteComplaint.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
 

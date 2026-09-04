@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 
-const data = [
-  { name: "Jan", val: 10 },
-  { name: "Feb", val: 25 },
-  { name: "Mar", val: 45 },
-  { name: "Apr", val: 30 },
-  { name: "May", val: 60 },
-  { name: "Jun", val: 75 },
-];
-
 const ProductivityTrend = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -32,9 +23,11 @@ const ProductivityTrend = () => {
           <option>Last 6 months</option>
         </select>
       </div>
-      <div className="h-64 w-full mx-10"> 
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ left: 20, right: 60, top: 20, bottom: 10 }}>
+      <div className="h-64 w-full mx-10">
+        <p className="flex h-full items-center justify-center text-sm text-gray-500">Productivity history is unavailable.</p>
+        {/* Historical productivity is not provided by the current API. */}
+        <ResponsiveContainer width="100%" height="0%">
+          <LineChart data={[]}>
             <CartesianGrid 
               strokeDasharray="0" 
               vertical={false} 

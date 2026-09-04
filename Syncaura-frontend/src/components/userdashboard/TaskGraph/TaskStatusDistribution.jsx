@@ -26,7 +26,7 @@ export default function TaskStatusDistribution({
           <div className="flex items-end gap-2">
             {showTotal && (
               <p className="text-xs xsm:text-sm font-bold text-[#000000] dark:text-gray-300">
-                {total} Active Tasks
+                {total} Tasks
               </p>
             )}
             <StatusLegend data={task} />

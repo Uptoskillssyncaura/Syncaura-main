@@ -2,17 +2,17 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-const data = [
-  { name: "Active", value: 65, color: "#00D2FF" },
-  { name: "Completed", value: 25, color: "#22C55E" },
-  { name: "At Risk", value: 10, color: "#EF4444" },
-  { name: "Upcoming", value: 0, color: "#94a3b8" },
-];
-
-const SUCCESS_RATE = 82;
-
-const OverallContextChart = () => {
+const OverallContextChart = ({ projects = [], loading = false }) => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const completed = projects.filter((project) => project.progress === 100).length;
+  const atRisk = projects.filter((project) => project.overdue).length;
+  const active = projects.filter((project) => project.progress < 100 && !project.overdue).length;
+  const data = [
+    { name: "Active", value: active, color: "#00D2FF" },
+    { name: "Completed", value: completed, color: "#22C55E" },
+    { name: "At Risk", value: atRisk, color: "#EF4444" },
+  ];
+  const successRate = projects.length ? Math.round((completed / projects.length) * 100) : 0;
 
   return (
     <motion.div
@@ -55,7 +55,7 @@ const OverallContextChart = () => {
           {/* Center Text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-3xl font-bold">
-              {SUCCESS_RATE}%
+              {loading ? '...' : `${successRate}%`}
             </span>
             <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 dark:text-[#94a3b8]">
               Success Rate
@@ -65,7 +65,8 @@ const OverallContextChart = () => {
 
         {/* Legend */}
         <div className="flex flex-wrap gap-x-10 gap-y-4 justify-center md:justify-start">
-          {data.map((item, index) => (
+          {!loading && projects.length === 0 && <p className="text-sm text-slate-500">No project context available.</p>}
+          {!loading && projects.length > 0 && data.map((item, index) => (
             <div key={index} className="flex items-center gap-3">
               <span
                 className="size-3 rounded-full"

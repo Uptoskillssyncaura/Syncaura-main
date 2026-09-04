@@ -143,7 +143,7 @@ export default function SignIn() {
 
             <p className="lead">
               {selectedRole === 'employee'
-                ? t('auth_signin_lead')
+                ? t('auth_signin_lead', 'Login to continue your journey.')
                 : getLeadText()}
             </p>
 

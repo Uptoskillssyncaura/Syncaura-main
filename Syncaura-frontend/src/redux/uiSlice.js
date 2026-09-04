@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  theme: localStorage.getItem("app_theme") || "light",
-  font: localStorage.getItem("app_font") || "Arial",
-  fontSize: localStorage.getItem("app_fontSize") || "medium",
-  zoom: Number(localStorage.getItem("app_zoom")) || 100,
+theme: localStorage.getItem("app_theme") || "light",
+font: localStorage.getItem("app_font") || "Arial",
+fontSize: localStorage.getItem("app_fontSize") || "medium",
+zoom: Number(localStorage.getItem("app_zoom")) || 100,
 };
 
 const uiSlice = createSlice({

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ScrollToTop from "./components/ScrollToTop";
 import MainLayout from "./layouts/MainLayout";
 import { lazy, Suspense, useEffect } from "react";
@@ -25,6 +25,7 @@ const Home = lazy(() => import("./pages/Home"));
 const RoleSelection = lazy(() => import("./pages/RoleSelection"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const GithubCallback = lazy(() => import("./pages/GithubCallback"));
+const IssueStatus = lazy(() => import("./pages/IssueStatus"));
 const Profile = lazy(() => import("./pages/Profile"));
 
 import NotFound from "./pages/NotFound";
@@ -40,9 +41,6 @@ import {
 import { Loader } from "lucide-react";
 import ProtectRoute from "./RouteProtection/ProtectRoute";
 
-
-
-
 export default function App() {
   const dispatch = useDispatch();
   const isDark = useSelector((state) => state.theme.isDark);
@@ -50,13 +48,20 @@ export default function App() {
 
   useEffect(() => {
     const initAuth = async () => {
-      try {
-        const result = await dispatch(refreshAccessToken());
-        if (refreshAccessToken.fulfilled.match(result)) {
-          dispatch(fetchUserProfile());
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+      if (token) {
+        try {
+          await dispatch(fetchUserProfile()).unwrap();
+        } catch (profileErr) {
+          try {
+            const refreshRes = await dispatch(refreshAccessToken()).unwrap();
+            if (refreshRes?.accessToken) {
+              await dispatch(fetchUserProfile()).unwrap();
+            }
+          } catch (refreshErr) {
+            console.warn("Session restore failed:", refreshErr);
+          }
         }
-      } catch (err) {
-        console.log(err);
       }
     };
 
@@ -128,10 +133,12 @@ export default function App() {
           }
         >
           <Routes>
+            {/* Public Routes */}
             <Route element={<ProtectRoute publicOnly />}>
               <Route path="/" element={<Home />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/sign-in" element={<SignIn />} />
+              <Route path="/login" element={<SignIn />} />
               <Route path="/role-selection" element={<RoleSelection />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/sign-up" element={<SignUp />} />
@@ -141,181 +148,39 @@ export default function App() {
               <Route path="/about-us" element={<AboutUs />} />
             </Route>
 
-            <Route
-              element={
-                <ProtectRoute allowedRoles={["user", "admin", "co-admin"]} />
-              }
-            >
+            {/* Authenticated Shared Routes */}
+            <Route element={<ProtectRoute allowedRoles={["user", "admin", "co-admin"]} />}>
+              <Route path="/user-dashboard" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><UserDashboard /></MainLayout>} />
+              <Route path="/projects" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Projects /></MainLayout>} />
+              <Route path="/attendance-leave" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><AttendanceLeave /></MainLayout>} />
+              <Route path="/my-attendance" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><MyAttendance /></MainLayout>} />
+              <Route path="/tasks" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Tasks /></MainLayout>} />
+              <Route path="/meetings" element={<MainLayout SideBar={MobileSidebar} TopbarComponent={Header}><Meetings /></MainLayout>} />
+              <Route path="/profile" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Profile /></MainLayout>} />
+              <Route path="/chat" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Chat /></MainLayout>} />
+              <Route path="/notice" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Notice /></MainLayout>} />
+              <Route path="/documents" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Documents /></MainLayout>} />
+              <Route path="/complaints" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Complaints /></MainLayout>} />
+              <Route path="/settings" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><Settings /></MainLayout>} />
               <Route path="/meet/:id" element={<CurrentMeet />} />
             </Route>
 
+            {/* Admin and Co-Admin Specific Routes */}
+            <Route element={<ProtectRoute allowedRoles={["admin", "co-admin"]} />}>
+              <Route path="/issue-status" element={<MainLayout TopbarComponent={Header} SideBar={MobileSidebar}><IssueStatus /></MainLayout>} />
+            </Route>
+
+            {/* Admin Only Routes */}
             <Route element={<ProtectRoute allowedRoles={["admin"]} />}>
-              <Route
-                path="/admin"
-                element={
-                  <MainLayout SideBar={MobileSidebar} TopbarComponent={Header}>
-                    <Admin />
-                  </MainLayout>
-                }
-              />
+              <Route path="/admin" element={<MainLayout SideBar={MobileSidebar} TopbarComponent={Header}><Admin /></MainLayout>} />
             </Route>
 
+            {/* Co-Admin Only Routes */}
             <Route element={<ProtectRoute allowedRoles={["co-admin"]} />}>
-              <Route
-                path="/co-admin"
-                element={
-                  <MainLayout SideBar={MobileSidebar} TopbarComponent={Header}>
-                    <CoAdmin />
-                  </MainLayout>
-                }
-              />
+              <Route path="/co-admin" element={<MainLayout SideBar={MobileSidebar} TopbarComponent={Header}><CoAdmin /></MainLayout>} />
             </Route>
 
-            <Route
-              element={
-                <ProtectRoute allowedRoles={["user", "admin", "co-admin"]} />
-              }
-            >
-              <Route
-                path="/user-dashboard"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <UserDashboard />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/projects"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Projects />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/attendance-leave"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <AttendanceLeave />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/my-attendance"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <MyAttendance />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/tasks"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Tasks />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/meetings"
-                element={
-                  <MainLayout SideBar={MobileSidebar} TopbarComponent={Header}>
-                    <Meetings />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Profile />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/chat"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Chat />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/notice"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Notice />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/documents"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Documents />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/complaints"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Complaints />
-                  </MainLayout>
-                }
-              />
-
-              <Route
-                path="/settings"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <Settings />
-                  </MainLayout>
-                }
-              />
-            </Route>
-
-            <Route element={<ProtectRoute allowedRoles={["admin"]} />}>
-              <Route
-                path="/admin"
-                element={
-                  <MainLayout SideBar={MobileSidebar} TopbarComponent={Header}>
-                    <Admin />
-                  </MainLayout>
-                }
-              />
-            </Route>
-
-            <Route element={<ProtectRoute allowedRoles={["co-admin"]} />}>
-              <Route
-                path="/co-admin"
-                element={
-                  <MainLayout SideBar={MobileSidebar} TopbarComponent={Header}>
-                    <CoAdmin />
-                  </MainLayout>
-                }
-              />
-            </Route>
-
-            <Route element={<ProtectRoute allowedRoles={["user"]} />}>
-              <Route
-                path="/user-dashboard"
-                element={
-                  <MainLayout TopbarComponent={Header} SideBar={MobileSidebar}>
-                    <UserDashboard />
-                  </MainLayout>
-                }
-              />
-            </Route>
-
+            {/* Fallback */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

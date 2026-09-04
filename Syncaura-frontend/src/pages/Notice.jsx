@@ -8,12 +8,25 @@ import NewNoticeModal from "../components/notice/NewNoticeModel";
 import { AnimatePresence, motion } from "framer-motion";
 import NoticeFilter from "../components/notice/NoticeFilter";
 import { fetchNotices, createNotice, updateNotice, deleteNotice } from "../redux/features/noticeThunks";
+import { toast } from "react-toastify";
 
 const Notice = () => {
   const dispatch = useDispatch();
   const { notices, isLoading } = useSelector((state) => state.notice);
   const isdark = useSelector((state) => state.theme.isDark);
   const user = useSelector((state) => state.auth.user);
+  const storedUser = (() => {
+    try {
+      const raw = localStorage.getItem("user");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const currentUser = user || storedUser;
+  const userRole = String(currentUser?.role || "").trim().toLowerCase();
+  const canCreateNotice = userRole === "admin" || userRole === "co-admin" || userRole === "coadmin";
+
   const [showModel, setShowModal] = useState(false);
   const [editingNotice, setEditingNotice] = useState(null);
   const [search, setSearch] = useState("");
@@ -32,11 +45,9 @@ const Notice = () => {
   }, [notices]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(search.toLowerCase()), 500);
+    const timer = setTimeout(() => setDebouncedValue(search.toLowerCase()), 350);
     return () => clearTimeout(timer);
   }, [search]);
-
-
 
   const filteredNotice = useMemo(() => {
     let result = [...noticeData];
@@ -44,12 +55,24 @@ const Notice = () => {
       result = result.filter(
         (item) =>
           item.title?.toLowerCase().includes(debouncedValue) ||
-          item.description?.toLowerCase().includes(debouncedValue)
+          item.description?.toLowerCase().includes(debouncedValue) ||
+          item.category?.toLowerCase().includes(debouncedValue) ||
+          item.created_by?.toLowerCase().includes(debouncedValue) ||
+          item.creator_user_name?.toLowerCase().includes(debouncedValue)
       );
     }
     if (appliedFilters?.date) {
       const selectedDate = new Date(appliedFilters.date);
-      result = result.filter((item) => new Date(item.createdAt) >= selectedDate);
+      selectedDate.setHours(0, 0, 0, 0);
+      result = result.filter((item) => {
+        const d = new Date(item.created_at || item.createdAt);
+        d.setHours(0, 0, 0, 0);
+        return d >= selectedDate;
+      });
+    }
+    if (appliedFilters?.type && appliedFilters.type.toLowerCase() !== "all") {
+      const cat = appliedFilters.type.toLowerCase();
+      result = result.filter((item) => (item.category || "general").toLowerCase() === cat);
     }
     return result;
   }, [noticeData, debouncedValue, appliedFilters]);
@@ -60,16 +83,37 @@ const Notice = () => {
 
   const handleApplyFilters = (newFilters) => setAppliedFilters(newFilters);
 
-  const handleAddNotice = (formData) => {
-    return dispatch(createNotice(formData));
+  const handleAddNotice = async (formData) => {
+    try {
+      const res = await dispatch(createNotice(formData)).unwrap();
+      toast.success("Notice published successfully");
+      return res;
+    } catch (err) {
+      toast.error(typeof err === "string" ? err : "Failed to publish notice");
+      throw err;
+    }
   };
 
-  const handleUpdateNotice = (formData) => {
-    return dispatch(updateNotice({ id: editingNotice.id ?? editingNotice._id, formData }));
+  const handleUpdateNotice = async (formData) => {
+    try {
+      const targetId = editingNotice.id ?? editingNotice._id;
+      const res = await dispatch(updateNotice({ id: targetId, formData })).unwrap();
+      toast.success("Notice updated successfully");
+      return res;
+    } catch (err) {
+      toast.error(typeof err === "string" ? err : "Failed to update notice");
+      throw err;
+    }
   };
 
-  const handleDeleteNotice = (id) => {
-    dispatch(deleteNotice(id));
+  const handleDeleteNotice = async (id) => {
+    try {
+      await dispatch(deleteNotice(id)).unwrap();
+      setNoticeData((prev) => prev.filter((n) => (n.id ?? n._id) !== id));
+      toast.success("Notice deleted successfully");
+    } catch (err) {
+      toast.error(typeof err === "string" ? err : "Failed to delete notice");
+    }
   };
 
   const handleCloseModal = () => {
@@ -109,7 +153,7 @@ const Notice = () => {
             <Search className="size-5 text-gray-500" />
             <input
               onChange={(e) => setSearch(e.target.value)}
-              type="text" value={search} placeholder="Search"
+              type="text" value={search} placeholder="Search by title, category, publisher…"
               className="flex-1 outline-none text-[#A19C9C] dark:text-[#acabab] text-sm placeholder:text-sm placeholder:text-[#A19C9C] dark:placeholder:text-[#acabab]"
             />
           </div>
@@ -117,7 +161,7 @@ const Notice = () => {
       </div>
 
       <div className="flex items-center justify-center w-full px-2 sm:px-10">
-        <RecentActivity />
+        <RecentActivity notices={noticeData} />
       </div>
 
       <div className="flex flex-col items-start justify-center w-full">
@@ -129,19 +173,22 @@ const Notice = () => {
             className="flex flex-col gap-2 justify-center w-full"
             variants={containerVariants} initial="hidden" animate="show" key={fewNotification.length}
           >
-            {isLoading && <p className="text-center text-gray-400 py-4">Loading...</p>}
+            {isLoading && <p className="text-center text-gray-400 py-4">Loading notices...</p>}
             {!isLoading && fewNotification.length === 0 && (
               <p className="text-center text-gray-400 py-4">No notices found.</p>
             )}
             {fewNotification.map((item, idx) => (
-              <motion.div key={item._id} variants={itemVariants}>
+              <motion.div key={item.id ?? item._id} variants={itemVariants}>
                 <NotificationRow
-                  key={item._id}
+                  key={item.id ?? item._id}
                   id={item.id ?? item._id}
                   attachments={item.attachments}
                   about={item.title}
                   title={item.description}
-                  date={item.createdAt}
+                  category={item.category}
+                  creator={item.creator_user_name || item.created_by || "Admin"}
+                  creatorId={item.creator_id || item.created_by_id}
+                  date={item.created_at || item.createdAt}
                   onEdit={() => { setEditingNotice(item); setShowModal(true); }}
                   onDelete={handleDeleteNotice}
                   bgColor={idx % 3 === 0 ? "bg-red-50" : idx % 3 === 1 ? "bg-purple-50" : "bg-blue-50"}
@@ -163,10 +210,10 @@ const Notice = () => {
         </div>
       </div>
 
-      {user?.role === "admin" && (
+      {canCreateNotice && (
         <button
           onClick={() => setShowModal(true)}
-          className="fixed bottom-8 right-8 flex items-center gap-2 rounded-full bg-blue-600 dark:bg-[#73FBFD] dark:text-black transition duration-500 px-6 py-3 text-white shadow-lg hover:bg-blue-400 dark:hover:bg-[#2cc4c7] btn-hover"
+          className="fixed bottom-8 right-8 flex items-center gap-2 rounded-full bg-blue-600 dark:bg-[#73FBFD] dark:text-black transition duration-500 px-6 py-3 text-white shadow-lg hover:bg-blue-400 dark:hover:bg-[#2cc4c7] btn-hover cursor-pointer"
         >
           <Plus size={18} />
           New Notice

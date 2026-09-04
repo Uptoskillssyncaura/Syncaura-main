@@ -7,13 +7,6 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-const tasks = [
-  { id: 1, name: "Implement OAuth Login", project: "Auth-Service", status: "In Progress", priority: "HIGH", dueDate: "2026-10-12", sprint: "Sprint 24" },
-  { id: 2, name: "Update Documentation", project: "Core-API", status: "To Do", priority: "LOW", dueDate: "2026-10-25", sprint: "Sprint 25" },
-  { id: 3, name: "Bug: Header alignment on Mobile", project: "Frontend-UI", status: "Blocked", priority: "MEDIUM", dueDate: "2026-10-20", sprint: "Sprint 24" },
-  { id: 4, name: "Setup CI/CD Pipeline", project: "DevOps", status: "Done", priority: "HIGH", dueDate: "2026-10-05", sprint: "Sprint 23" },
-];
-
 const statusStyles = {
   "In Progress": "bg-blue-100 text-blue-600 dark:bg-[#1D283A] dark:text-blue-400 dark:border dark:border-blue-900/50",
   "To Do": "bg-yellow-100 text-yellow-700 dark:bg-[#2D2615] dark:text-yellow-500 dark:border dark:border-yellow-900/50",
@@ -46,10 +39,10 @@ const checkboxClass = `
   bg-center bg-no-repeat bg-[length:14px_14px]
 `;
 
-export default function TasksTable() {
+export default function TasksTable({ tasks = [], loading = false, error = null }) {
   const [page] = useState(1);
   const perPage = 4;
-  const rows = useMemo(() => tasks.slice((page - 1) * perPage, page * perPage), [page]);
+  const rows = useMemo(() => tasks.slice((page - 1) * perPage, page * perPage), [page, tasks]);
 
   return (
     <div className="w-full overflow-x-auto rounded-xl bg-white dark:bg-[#1E1E1E] shadow border border-gray-200 dark:border-[#2D2F31]">
@@ -73,8 +66,13 @@ export default function TasksTable() {
         </thead>
 
         <tbody className="divide-y divide-gray-200 dark:divide-[#2D2F31]">
-          {rows.map((task) => {
-            const isLate = new Date(task.dueDate) < new Date();
+          {loading && <tr><td colSpan="8" className="p-6 text-center text-gray-500">Loading tasks...</td></tr>}
+          {!loading && error && <tr><td colSpan="8" className="p-6 text-center text-red-500">{error}</td></tr>}
+          {!loading && !error && rows.length === 0 && <tr><td colSpan="8" className="p-6 text-center text-gray-500">No tasks found.</td></tr>}
+          {!loading && !error && rows.map((task) => {
+            const dueDate = task.deadline || task.dueDate;
+            const status = task.status === 'IN_PROGRESS' ? 'In Progress' : task.status === 'TODO' ? 'To Do' : task.status === 'DONE' ? 'Done' : task.status;
+            const isLate = dueDate && new Date(dueDate) < new Date() && status !== 'Done';
 
             return (
               <motion.tr
@@ -86,33 +84,33 @@ export default function TasksTable() {
                 <td className="p-4">
                   <input
                     type="checkbox"
-                    defaultChecked={task.status === "Done"}
+                    defaultChecked={status === "Done"}
                     className={checkboxClass}
                   />
                 </td>
 
-                <td className="font-medium text-gray-800 dark:text-gray-200">{task.name}</td>
-                <td className="text-gray-600 dark:text-[#9BA1B0]">{task.project}</td>
+                <td className="font-medium text-gray-800 dark:text-gray-200">{task.title}</td>
+                <td className="text-gray-600 dark:text-[#9BA1B0]">{task.project_name || task.project_id || 'Unassigned'}</td>
 
                 <td>
-                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase ${statusStyles[task.status]}`}>
-                    {statusIcon[task.status]}
-                    <span>{task.status}</span>
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase ${statusStyles[status] || statusStyles["To Do"]}`}>
+                    {statusIcon[status] || statusIcon["To Do"]}
+                    <span>{status}</span>
                   </div>
                 </td>
 
                 <td>
-                  <span className={`px-3 py-0.5 rounded border text-[10px] font-bold ${priorityStyles[task.priority]}`}>
-                    {task.priority}
+                  <span className={`px-3 py-0.5 rounded border text-[10px] font-bold ${priorityStyles[task.priority] || priorityStyles.LOW}`}>
+                    {task.priority || 'LOW'}
                   </span>
                 </td>
 
                 <td className={`flex items-center gap-2 py-4 ${isLate ? "text-red-500 font-medium" : "text-gray-400"}`}>
                   {isLate && <CircleAlert size={14} className="fill-red-500 text-white dark:text-[#141517]" />}
-                  {formatDate(task.dueDate)}
+                  {dueDate ? formatDate(dueDate) : 'No deadline'}
                 </td>
 
-                <td className="text-gray-600 dark:text-[#9BA1B0]">{task.sprint}</td>
+                <td className="text-gray-600 dark:text-[#9BA1B0]">{task.sprint || 'Not assigned'}</td>
 
                 <td className="text-center">
                   <MoreHorizontal className="mx-auto text-gray-400 cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 transition-colors" />
@@ -125,7 +123,7 @@ export default function TasksTable() {
 
       {/* Pagination Bar */}
       <div className="flex items-center justify-between px-6 py-4 text-sm text-gray-500 dark:text-[#6E717F] border-t border-gray-200 dark:border-[#2D2F31]">
-        <span>Showing 1–4 of 42 tasks</span>
+        <span>Showing {rows.length ? (page - 1) * perPage + 1 : 0}–{Math.min(page * perPage, tasks.length)} of {tasks.length} tasks</span>
 
         <div className="flex gap-2">
           <button className="px-4 py-1.5 rounded-md border border-gray-300 dark:border-[#2D2F31] bg-white dark:bg-[#1c1d1f] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#252629] transition-colors btn-hover">

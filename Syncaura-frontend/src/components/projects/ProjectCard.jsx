@@ -22,10 +22,14 @@ const ProjectCard = ({
   priority,
   progress,
   avatars = [],
+  members = [],
+  owner = null,
   dueDate,
   onAction,
 }) => {
   const user = useSelector((state) => state.auth.user);
+  const userRole = (user?.role || localStorage.getItem("role") || "").toLowerCase();
+  const isAdminOrCoAdmin = userRole === "admin" || userRole === "co-admin" || userRole === "coadmin";
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
@@ -83,6 +87,11 @@ const ProjectCard = ({
   const priorityColor = {
     Critical: "bg-[#FEE2E2] text-[#C71212]",
     Ongoing: "bg-[#DBEAFE] text-[#0000A5]",
+    "In Progress": "bg-[#DBEAFE] text-[#0000A5]",
+    ACTIVE: "bg-[#DBEAFE] text-[#0000A5]",
+    "Not Started": "bg-[#EDE9FE] text-[#6D28D9]",
+    Planning: "bg-[#FEF3C7] text-[#D97706]",
+    Backlog: "bg-[#F3F4F6] text-[#4B5563]",
     "On Hold": "bg-[#F3F4F6] text-[#69707E]",
     Completed: "bg-[#DCFCE7] text-[#004500]",
   };
@@ -90,6 +99,11 @@ const ProjectCard = ({
   const bottomIconBgColor = {
     Critical: "bg-[#FEE2E2] text-[#C71212] dark:bg-[#212121]",
     Ongoing: "bg-[#DBEAFE] text-[#0000A5] dark:bg-[#212121]",
+    "In Progress": "bg-[#DBEAFE] text-[#0000A5] dark:bg-[#212121]",
+    ACTIVE: "bg-[#DBEAFE] text-[#0000A5] dark:bg-[#212121]",
+    "Not Started": "bg-[#EDE9FE] text-[#6D28D9] dark:bg-[#212121]",
+    Planning: "bg-[#FEF3C7] text-[#D97706] dark:bg-[#212121]",
+    Backlog: "bg-[#F3F4F6] text-[#4B5563] dark:bg-[#212121]",
     "On Hold": "bg-[#F3F4F6] text-[#69707E] dark:bg-[#212121]",
     Completed: "bg-[#DCFCE7] text-[#004500] dark:bg-[#212121]",
   };
@@ -97,12 +111,44 @@ const ProjectCard = ({
   const bottomIcon = {
     Critical: <Flag className="size-3.5 text-[#C71212] fill-[#C71212]" />,
     Ongoing: <Calendar className="size-3.5 text-[#0000A5]" />,
+    "In Progress": <Calendar className="size-3.5 text-[#0000A5]" />,
+    ACTIVE: <Calendar className="size-3.5 text-[#0000A5]" />,
+    "Not Started": <Calendar className="size-3.5 text-[#6D28D9]" />,
+    Planning: <Calendar className="size-3.5 text-[#D97706]" />,
+    Backlog: <Calendar className="size-3.5 text-[#4B5563]" />,
     "On Hold": <Tally2 className="size-5 text-[#69707E]" />,
     Completed: <CheckCircle2 className="size-5 text-[#004500]" />,
   };
 
-  const visibleAvatars = (avatars || []).slice(0, 2);
-  const extraCount = (avatars || []).length - visibleAvatars.length;
+  const membersList = (Array.isArray(members) && members.length > 0)
+    ? members
+    : (Array.isArray(avatars) && avatars.length > 0)
+      ? avatars.map((a, i) => (typeof a === "object" ? a : { id: i, profile_pic: a }))
+      : (owner ? [owner] : []);
+
+  const visibleMembers = membersList.slice(0, 3);
+  const extraCount = membersList.length - visibleMembers.length;
+
+  const getInitials = (item) => {
+    const name = typeof item === "string" ? item : item?.name || item?.email || "U";
+    return name
+      .split(" ")
+      .map((p) => p[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+  const getAvatarColor = (idx) => {
+    const colors = [
+      "bg-blue-600 text-white",
+      "bg-emerald-600 text-white",
+      "bg-purple-600 text-white",
+      "bg-amber-600 text-white",
+      "bg-rose-600 text-white",
+    ];
+    return colors[idx % colors.length];
+  };
 
   return (
     <div className="relative bg-white dark:bg-[#2E2F2F] w-60 md:w-80 flex flex-col gap-12 shrink-0 box-border px-4 py-3 rounded-2xl shadow-[0_4px_10px_rgba(0,0,0,0.25)] transition-colors duration-300">
@@ -157,70 +203,72 @@ const ProjectCard = ({
                     <span>Duplicate</span>
                   </button>
 
-                  {/* Change Status Submenu Toggle */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowStatusSubmenu((prev) => !prev)}
-                      className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors text-left cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <CheckCircle2 className="size-4 text-amber-500" />
-                        <span>Change Status</span>
-                      </div>
-                      <ChevronRight className={`size-3.5 text-gray-400 transition-transform ${showStatusSubmenu ? "rotate-90" : ""}`} />
-                    </button>
-
-                    {/* Status Options Submenu */}
-                    <AnimatePresence>
-                      {showStatusSubmenu && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.15 }}
-                          className="bg-gray-50 dark:bg-[#151515] py-1 border-y border-gray-100 dark:border-gray-800 overflow-hidden"
+                      {/* Change Status Submenu Toggle */}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowStatusSubmenu((prev) => !prev)}
+                          className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors text-left cursor-pointer"
                         >
-                          {[
-                            { label: "Ongoing", color: "bg-[#0000A5]" },
-                            { label: "Completed", color: "bg-[#004500]" },
-                            { label: "On Hold", color: "bg-[#69707E]" },
-                            { label: "Critical", color: "bg-[#C71212]" },
-                          ].map((st) => (
-                            <button
-                              key={st.label}
-                              type="button"
-                              onClick={() => handleAction("status", st.label)}
-                              className={`w-full flex items-center gap-2 px-5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#252525] transition-colors text-left cursor-pointer ${priority === st.label ? "font-bold text-black dark:text-white bg-gray-200/60 dark:bg-[#202020]" : ""
-                                }`}
+                          <div className="flex items-center gap-2.5">
+                            <CheckCircle2 className="size-4 text-amber-500" />
+                            <span>Change Status</span>
+                          </div>
+                          <ChevronRight className={`size-3.5 text-gray-400 transition-transform ${showStatusSubmenu ? "rotate-90" : ""}`} />
+                        </button>
+
+                        {/* Status Options Submenu */}
+                        <AnimatePresence>
+                          {showStatusSubmenu && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.15 }}
+                              className="bg-gray-50 dark:bg-[#151515] py-1 border-y border-gray-100 dark:border-gray-800 overflow-hidden"
                             >
-                              <span className={`size-2 rounded-full ${st.color}`} />
-                              <span>{st.label}</span>
-                              {priority === st.label && <Check className="size-3 ml-auto text-blue-500 dark:text-[#73FBFD]" />}
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                              {[
+                                { label: "Not Started", color: "bg-[#6D28D9]" },
+                                { label: "In Progress", color: "bg-[#0000A5]" },
+                                { label: "Planning", color: "bg-[#D97706]" },
+                                { label: "On Hold", color: "bg-[#69707E]" },
+                                { label: "Completed", color: "bg-[#004500]" },
+                              ].map((st) => (
+                                <button
+                                  key={st.label}
+                                  type="button"
+                                  onClick={() => handleAction("status", st.label)}
+                                  className={`w-full flex items-center gap-2 px-5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#252525] transition-colors text-left cursor-pointer ${priority === st.label ? "font-bold text-black dark:text-white bg-gray-200/60 dark:bg-[#202020]" : ""
+                                    }`}
+                                >
+                                  <span className={`size-2 rounded-full ${st.color}`} />
+                                  <span>{st.label}</span>
+                                  {priority === st.label && <Check className="size-3 ml-auto text-blue-500 dark:text-[#73FBFD]" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
 
-                  <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
+                      <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
 
-                  {user?.role === "admin" && (
-                    <button
-                      type="button"
-                      onClick={() => handleAction("delete")}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left cursor-pointer"
-                    >
-                      <Trash2 className="size-4 text-red-500" />
-                      <span>Delete Project</span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAction("delete")}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left cursor-pointer"
+                      >
+                        <Trash2 className="size-4 text-red-500" />
+                        <span>Delete Project</span>
+                      </button>
+                    </>
                   )}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
+
 
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-semibold text-black dark:text-[#FFFFFF]">{title}</h1>
@@ -241,7 +289,7 @@ const ProjectCard = ({
               style={{ width: `${progress}%` }}
               className={`h-2 ${priority === "Critical"
                 ? "bg-[#C71212]"
-                : priority === "Ongoing"
+                : priority === "Ongoing" || priority === "In Progress" || priority === "ACTIVE"
                   ? "bg-[#0000A5]"
                   : priority === "On Hold"
                     ? "bg-[#69707E]"
@@ -253,18 +301,38 @@ const ProjectCard = ({
 
         {/* Avatars + Date */}
         <div className="flex items-center justify-between px-2">
-          <div className="flex items-center -space-x-3">
-            {visibleAvatars.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                className="size-8 rounded-full border-2 border-white object-cover"
-                alt="Member avatar"
-              />
-            ))}
+          <div className="flex items-center -space-x-2">
+            {visibleMembers.length > 0 ? (
+              visibleMembers.map((m, i) => {
+                const pic = typeof m === "object" ? m.profile_pic : m;
+                const mName = typeof m === "object" ? (m.name || m.email || "Member") : "Member";
+                return pic ? (
+                  <img
+                    key={i}
+                    src={pic}
+                    title={mName}
+                    className="size-8 rounded-full border-2 border-white dark:border-[#2E2F2F] object-cover"
+                    alt={mName}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div
+                    key={i}
+                    title={mName}
+                    className={`size-8 rounded-full border-2 border-white dark:border-[#2E2F2F] flex items-center justify-center text-xs font-bold ${getAvatarColor(i)}`}
+                  >
+                    {getInitials(m)}
+                  </div>
+                );
+              })
+            ) : (
+              <span className="text-[11px] text-gray-400 font-medium">No members</span>
+            )}
 
             {extraCount > 0 && (
-              <span className="size-8 text-xs font-semibold flex items-center justify-center bg-[#F3F4F6] rounded-full border border-white text-[#000000]">
+              <span className="size-8 text-xs font-semibold flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full border-2 border-white dark:border-[#2E2F2F] text-gray-700 dark:text-gray-200">
                 +{extraCount}
               </span>
             )}

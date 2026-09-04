@@ -9,40 +9,15 @@ const Navbar = () => {
   const { t } = useTranslation();
   const { theme, toggleTheme } = useDarkMode();
   const location = useLocation();
-const isAboutActive = location.pathname === "/about-us";
-const isLearnMoreActive = location.pathname === "/learn-more";
+  const isAboutActive = location.pathname === "/about-us";
+  const isLearnMoreActive = location.pathname === "/learn-more";
   const [activeSection, setActiveSection] = useState('home');
-
- useEffect(() => {
-    if (location.pathname !== "/") {
-      setActiveSection("");
-      return;
-    }
-
-    const sections = ["home", "features", "contact"];
-    const elements = sections
-      .map((id) => document.getElementById(id))
-      .filter(Boolean);
-
-    if (elements.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-
-        if (visible.length > 0) {
-          setActiveSection(visible[0].target.id);
-        }
-      },
-      { threshold: [0.3, 0.5, 0.7], rootMargin: "-100px 0px -100px 0px" }
-    );
-
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, [location.pathname]);
+useEffect(() => {
+  if (location.pathname !== "/") {
+    setActiveSection("");
+  }
+}, [location.pathname]);
+ 
   const scrollToSection = (e, sectionId) => {
     e.preventDefault();
     if (location.pathname !== "/") {
@@ -73,7 +48,7 @@ const isLearnMoreActive = location.pathname === "/learn-more";
             FlowBit
           </div>
 
-          <nav 
+          <nav
             className="flex items-center gap-1 p-1.5 rounded-2xl"
             style={{
               background: "linear-gradient(145deg, rgba(128, 128, 128, 0.05) 0%, rgba(128, 128, 128, 0.01) 100%)",
@@ -131,7 +106,7 @@ const isLearnMoreActive = location.pathname === "/learn-more";
               <Info className="w-4 h-4 transition-transform group-hover:scale-110" />
               {t("nav_about")}
             </Link>
-           <Link
+            <Link
               to="/learn-more"
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 group hover:bg-black/5 dark:hover:bg-white/5"
               style={{
@@ -170,7 +145,7 @@ const isLearnMoreActive = location.pathname === "/learn-more";
             onClick={() => navigate("/sign-up")}
             className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl hover:-translate-y-0.5 transition-all duration-300 bg-blue-600 dark:bg-[#4FE6E6] text-white dark:text-gray-900 shadow-[0_4px_14px_0_rgba(51,102,255,0.39)] hover:shadow-[0_6px_20px_rgba(51,102,255,0.23)] dark:shadow-[0_4px_14px_0_rgba(79,230,230,0.39)] dark:hover:shadow-[0_6px_20px_rgba(79,230,230,0.23)]"
           >
-            Start Free
+            {t("start_free")}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -179,91 +154,129 @@ const isLearnMoreActive = location.pathname === "/learn-more";
       {/* Mobile */}
       <div className="md:hidden">
         <div className="flex items-center justify-between px-6 py-5">
-          <div
-            className="text-[23px] font-bold tracking-tight text-blue-600 dark:text-[#4FE6E6]"
-          >
+          {/* Logo */}
+          <div className="text-[23px] font-bold tracking-tight text-blue-600 dark:text-[#4FE6E6]">
             FlowBit
           </div>
+             <div className="flex items-center gap-2">
+  <button
+  onClick={() => navigate("/sign-in")}
+  className="flex items-center gap-2 text-sm font-semibold whitespace-nowrap transition-all hover:opacity-70 text-blue-600 dark:text-[#4FE6E6]"
+>
+  <LogIn className="w-4 h-4" />
+  {t("nav_login")}
+</button>
 
-          <button
-            onClick={() => navigate("/SignUp")}
-            className="px-4 py-1.5 text-sm font-semibold rounded-[10px] bg-blue-600 dark:bg-[#4FE6E6] text-white dark:text-gray-900"
-          >
-            Start Free
-          </button>
+  <button
+    onClick={() => navigate("/sign-up")}
+    className="px-4 py-1.5 text-sm font-semibold whitespace-nowrap rounded-[10px] bg-blue-600 dark:bg-[#4FE6E6] text-white dark:text-gray-900"
+  >
+    Start Free
+  </button>
+</div>
+          
         </div>
 
         <div className="flex justify-center px-4 py-5 pb-3">
           <nav
-            className="inline-flex items-center gap-5 px-6 py-2.5 rounded-[15px] border overflow-x-auto"
+  className="flex items-center gap-4 px-4 py-2.5 rounded-[15px] border overflow-x-auto w-full"
             style={{
               borderColor: 'var(--border-color)',
               backgroundColor: 'var(--bg-primary)',
             }}
           >
-            <a
-              href="#home"
-              onClick={(e) => scrollToSection(e, 'home')}
-              className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
-              style={{
-                color:
-                  activeSection === 'home'
-                    ? 'var(--accent-color)'
-                    : 'var(--text-secondary)',
-                borderColor:
-                  activeSection === 'home'
-                    ? 'var(--accent-color)'
-                    : 'transparent',
-              }}
-            >
-              Home
-            </a>
+           {/* Home */}
+      <a
+  href="#home"
+  onClick={(e) => scrollToSection(e, "home")}
+  className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
+  style={{
+    color:
+      activeSection === "home"
+        ? "var(--accent-color)"
+        : "var(--text-secondary)",
+    borderColor:
+      activeSection === "home"
+        ? "var(--accent-color)"
+        : "transparent",
+  }}
+>
+  Home
+</a>
 
-            <a
-              href="#features"
-              onClick={(e) => scrollToSection(e, 'features')}
-              className="text-sm font-medium whitespace-nowrap"
-              style={{
-                color:
-                  activeSection === 'features'
-                    ? 'var(--accent-color)'
-                    : 'var(--text-secondary)',
-              }}
-            >
-              Features
-            </a>
+      {/* Features */}
+      <a
+  href="#features"
+  onClick={(e) => scrollToSection(e, "features")}
+  className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
+  style={{
+    color:
+      activeSection === "features"
+        ? "var(--accent-color)"
+        : "var(--text-secondary)",
+    borderColor:
+      activeSection === "features"
+        ? "var(--accent-color)"
+        : "transparent",
+  }}
+>
+  Features
+</a>
 
-            <a
-              href="#contact"
-              onClick={(e) => scrollToSection(e, 'contact')}
-              className="text-sm font-medium whitespace-nowrap"
-              style={{
-                color:
-                  activeSection === 'contact'
-                    ? 'var(--accent-color)'
-                    : 'var(--text-secondary)',
-              }}
-            >
-              Contact
-            </a>
-            <Link
-              to="/about-us"
-              className="text-sm font-medium whitespace-nowrap"
-              style={{ color: isAboutActive ? 'var(--accent-color)' : 'var(--text-secondary)' }}
-            >
-              {t("nav_about")}
-            </Link>
+      {/* Contact */}
+      <a
+  href="#contact"
+  onClick={(e) => scrollToSection(e, "contact")}
+  className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
+  style={{
+    color:
+      activeSection === "contact"
+        ? "var(--accent-color)"
+        : "var(--text-secondary)",
+    borderColor:
+      activeSection === "contact"
+        ? "var(--accent-color)"
+        : "transparent",
+  }}
+>
+  Contact
+</a>
 
-           <Link
-              to="/learn-more"
-              className="text-sm font-medium whitespace-nowrap"
-              style={{ color: isLearnMoreActive ? 'var(--accent-color)' : 'var(--text-secondary)' }}
-            >
-              {t("nav_learn_more")}
-            </Link>
-          </nav>
-        </div>
-      </div>
+      {/* About Us */}
+      <Link
+        to="/about-us"
+        className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
+        style={{
+          color: isAboutActive
+            ? "var(--accent-color)"
+            : "var(--text-secondary)",
+          borderColor: isAboutActive
+            ? "var(--accent-color)"
+            : "transparent",
+        }}
+      >
+        {t("nav_about")}
+      </Link>
+
+      {/* Learn More */}
+      <Link
+        to="/learn-more"
+        className="text-sm font-medium whitespace-nowrap border-b-2 pb-0.5 transition-all"
+        style={{
+          color: isLearnMoreActive
+            ? "var(--accent-color)"
+            : "var(--text-secondary)",
+          borderColor: isLearnMoreActive
+            ? "var(--accent-color)"
+            : "transparent",
+        }}
+      >
+        {t("nav_learn_more")}
+      </Link>
+    </nav>
+  </div>
+</div>  
+            
     </header>
   );
 };

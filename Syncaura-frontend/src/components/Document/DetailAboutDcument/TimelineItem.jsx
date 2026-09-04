@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion,useTransform } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
-const TimelineItem = ({ item, index, lineProgress }) => {
+const TimelineItem = ({ item, index, lineProgress, onView, onRestore }) => {
   const { t } = useTranslation();
   const dotRef = useRef(null);
   const [dotY, setDotY] = useState(0);
@@ -62,29 +62,43 @@ const TimelineItem = ({ item, index, lineProgress }) => {
         <div className="flex flex-col items-start justify-center w-full gap-3 -mt-5 ">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center justify-start w-full gap-2">
-              <p className="text-[#000000] dark:text-[#FFFFFF] text-sm">{item.version}</p>
+              <p className="text-[#000000] dark:text-[#FFFFFF] text-sm font-semibold">{item.version}</p>
               {item.status && (
-                <div className="bg-[#DFFFE9] px-5 py-1 rounded-2xl">
-                  <p className="text-[#00990F] text-sm">{t(`status_${item.status.toLowerCase()}`, item.status)}</p>
+                <div className="bg-[#DFFFE9] dark:bg-emerald-950/60 px-3 py-0.5 rounded-2xl">
+                  <p className="text-[#00990F] dark:text-emerald-400 text-xs font-semibold">{t(`status_${item.status.toLowerCase()}`, item.status)}</p>
                 </div>
               )}
             </div>
             <div className="flex items-center justify-end w-full">
-              <p className="text-base text-[#000000] dark:text-[#FFFFFF]">{item.date}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">{item.date}</p>
             </div>
           </div>
           <div className="flex items-center justify-start w-full">
-            <p className="text-lg text-[#000000] dark:text-[#FFFFFF]">{t("edited_by", "Edited by")} {item.editor}</p>
+            <p className="text-sm font-medium text-[#000000] dark:text-[#FFFFFF]">{t("edited_by", "Edited by")} <span className="font-bold">{item.editor}</span></p>
           </div>
           <div className="flex items-center justify-center w-full">
-            <div className="flex items-center justify-center w-full bg-[#F8F8F8] dark:bg-[#575757] py-2 rounded-xl border border-[#E0DDDD] dark:border-[#575757]">
-              <p className="text-[#000000] dark:text-[#FFFFFF] text-base">“{item.title}”</p>
+            <div className="flex items-center justify-start w-full bg-[#F8F8F8] dark:bg-[#202124] p-2.5 rounded-xl border border-[#E0DDDD] dark:border-gray-800">
+              <p className="text-[#000000] dark:text-[#FFFFFF] text-sm italic">“{item.title}”</p>
             </div>
           </div>
           <div className="flex items-center justify-start w-full">
-            <div className="flex items-center justify-center gap-3">
-              <p className="text-[#2461E6] dark:text-[#73FBFD] cursor-pointer hover:underline text-base">{t("view", "View")}</p>
-              <p className="text-[#000000] dark:text-[#FFFFFF] cursor-pointer hover:underline text-base">{t("restore", "Restore")}</p>
+            <div className="flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => onView?.(item)}
+                className="text-[#2461E6] dark:text-[#73FBFD] cursor-pointer hover:underline text-sm font-bold btn-hover"
+              >
+                {t("view", "View")}
+              </button>
+              {!item.current && (
+                <button
+                  type="button"
+                  onClick={() => onRestore?.(item)}
+                  className="text-gray-800 dark:text-gray-200 cursor-pointer hover:underline text-sm font-bold btn-hover"
+                >
+                  {t("restore", "Restore")}
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -60,14 +60,16 @@
   /* Responsive breakpoints used across the app:
      sm = 640px, md = 768px, lg = 1024px, xl = 1280px, 2xl = 1536px */
   --breakpoint-xs: 370px;
-  --breakpoint-xsm: 470px;
-  --breakpoint-xssm: 500px;
+   --breakpoint-xsm: 470px;
+    --breakpoint-xssm: 500px;
   --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1536px;
-  --breakpoint-page-2xl: 1650px;
+--breakpoint-md: 768px;
+--breakpoint-lg: 1024px;
+--breakpoint-xl: 1280px;
+--breakpoint-2xl: 1536px;
+--breakpoint-page-2xl: 1650px;
+
+
 }
 
 .h1-poppin {
@@ -160,14 +162,15 @@
 
 /* Container scrollable but scrollbar hidden */
 .sidebar-chat-list {
-  overflow-y: scroll; /* enable vertical scrolling */
+  overflow-y: scroll;       /* enable vertical scrolling */
   -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;    /* Firefox */
 }
 
 .sidebar-chat-list::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none;            /* Chrome, Safari, Edge */
 }
+
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -176,6 +179,28 @@
 .no-scrollbar {
   -ms-overflow-style: none; /* IE & Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+/* Custom Scrollbar for Chat */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+.dark .chat-scroll {
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
+.dark .chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
 }
 
 :root {

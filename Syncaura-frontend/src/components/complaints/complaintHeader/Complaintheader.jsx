@@ -3,27 +3,37 @@ import { Funnel, Search } from 'lucide-react'
 import { useState } from 'react'
 import ComplaintFilters from '../ComplaintFilters'
 
-const Complaintheader = ({ search, setSearch, onApplyFilters }) => {
-    const [openFilter, setOpenFilter]=useState(false)
+const Complaintheader = ({ search, setSearch, onApplyFilters, appliedFilters, onResetFilters }) => {
+    const [openFilter, setOpenFilter] = useState(false);
+    const hasActiveFilters = Boolean(
+      appliedFilters && (
+        (appliedFilters.status && appliedFilters.status.toLowerCase() !== "all") ||
+        appliedFilters.date
+      )
+    );
+
     return (
-        <div className="flex transition-colors duration-500 flex-col md:flex-row px-6  items-center justify-between gap-4 mb-6">
-            <h1 className=" text-2xl sm:text-3xl flex-5/9 font-semibold text-black dark:text-[#FFFFFF]">
+        <div className="flex transition-colors duration-500 flex-col md:flex-row px-6 items-center justify-between gap-4 mb-6">
+            <h1 className="text-2xl sm:text-3xl flex-5/9 font-semibold text-black dark:text-[#FFFFFF]">
                 Complaints Management
             </h1>
 
-            <div className="flex items-center justify-center sm:justify-end gap-3 flex-2/9   ">
+            <div className="flex items-center justify-center sm:justify-end gap-3 flex-2/9">
               
       {/* Filter Button */}
       <button
         onClick={() => setOpenFilter((prev) => !prev)}
-        className={`btn-hover rounded-full flex items-center justify-center border px-4 py-2 text-sm gap-3 transition-colors ${
-            openFilter
-              ? "border-[#2461E6] text-[#2461E6] dark:border-[#73FBFD] dark:text-[#73FBFD]"
+        className={`btn-hover rounded-full flex items-center justify-center border px-4 py-2 text-sm gap-2 transition-colors cursor-pointer ${
+            openFilter || hasActiveFilters
+              ? "border-[#2461E6] bg-blue-50/50 dark:bg-[#73FBFD]/10 text-[#2461E6] dark:border-[#73FBFD] dark:text-[#73FBFD] font-medium"
               : "border-gray-300 text-black dark:border-[#777575] dark:text-[#8A8A8A]"
           } `}
       >
         <Funnel className="size-4" />
         <span>Filter</span>
+        {hasActiveFilters && (
+          <span className="size-2 rounded-full bg-blue-600 dark:bg-[#73FBFD]" />
+        )}
       </button>
 
        <AnimatePresence mode="wait">
@@ -36,10 +46,11 @@ const Complaintheader = ({ search, setSearch, onApplyFilters }) => {
       className="w-full absolute left-0 top-30 md:top-20 z-100"
     >
            <ComplaintFilters
-  onClose={() => setOpenFilter(false)}
-  onApply={onApplyFilters}
-/>
-
+             currentFilters={appliedFilters}
+             onClose={() => setOpenFilter(false)}
+             onApply={onApplyFilters}
+             onReset={onResetFilters}
+           />
           </motion.div>
         )}
       </AnimatePresence>

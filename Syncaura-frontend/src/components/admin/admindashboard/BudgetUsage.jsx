@@ -2,10 +2,7 @@ import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const BudgetUsage = () => {
-  const data = [
-    { name: "Consumed", value: 75 },
-    { name: "Remaining", value: 25 },
-  ];
+  const data = [];
 
   return (
     <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 p-8 mt-6 transition-colors duration-300">
@@ -43,8 +40,7 @@ const BudgetUsage = () => {
 
           {/* Center Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-4xl font-bold text-gray-800 dark:text-white transition-colors">75%</span>
-            <span className="text-[11px] font-bold text-gray-400 dark:text-[#00f2ff] tracking-widest mt-1">CONSUMED</span>
+          <span className="text-sm font-bold text-gray-400">Unavailable</span>
           </div>
         </div>
 
@@ -52,12 +48,12 @@ const BudgetUsage = () => {
         <div className="flex gap-20">
           <div className="text-center">
             <p className="text-sm font-medium text-gray-400 mb-2">Allocated</p>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white transition-colors">$1.2M</p>
+            <p className="text-2xl font-bold text-gray-800 dark:text-white transition-colors">N/A</p>
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-gray-400 mb-2">Remaining</p>
             {/* Text color conditional with Tailwind */}
-            <p className="text-2xl font-bold text-blue-500 dark:text-[#00f2ff] transition-colors">300k</p>
+            <p className="text-2xl font-bold text-blue-500 dark:text-[#00f2ff] transition-colors">N/A</p>
           </div>
         </div>
       </div>

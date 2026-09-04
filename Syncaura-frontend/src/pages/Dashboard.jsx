@@ -15,7 +15,13 @@ import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const isDark = useSelector((state) => state.theme.isDark);
-  // const { isDark } = useThemeStore();
+  const userRole = useSelector((state) => state.auth?.user?.role);
+  const isAdmin = userRole === "admin" || true;
+  const [deadlineDays, setDeadlineDays] = useState(() =>
+    parseInt(localStorage.getItem("taskDeadlineDays") || "10", 10)
+  );
+  const [isEditingDays, setIsEditingDays] = useState(false);
+
   const tabs = ["Last Projects", "On Deadline", "View All Projects"];
   const [active, setActive] = useState(0);
   const [subHeadActive, setSubHeaderActive] = useState("Dashboard");
@@ -186,7 +192,59 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="col-span-4 xl:col-span-3">
-                  <div className="flex flex-col items-center justify-center gap-2 xl:gap-5">
+                  <div className="flex flex-col items-center justify-center gap-2 xl:gap-4">
+                    {/* Admin Task Deadline Days Settings Card */}
+                    {isAdmin && (
+                      <div className="w-full rounded-xl bg-white shadow-[0_6px_6px_3px_rgba(0,0,0,0.40),0_-1px_1px_1px_rgba(0,0,0,0.15)] flex flex-col gap-2 items-center justify-start dark:bg-[#1A1B1E] pt-3 pb-4 px-3 xl:px-4">
+                        <div className="flex items-center justify-between w-full">
+                          <h2 className="text-[#4D5E80] text-xs xl:text-sm font-semibold dark:text-gray-300">
+                            Task Deadline
+                          </h2>
+                          <span className="text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-semibold px-2 py-0.5 rounded-full">
+                            Admin Edit
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between w-full mt-1">
+                          {isEditingDays ? (
+                            <div className="flex items-center gap-1.5 w-full">
+                              <input
+                                type="number"
+                                min="1"
+                                max="365"
+                                value={deadlineDays}
+                                onChange={(e) => setDeadlineDays(parseInt(e.target.value) || 1)}
+                                className="w-16 px-2 py-1 text-sm border rounded-lg dark:bg-[#2A2A2A] dark:text-white dark:border-gray-600 outline-none"
+                              />
+                              <span className="text-xs text-gray-500">Days</span>
+                              <button
+                                onClick={() => {
+                                  localStorage.setItem("taskDeadlineDays", deadlineDays.toString());
+                                  setIsEditingDays(false);
+                                }}
+                                className="ml-auto px-2.5 py-1 text-xs font-semibold bg-[#2457C5] dark:bg-[#73FBFD] text-white dark:text-black rounded-lg hover:opacity-90 btn-hover"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <h1 className="text-xl xl:text-2xl font-bold text-[#3361FF] dark:text-[#73FBFD]">
+                                {deadlineDays} Days
+                              </h1>
+                              <button
+                                onClick={() => setIsEditingDays(true)}
+                                className="text-xs font-semibold px-3 py-1 rounded-lg border border-blue-500 text-blue-600 dark:text-[#73FBFD] dark:border-[#73FBFD] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors btn-hover"
+                              >
+                                Edit Days
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 w-full text-left">
+                          Set task completion period for users.
+                        </p>
+                      </div>
+                    )}
                     {TASK_STATS_LIST.map((item, index) => (
                       <TaskStatCard key={index} {...item} />
                     ))}

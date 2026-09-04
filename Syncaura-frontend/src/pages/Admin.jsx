@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import AdminDashboard from "../components/admin/adminDashboard.jsx";
+import AdminDashboard from "../components/admin/AdminDashboard.jsx";
 import ProjectsPage from "../components/admin/adminprojectdashboard/ProjectsPage.jsx";
-import AnalyticsSection from "../components/admin/adminanalyticaldashboard/AnalyticsSection.jsx";
+//import AnalyticsSection from "../components/admin/adminanalyticaldashboard/AnalyticsSection.jsx";
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -9,13 +9,13 @@ const Admin = () => {
   const tabs = [
     { key: "dashboard", label: "Dashboard" },
     { key: "projects", label: "Projects" },
-    { key: "analytics", label: "Analytics" },
+    //{ key: "analytics", label: "Analytics" },
   ];
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
-     {/* Top Navbar - Border hatane ke baad */}
-    <div className="bg-white dark:bg-black px-8 py-4 flex items-center gap-8 transition-colors duration-300">
+      {/* Top Navbar - Border hatane ke baad */}
+      <div className="bg-white dark:bg-black px-8 py-4 flex items-center gap-8 transition-colors duration-300">
         {/* Title */}
         <h1 className="text-xl font-bold text-black dark:text-white tracking-wide whitespace-nowrap">
           DashBoard
@@ -46,7 +46,7 @@ const Admin = () => {
       <div className="p-8 bg-white dark:bg-black">
         {activeTab === "dashboard" && <AdminDashboard />}
         {activeTab === "projects" && <ProjectsPage />}
-        {activeTab === "analytics" && <AnalyticsSection />}
+        {/* {activeTab === "analytics" && <AnalyticsSection />} */}
       </div>
     </div>
   );

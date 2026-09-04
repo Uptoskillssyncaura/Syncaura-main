@@ -3,10 +3,13 @@ import {
   fetchDocuments,
   createDocument,
   deleteDocument,
+  updateDocument,
+  fetchDocumentVersions,
 } from "../features/documentThunks";
 
 const initialState = {
   documents: [],
+  documentVersions: {},
   loading: false,
   error: null,
 };
@@ -47,11 +50,26 @@ const documentSlice = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : action.payload?.message || "Failed to create document";
       })
 
+      // Update
+      .addCase(updateDocument.fulfilled, (state, action) => {
+        const updated = action.payload?.document || action.payload;
+        if (updated) {
+          const uId = updated.id || updated._id;
+          state.documents = state.documents.map((d) => ((d.id || d._id) === uId ? updated : d));
+        }
+      })
+
       // Delete
       .addCase(deleteDocument.fulfilled, (state, action) => {
         state.documents = state.documents.filter(
           (doc) => (doc.id || doc._id) !== action.payload
         );
+      })
+
+      // Versions
+      .addCase(fetchDocumentVersions.fulfilled, (state, action) => {
+        const { id, versions } = action.payload;
+        state.documentVersions[id] = versions;
       });
   },
 });

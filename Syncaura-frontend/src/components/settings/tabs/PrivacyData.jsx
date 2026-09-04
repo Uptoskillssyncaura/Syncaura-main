@@ -7,10 +7,11 @@ const PrivacyData = () => {
     <div className="max-w-5xl">
 
       <h2 className="text-xl font-semibold text-black dark:text-white mb-6">
-        {t("Privacy & Data")}
+        {t("privacyData")}
       </h2>
+
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Privacy and data controls have not been configured yet.
+        {t("privacyDataDesc")}
       </p>
 
     </div>

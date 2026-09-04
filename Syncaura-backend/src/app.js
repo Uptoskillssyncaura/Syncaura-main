@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
@@ -40,6 +41,8 @@ import userRoutes from './routes/userRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const frontendDistPath = path.resolve(__dirname, '../../Syncaura-frontend/dist');
+const frontendIndexPath = path.join(frontendDistPath, 'index.html');
 
 const app = express();
 
@@ -48,15 +51,23 @@ const app = express();
 // Initialize Slack Bot (uncomment below if you want to use Slack bot features)
 // initSlackBot();
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 app.use(cors({
-  origin: [
-    process.env.CLIENT_URL,
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174'
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || (process.env.CLIENT_URL && origin.startsWith(process.env.CLIENT_URL))) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10kb' }));
@@ -104,6 +115,46 @@ app.get("/", (req, res) => {
 
 // Health check route
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Serve the React app for frontend routes when users open the backend URL.
+app.use(express.static(frontendDistPath));
+
+const frontendRoutes = [
+  '/login',
+  '/signin',
+  '/sign-in',
+  '/role-selection',
+  '/signup',
+  '/sign-up',
+  '/auth/callback',
+  '/auth/github/callback',
+  '/learn-more',
+  '/about-us',
+  '/meet/:id',
+  '/admin',
+  '/co-admin',
+  '/user-dashboard',
+  '/projects',
+  '/attendance-leave',
+  '/my-attendance',
+  '/tasks',
+  '/meetings',
+  '/profile',
+  '/chat',
+  '/notice',
+  '/documents',
+  '/complaints',
+  '/settings',
+];
+
+app.get(frontendRoutes, (req, res) => {
+  if (fs.existsSync(frontendIndexPath)) {
+    return res.sendFile(frontendIndexPath);
+  }
+
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  return res.redirect(`${clientUrl}${req.originalUrl}`);
+});
 
 // 404 handler
 app.use((req, res) => {

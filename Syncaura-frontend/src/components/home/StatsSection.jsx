@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from "react-i18next";
 import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, animate, useInView } from 'framer-motion';
 import { Users, TrendingUp, BookOpen, ArrowRight } from 'lucide-react';
@@ -17,6 +18,7 @@ import img17 from "../../assets/17-Photoroom.png";
 const trustImages = [img3, img5, img6, img9, img10, img12, img13, img14, img15, img16, img17];
 
 const StatsSection = () => {
+  const { t } = useTranslation();
   const sectionRef = useRef(null); // Reference to track when this section scrolls into view
   const usersRef = useRef(null); // Reference for the "2M+" counter
   const satisfactionRef = useRef(null); // Reference for the "98%" counter
@@ -116,7 +118,7 @@ const StatsSection = () => {
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 mb-6 shadow-sm"
               >
                 <TrendingUp className="w-4 h-4" />
-                <span className="text-xs font-black tracking-[0.2em] uppercase">Growth</span>
+                <span className="text-xs font-black tracking-[0.2em] uppercase">{t("stats_growth")}</span>
               </motion.div>
 
               <motion.h2 
@@ -126,7 +128,7 @@ const StatsSection = () => {
                 className="text-4xl md:text-5xl lg:text-[54px] font-black tracking-tighter mb-6 leading-[1.1]" 
                 style={{ color: 'var(--text-primary)' }}
               >
-                Millions trust FlowBit daily
+                {t("stats_title")}
               </motion.h2>
 
               <motion.p 
@@ -136,7 +138,7 @@ const StatsSection = () => {
                 className="text-base md:text-lg lg:text-xl font-medium max-w-2xl leading-relaxed" 
                 style={{ color: 'var(--text-secondary)' }}
               >
-                Over <strong className="font-bold text-indigo-500 dark:text-indigo-400">two million users</strong> worldwide depend on FlowBit to manage their work. Students, teams, and organizations choose us because we deliver results.
+                {t("stats_description")}
               </motion.p>
             </div>
 

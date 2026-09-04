@@ -3,12 +3,18 @@ import { google } from "googleapis";
 import { auth } from "../middlewares/auth.js";
 import pool from "../config/db.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { generateAccessToken, generateRefreshToken, assignRefreshId } from "../utils/generateTokens.js";
 
 const router = express.Router();
 
 const getOAuth2Client = () => {
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/auth/google/callback";
+  const redirectUri =
+    process.env.GOOGLE_REDIRECT_URI ||
+    "http://localhost:5000/auth/callback";
+
   console.log("Creating OAuth2Client with redirectUri:", redirectUri);
+
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -49,7 +55,7 @@ router.get("/google", auth, async (req, res) => {
 });
 
 // Step 1: Generate Google auth URL
-router.get("/google/callback", async (req, res) => {
+router.get("/callback", async (req, res) => {
   try {
     const { code, state } = req.query;
 
@@ -73,61 +79,106 @@ router.get("/google/callback", async (req, res) => {
     }
 
     let decoded;
+    let isLoginFlow = false;
 
-    try {
-      decoded = jwt.verify(state, process.env.JWT_ACCESS_SECRET || "default_jwt_secret");
-      console.log("State token verified successfully. User ID:", decoded.sub || decoded.id);
-    } catch (err) {
-      console.error("JWT Verification failed for state parameter:", err.message);
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired token",
-      });
+    if (state === "login") {
+      isLoginFlow = true;
+    } else {
+      try {
+        decoded = jwt.verify(state, process.env.JWT_ACCESS_SECRET || "default_jwt_secret");
+        console.log("State token verified successfully. User ID:", decoded.sub || decoded.id);
+      } catch (err) {
+        console.error("JWT Verification failed for state parameter:", err.message);
+        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        return res.redirect(`${clientUrl}/signin?error=${encodeURIComponent("State token verification failed")}`);
+      }
     }
 
     const oauth2Client = getOAuth2Client();
     const { tokens } = await oauth2Client.getToken(code);
-    
-    console.log("Tokens received from Google:", {
-      access_token: tokens.access_token ? "PRESENT" : "NULL",
-      refresh_token: tokens.refresh_token ? "PRESENT" : "NULL",
-      scope: tokens.scope,
-      expiry_date: tokens.expiry_date,
-    });
-    
     oauth2Client.setCredentials(tokens);
 
-    const targetUserId = decoded.sub || decoded.id;
-    console.log("Updating database user tokens for user ID:", targetUserId);
+    if (isLoginFlow) {
+      // Get user info from Google API
+      const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+      const { data: userInfo } = await oauth2.userinfo.get();
 
-    const dbResult = await pool.query(
-      `UPDATE users SET 
-        google_access_token = $1, 
-        google_refresh_token = COALESCE($2, google_refresh_token), 
-        google_scope = COALESCE($3, google_scope), 
-        google_token_type = COALESCE($4, google_token_type), 
-        google_expiry_date = COALESCE($5, google_expiry_date),
-        updated_at = CURRENT_TIMESTAMP 
-      WHERE id = $6`,
-      [
-        tokens.access_token,
-        tokens.refresh_token || null,
-        tokens.scope || null,
-        tokens.token_type || null,
-        tokens.expiry_date || null,
-        targetUserId,
-      ]
-    );
+      if (!userInfo.email) {
+        throw new Error("Google account does not have a valid email address");
+      }
 
-    console.log("Database update complete. Rows affected:", dbResult.rowCount);
+      const email = userInfo.email.toLowerCase();
 
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-    return res.redirect(`${clientUrl}/meetings?google_connected=true`);
+      // Check if user exists in database
+      let userRes = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+      let user;
+
+      if (userRes.rowCount > 0) {
+        user = userRes.rows[0];
+      } else {
+        // User doesn't exist -> Create new user with a secure disabled password hash
+        const dummyPassword = await bcrypt.hash(Math.random().toString(36), 12);
+        const name = userInfo.name || "Google User";
+        
+        const insertRes = await pool.query(
+          "INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING *",
+          [name, email, dummyPassword, "user"]
+        );
+        user = insertRes.rows[0];
+      }
+
+      // Generate JWT access & refresh tokens
+      const rid = assignRefreshId(user);
+      await pool.query("UPDATE users SET refresh_token_id = $1 WHERE id = $2", [rid, user.id]);
+
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user, rid);
+
+      // Set refresh token cookie matching existing pattern
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      // Redirect user back to frontend AuthCallback route
+      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+      return res.redirect(`${clientUrl}/auth/callback?token=${accessToken}&refreshToken=${refreshToken}&role=${user.role}&name=${encodeURIComponent(user.name)}`);
+    } else {
+      const targetUserId = decoded.sub || decoded.id;
+      console.log("Updating database user tokens for user ID:", targetUserId);
+
+      const dbResult = await pool.query(
+        `UPDATE users SET 
+          google_access_token = $1, 
+          google_refresh_token = COALESCE($2, google_refresh_token), 
+          google_scope = COALESCE($3, google_scope), 
+          google_token_type = COALESCE($4, google_token_type), 
+          google_expiry_date = COALESCE($5, google_expiry_date),
+          updated_at = CURRENT_TIMESTAMP 
+        WHERE id = $6`,
+        [
+          tokens.access_token,
+          tokens.refresh_token || null,
+          tokens.scope || null,
+          tokens.token_type || null,
+          tokens.expiry_date || null,
+          targetUserId,
+        ]
+      );
+
+      console.log("Database update complete. Rows affected:", dbResult.rowCount);
+
+      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+      return res.redirect(`${clientUrl}/meetings?google_connected=true`);
+    }
   } catch (error) {
     console.error("OAuth callback error:", error);
 
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-    return res.redirect(`${clientUrl}/meetings?error=${encodeURIComponent(error.message || "Google OAuth failed")}`);
+    const redirectPath = req.query.state === "login" ? "signin" : "meetings";
+    return res.redirect(`${clientUrl}/${redirectPath}?error=${encodeURIComponent(error.message || "Google OAuth failed")}`);
   }
 });
 

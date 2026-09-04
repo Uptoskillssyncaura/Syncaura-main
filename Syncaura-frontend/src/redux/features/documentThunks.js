@@ -44,3 +44,27 @@ export const deleteDocument = createAsyncThunk(
     }
   }
 );
+
+export const fetchDocumentVersions = createAsyncThunk(
+  "documents/fetchVersions",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await api.get(`/documents/${id}/versions`);
+      return { id, versions: res.data };
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to fetch document versions");
+    }
+  }
+);
+
+export const updateDocument = createAsyncThunk(
+  "documents/update",
+  async ({ id, payload }, { rejectWithValue }) => {
+    try {
+      const res = await api.put(`/documents/${id}`, payload);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to update document");
+    }
+  }
+);

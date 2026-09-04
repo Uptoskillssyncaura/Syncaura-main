@@ -73,10 +73,23 @@ const Theme = () => {
   }, [fontSize]);
 
   const handleThemeChange = (e) => {
-    const val = e.target.value.toLowerCase();
-    dispatch(setUiTheme(val));
-    dispatch(setBoolTheme(val === "dark"));
-  };
+  const val = e.target.value.toLowerCase();
+
+  dispatch(setUiTheme(val));
+
+  const isDark = val === "dark";
+
+  dispatch(setBoolTheme(isDark));
+
+  // Tailwind dark mode ko actual page par apply/remove karo
+  document.documentElement.classList.toggle("dark", isDark);
+};
+
+useEffect(() => {
+  const isDark = theme === "dark";
+
+  document.documentElement.classList.toggle("dark", isDark);
+}, [theme]);
 
   const handleLanguageChange = (e) => {
     const code = e.target.value;
@@ -87,8 +100,8 @@ const Theme = () => {
   const handleFontChange = (e) => dispatch(setFont(e.target.value));
 
   const handleFontSizeChange = (e) => {
-    dispatch(setFontSize(e.target.value));
-  };
+  dispatch(setFontSize(e.target.value));
+};
 
   const handleZoomDecrease = () => dispatch(setZoom(Math.max(50, zoom - 10)));
 
@@ -128,31 +141,23 @@ const Theme = () => {
   const currentLangLabel =
     LANGUAGES.find((l) => l.code === language)?.label || "English";
 
-  const fontSizeLabels = {
-    small: "Small",
-    medium: "Medium",
-    large: "Large",
-    xlarge: "Extra Large",
-  };
-  const currentFontSizeLabel = fontSizeLabels[fontSize] || "Medium";
-
   return (
     <div className="w-full flex justify-center bg-white dark:bg-[#0B0B0B] min-h-screen text-gray-900 dark:text-white">
       <div className="w-full max-w-[650px]">
         {/* Display */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-5 text-gray-900 dark:text-white">
-            {t("Display")}
+            {t("display")}
           </h2>
 
-          <SettingRow label={t("theme")} value={theme}>
+          <SettingRow label={t("theme")} value={t(theme)}>
             <select
-              value={theme === "dark" ? "Dark" : "Light"}
+              value={theme}
               onChange={handleThemeChange}
               className="bg-white dark:bg-[#0B0B0B] text-black dark:text-white border border-gray-300 dark:border-[#2A2A2A] px-3 py-1 rounded-md focus:outline-none"
             >
-              <option value="Light">{t("light")}</option>
-              <option value="Dark">{t("dark")}</option>
+            <option value="light">{t("light")}</option>
+            <option value="dark">{t("dark")}</option>
             </select>
           </SettingRow>
         </div>
@@ -190,21 +195,21 @@ const Theme = () => {
               </select>
             </SettingRow>
 
-            <SettingRow label={t("fontSize")} value={currentFontSizeLabel}>
-              <select
-                value={fontSize}
-                onChange={handleFontSizeChange}
-                className="bg-white dark:bg-[#0B0B0B] text-black dark:text-white border border-gray-300 dark:border-[#2A2A2A] px-3 py-1 rounded-md"
-              >
-                <option value="small">{t("Small") || "Small"}</option>
-                <option value="medium">{t("Medium") || "Medium"}</option>
-                <option value="large">{t("Large") || "Large"}</option>
-                <option value="xlarge">
-                  {t("Extra Large") || "Extra Large"}
-                </option>
-              </select>
-            </SettingRow>
-
+<SettingRow
+  label={t("fontSize")}
+  value={t(fontSize)}
+>
+  <select
+    value={fontSize}
+    onChange={handleFontSizeChange}
+    className="bg-white dark:bg-[#0B0B0B] text-black dark:text-white border border-gray-300 dark:border-[#2A2A2A] px-3 py-1 rounded-md"
+  >
+    <option value="small">{t("small")}</option>
+    <option value="medium">{t("medium")}</option>
+    <option value="large">{t("large")}</option>
+    <option value="xlarge">{t("extraLarge")}</option>
+  </select>
+</SettingRow>
             {/* ✅ Improved zoom UI */}
             <SettingRow label={t("pageZoom")} value="">
               <div className="flex items-center gap-2">

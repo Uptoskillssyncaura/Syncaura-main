@@ -3,9 +3,11 @@ import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from "react-router-dom";
 import { Rocket, Compass } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 import heroAnimatedVideo from "../../assets/hero animated video.mp4";
 
 const Hero = () => {
+  const { t } = useTranslation();
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -73,9 +75,9 @@ const Hero = () => {
               className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter leading-[1.1] mb-6"
               style={{ color: 'var(--text-primary)' }}
             >
-              Welcome to <br className="hidden md:block" /> 
+              {t("hero_title_line1")} <br className="hidden md:block" /> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400">
-                FlowBit
+                {t("hero_title_line2")}
               </span>
             </motion.h1>
 
@@ -86,7 +88,7 @@ const Hero = () => {
               className="text-base md:text-lg lg:text-xl font-medium leading-relaxed max-w-xl mb-8" 
               style={{ color: 'var(--text-secondary)' }}
             >
-              FlowBit brings projects, tasks, chat, meetings, documents and performance insights into <strong className="font-bold text-blue-500">one seamless workspace</strong>. Create your first project and start organizing your workflow today.
+              {t("hero_description")}
             </motion.p>
 
             {/* 
@@ -106,7 +108,7 @@ const Hero = () => {
                   {/* Shimmer Effect */}
                   <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-[150%] skew-x-[-20deg] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out" />
                   
-                  Get Started Free
+                  {t("cta_getStarted")}
                   <Rocket className="w-4 h-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </button>
               </Link>
@@ -115,7 +117,7 @@ const Hero = () => {
                 onClick={scrollToFeatures}
                 className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 hover:scale-110 active:scale-95 border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 shadow-sm hover:shadow-xl"
               >
-                Explore Features
+                {t("cta_learnMore")}
                 <Compass className="w-4 h-4 transition-transform group-hover:rotate-45" />
               </button>
             </motion.div>

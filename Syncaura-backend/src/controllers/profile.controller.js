@@ -30,27 +30,30 @@ export const updateProfile = async (req, res, next) => {
       first_name,
       last_name,
       phone,
-      language
+      language,
+      profile_pic
     } = req.body;
 
     const result = await pool.query(
       `UPDATE users
        SET
-          name = $1,
-         first_name = $2,
-         last_name = $3,
-         phone = $4,
-         language = $5,
+          name = COALESCE($1, name),
+         first_name = COALESCE($2, first_name),
+         last_name = COALESCE($3, last_name),
+         phone = COALESCE($4, phone),
+         language = COALESCE($5, language),
+         profile_pic = COALESCE($6, profile_pic),
          updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6
+       WHERE id = $7
        RETURNING *;
       `,
       [
-        name,
-        first_name,
-        last_name,
-        phone,
-        language,
+        name ?? null,
+        first_name ?? null,
+        last_name ?? null,
+        phone ?? null,
+        language ?? null,
+        profile_pic ?? null,
         userId,
       ]
     );

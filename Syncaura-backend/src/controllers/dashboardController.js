@@ -199,8 +199,26 @@ export const workload = async (req, res) => {
 
 export const myWorkload = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const result = await pool.query("SELECT * FROM tasks WHERE assigned_to = $1", [userId]);
+    // Tasks can be assigned by user id, email, or name (see task.controller.js
+    // getAllTasks), so matching on id alone silently missed tasks assigned by
+    // email/name and made the user's dashboard look empty even when they had
+    // work assigned. Match the same way getAllTasks does.
+    const values = [req.user.id];
+    const conditions = [`assigned_to = $1`];
+
+    if (req.user?.email) {
+      values.push(req.user.email);
+      conditions.push(`LOWER(assigned_to) = LOWER($${values.length})`);
+    }
+    if (req.user?.name) {
+      values.push(req.user.name);
+      conditions.push(`LOWER(assigned_to) = LOWER($${values.length})`);
+    }
+
+    const result = await pool.query(
+      `SELECT * FROM tasks WHERE ${conditions.join(" OR ")}`,
+      values
+    );
     const tasks = result.rows;
 
     res.status(200).json({
@@ -213,3 +231,4 @@ export const myWorkload = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+ 

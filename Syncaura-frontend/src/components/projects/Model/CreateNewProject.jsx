@@ -1,8 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import MotionSelect from "./MotionSelect";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
+import api from "../../../config/axios";
 
 const CreateNewProject = ({ onClose, onAddProject }) => {
     const teams = ["Design", "Development", "Marketing", "HR", "Sales"];
@@ -86,9 +88,35 @@ const CreateNewProject = ({ onClose, onAddProject }) => {
                     className="
                relative w-full max-w-md sm:max-w-3xl
                rounded-2xl
-               bg-[#C8C6C6] dark:bg-[#000000]
-               p-6 max-h-[90vh] overflow-y-auto no-scrollbar
+               bg-[#C8C6C6] dark:bg-[#1E1E1E]
+               p-6 max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl
              "
+        >
+          <div className="flex flex-col w-full gap-5">
+            <div className="flex w-full items-center justify-between">
+              <h1 className="text-2xl text-[#000000] dark:text-[#FFFFFF] font-bold">
+                New Project
+              </h1>
+              <button
+                onClick={onClose}
+                className="absolute right-4 top-4 text-gray-600 dark:text-[#898888] hover:text-black dark:hover:text-white btn-hover cursor-pointer"
+              >
+                <X className="size-7" />
+              </button>
+            </div>
+            <form
+              onSubmit={handleSubmit(onSubmit, onError)}
+              className="flex flex-col w-full gap-4"
+            >
+              {/* Project Name */}
+              <div className="flex flex-col w-full gap-1">
+                <h2 className="text-lg font-medium text-[#000000] dark:text-[#FFFFFF]">
+                  Project Name <span className="text-red-500">*</span>
+                </h2>
+                <div
+                  className={`w-full bg-[#FFFFFF] dark:bg-[#2E2F2F] py-2 px-5 rounded-2xl border ${
+                    errors.projectName ? "border-red-500" : "border-transparent"
+                  }`}
                 >
                     <div className="flex flex-col w-full gap-5 ">
                         <div className="flex w-full items-center justify-between ">
@@ -236,25 +264,101 @@ const CreateNewProject = ({ onClose, onAddProject }) => {
                                             />
                                         </div>
 
-                                    </div>
-                                    <div className="flex flex-1/2 flex-col w-full gap-1 ">
-                                        <h2 className="text-lg font-medium text-[#000000] dark:text-[#FFFFFF]">
-                                            End Date
-                                        </h2>
-                                        <div className="w-full bg-[#FFFFFF] dark:bg-[#2E2F2F] py-2 px-5 rounded-2xl">
-                                            <input
-                                                type="date"
-                                                min={startDate || today}
-                                                {...register("endDate", {
-                                                    required: "End date is required",
-                                                    validate: (value) =>
-                                                        !startDate || value > startDate || "End date must be after start date",
-                                                })}
+                <div className="flex sm:flex-row flex-col flex-1/2 w-full gap-2">
+                  <div className="flex flex-1/2 flex-col w-full gap-1">
+                    <h2 className="text-lg font-medium text-[#000000] dark:text-[#FFFFFF]">
+                      Start Date <span className="text-red-500">*</span>
+                    </h2>
+                    <div
+                      className={`w-full bg-[#FFFFFF] dark:bg-[#2E2F2F] py-2 px-5 rounded-2xl border ${
+                        errors.startDate
+                          ? "border-red-500"
+                          : "border-transparent"
+                      }`}
+                    >
+                      <input
+                        type="date"
+                        {...register("startDate", {
+                          required: "Start date is required",
+                        })}
+                        className="bg-transparent w-full date-input font-semibold outline-none text-[#1A1A1A] dark:text-[#FFFFFF] text-sm placeholder:text-[#898888]"
+                      />
+                    </div>
+                    {errors.startDate && (
+                      <span className="text-xs text-red-500 font-medium px-2">
+                        {errors.startDate.message}
+                      </span>
+                    )}
+                  </div>
 
+                  <div className="flex flex-1/2 flex-col w-full gap-1">
+                    <h2 className="text-lg font-medium text-[#000000] dark:text-[#FFFFFF]">
+                      End Date <span className="text-red-500">*</span>
+                    </h2>
+                    <div
+                      className={`w-full bg-[#FFFFFF] dark:bg-[#2E2F2F] py-2 px-5 rounded-2xl border ${
+                        errors.endDate
+                          ? "border-red-500"
+                          : "border-transparent"
+                      }`}
+                    >
+                      <input
+                        type="date"
+                        min={startDate || today}
+                        {...register("endDate", {
+                          required: "End date is required",
+                          validate: (value) =>
+                            !startDate ||
+                            value >= startDate ||
+                            "End date must be on or after start date",
+                        })}
+                        className="bg-transparent w-full date-input font-semibold outline-none text-[#1A1A1A] dark:text-[#FFFFFF] text-sm placeholder:text-[#898888]"
+                      />
+                    </div>
+                    {errors.endDate && (
+                      <span className="text-xs text-red-500 font-medium px-2">
+                        {errors.endDate.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-                                                className="bg-transparent w-full date-input font-semibold outline-none text-[#898888] text-sm placeholder:text-[#898888]"
-                                            />
-                                        </div>
+              {/* Members & Owner */}
+              <div className="flex sm:flex-row flex-col w-full items-start gap-4 justify-start">
+                <div className="flex flex-1/2 flex-col w-full gap-1">
+                  <h2 className="text-lg font-medium text-[#000000] dark:text-[#FFFFFF]">
+                    Add Members <span className="text-red-500">*</span>
+                  </h2>
+                  <Controller
+                    name="members"
+                    control={control}
+                    rules={{
+                      validate: (val) =>
+                        (Array.isArray(val) && val.length > 0) ||
+                        Boolean(val) ||
+                        "Please add at least one member",
+                    }}
+                    render={({ field }) => (
+                      <MotionSelect
+                        {...field}
+                        startVal="Select Members.."
+                        options={usersList}
+                        loading={loadingUsers}
+                        error={userError}
+                        searchable
+                        multiple
+                        hasError={Boolean(errors.members)}
+                        searchPlaceholder="Search members by name or email..."
+                      />
+                    )}
+                  />
+                  {errors.members && (
+                    <span className="text-xs text-red-500 font-medium px-2">
+                      {errors.members.message}
+                    </span>
+                  )}
+                </div>
 
                                     </div>
                                 </div>
@@ -311,3 +415,4 @@ const CreateNewProject = ({ onClose, onAddProject }) => {
 };
 
 export default CreateNewProject;
+

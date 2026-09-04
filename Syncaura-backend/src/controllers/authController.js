@@ -72,14 +72,14 @@ export const register = async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     res.status(201).json({
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      tokens: { accessToken }
+      tokens: { accessToken, refreshToken }
     });
   } catch (err) { next(err); }
 };
@@ -112,7 +112,7 @@ export const login = async (req, res, next) => {
 
     res.json({
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      tokens: { accessToken }
+      tokens: { accessToken, refreshToken }
     });
   } catch (err) {
     console.error("LOGIN ERROR:", err);
@@ -125,10 +125,10 @@ export const login = async (req, res, next) => {
 
 export const refresh = async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
     if (!refreshToken) {
-      return res.status(400).json({ message: 'Missing refreshToken' })
-    };
+      return res.status(400).json({ message: 'Missing refreshToken' });
+    }
 
     const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const userId = payload.sub;
@@ -142,7 +142,11 @@ export const refresh = async (req, res, next) => {
     }
 
     const accessToken = generateAccessToken(user);
-    res.json({ accessToken });
+    res.json({
+      accessToken,
+      refreshToken,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired refresh token' });
   }

@@ -27,14 +27,12 @@ router.get("/:id", auth, getTaskById);
 router.get("/:id/activity", auth, getTaskActivity);
  
 // 2. User Actions (Protected: Logged-in Users)
+router.post("/", auth, createTask);
+router.put("/:id", auth, updateTask);
+router.delete("/:id", auth, deleteTask);
 router.patch("/:id/status", auth, updateTaskStatus);
 router.patch("/:id/start", auth, startTask);
 router.post("/:taskId/subtasks", auth, addSubtask);
 router.patch("/:taskId/subtasks/:subtaskId/status", auth, updateSubtaskStatus);
- 
-// 3. Admin-Only Actions (Protected: Auth + RBAC Permit)
-router.post("/", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), createTask);
-router.put("/:id", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), updateTask);
-router.delete("/:id", auth, permit(ROLES.ADMIN, ROLES.CO_ADMIN, 'coadmin'), deleteTask);
  
 export default router;

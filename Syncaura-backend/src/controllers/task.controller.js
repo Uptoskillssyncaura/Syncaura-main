@@ -1,7 +1,32 @@
 import { logTaskActivity } from "../utils/taskActivityLogger.js";
 import pool from "../config/db.js";
 import { validate as isUUID } from "uuid";
- 
+
+/**
+ * Helper: Check if user has Admin or Co-Admin privileges
+ */
+const isUserAdminOrCoAdmin = (user) => {
+  const role = String(user?.role || "").toLowerCase();
+  return role === "admin" || role === "co-admin" || role === "coadmin";
+};
+
+/**
+ * Helper: Check if a task is assigned to the given user
+ */
+const isTaskAssignedToUser = (task, user) => {
+  if (!task || !user) return false;
+  const assigned = String(task.assigned_to || "").trim().toLowerCase();
+  const userId = String(user.id || "").trim().toLowerCase();
+  const userEmail = String(user.email || "").trim().toLowerCase();
+  const userName = String(user.name || "").trim().toLowerCase();
+
+  return (
+    (userId && assigned === userId) ||
+    (userEmail && assigned === userEmail) ||
+    (userName && assigned === userName)
+  );
+};
+
 /**
  * CREATE TASK
  */
@@ -9,26 +34,49 @@ export const createTask = async (req, res) => {
   try {
     const { 
       title, description, priority, assignedTo, deadline, status, 
-      projectId, startDate, endDate, dependencies, reminderAt 
+      projectId, project_id, startDate, endDate, dependencies, reminderAt 
     } = req.body;
  
-    // RBAC: Fallback to logged-in user if assignedTo is omitted
-    const finalAssignedTo = assignedTo || req.user?.id;
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
+    // If not Admin/Co-Admin, task is always assigned to the user themselves
+    const finalAssignedTo = isAdminOrCoAdmin
+      ? (assignedTo || req.user?.email || req.user?.id)
+      : (req.user?.email || req.user?.id || req.user?.name);
  
+    const resolvedProjectId = (projectId || project_id) && isUUID(String(projectId || project_id))
+      ? String(projectId || project_id)
+      : null;
+
     const result = await pool.query(
       `INSERT INTO tasks (
         title, description, priority, assigned_to, deadline, status, 
-        project_id, start_date, end_date, reminder_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+        project_id, start_date, end_date, reminder_at, created_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
       RETURNING *, assigned_to AS "assignedTo"`,
       [
         title, description, priority || "medium", finalAssignedTo, deadline, 
-        status || "TODO", projectId || null, startDate || null, 
-        endDate || null, reminderAt || deadline || null
+        status || "TODO", resolvedProjectId, startDate || null, 
+        endDate || null, reminderAt || deadline || null, req.user?.id || null
       ]
     );
  
     const task = result.rows[0];
+
+    // Attach creator details
+    if (req.user) {
+      task.creator_user_name = req.user.name;
+      task.creator_user_email = req.user.email;
+      task.creator_user_role = req.user.role;
+    }
+
+    // Attach project name if project_id exists
+    if (task.project_id) {
+      const pRes = await pool.query("SELECT name FROM projects WHERE id = $1", [task.project_id]);
+      if (pRes.rowCount > 0) {
+        task.project_name = pRes.rows[0].name;
+        task.project_title = pRes.rows[0].name;
+      }
+    }
  
     // Handle dependencies
     if (dependencies && Array.isArray(dependencies)) {
@@ -57,6 +105,8 @@ export const createTask = async (req, res) => {
  
 /**
  * GET ALL TASKS
+ * Admins/Co-Admins: Can see all tasks (or filter by assignedTo)
+ * Regular users: ONLY see tasks assigned to them!
  */
 export const getAllTasks = async (req, res) => {
   try {
@@ -75,46 +125,76 @@ export const getAllTasks = async (req, res) => {
         message: "Invalid project ID",
       });
     }
+
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
  
-    let query = `SELECT *, assigned_to AS "assignedTo" FROM tasks`;
+    let query = `
+      SELECT t.*, t.assigned_to AS "assignedTo",
+        u.name AS assigned_user_name, u.email AS assigned_user_email,
+        u_creator.name AS creator_user_name, u_creator.email AS creator_user_email, u_creator.role AS creator_user_role,
+        p.name AS project_name, p.name AS project_title
+      FROM tasks t
+      LEFT JOIN users u ON (t.assigned_to = u.id::text OR t.assigned_to = u.email OR LOWER(t.assigned_to) = LOWER(u.name))
+      LEFT JOIN users u_creator ON (t.created_by = u_creator.id)
+      LEFT JOIN projects p ON t.project_id = p.id
+    `;
     const conditions = [];
     const values = [];
+
+    // Role-based visibility: Non-admins ONLY see tasks assigned to their user ID, email, or name
+    if (!isAdminOrCoAdmin) {
+      const userConditions = [];
+      if (req.user?.id) {
+        values.push(String(req.user.id));
+        userConditions.push(`t.assigned_to = $${values.length}`);
+      }
+      if (req.user?.email) {
+        values.push(req.user.email);
+        userConditions.push(`LOWER(t.assigned_to) = LOWER($${values.length})`);
+      }
+      if (req.user?.name) {
+        values.push(req.user.name);
+        userConditions.push(`LOWER(t.assigned_to) = LOWER($${values.length})`);
+      }
+      if (userConditions.length > 0) {
+        conditions.push(`(${userConditions.join(" OR ")})`);
+      } else {
+        conditions.push("1 = 0");
+      }
+    } else if (assignedTo) {
+      values.push(assignedTo);
+      conditions.push(`(t.assigned_to = $${values.length} OR LOWER(t.assigned_to) = LOWER($${values.length}))`);
+    }
  
     // Project Filter
     if (projectId) {
       values.push(projectId);
-      conditions.push(`project_id = $${values.length}`);
-    }
- 
-    // Assignee Filter
-    if (assignedTo) {
-      values.push(assignedTo);
-      conditions.push(`assigned_to = $${values.length}`);
+      conditions.push(`t.project_id = $${values.length}`);
     }
  
     // Priority Filter
     if (priority) {
       values.push(priority);
-      conditions.push(`priority = $${values.length}`);
+      conditions.push(`t.priority = $${values.length}`);
     }
  
     // Status Filter
     if (status) {
       values.push(status);
-      conditions.push(`status = $${values.length}`);
+      conditions.push(`t.status = $${values.length}`);
     }
  
     // Due Date Filter
     if (deadline) {
       values.push(deadline);
-      conditions.push(`DATE(deadline) = DATE($${values.length})`);
+      conditions.push(`DATE(t.deadline) = DATE($${values.length})`);
     }
  
     // Search by title or description
     if (search) {
       values.push(`%${search}%`);
       conditions.push(
-        `(title ILIKE $${values.length} OR description ILIKE $${values.length})`
+        `(t.title ILIKE $${values.length} OR t.description ILIKE $${values.length})`
       );
     }
  
@@ -124,13 +204,12 @@ export const getAllTasks = async (req, res) => {
     }
  
     // Sort latest first
-    query += " ORDER BY created_at DESC";
+    query += " ORDER BY t.created_at DESC";
  
     const result = await pool.query(query, values);
     const tasksList = result.rows;
  
-    // Attach subtasks to each task (getAllTasks previously omitted these,
-    // so subtasks vanished from the UI on every refresh)
+    // Attach subtasks to each task
     if (tasksList.length > 0) {
       const taskIds = tasksList.map((t) => t.id);
       const subtasksResult = await pool.query(
@@ -164,13 +243,26 @@ export const getAllTasks = async (req, res) => {
 export const getTaskById = async (req, res) => {
   try {
     const { id } = req.params;
-    const taskResult = await pool.query(`SELECT *, assigned_to AS "assignedTo" FROM tasks WHERE id = $1`, [id]);
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
+
+    const taskResult = await pool.query(
+      `SELECT t.*, t.assigned_to AS "assignedTo", u.name AS assigned_user_name, u.email AS assigned_user_email 
+       FROM tasks t
+       LEFT JOIN users u ON (t.assigned_to = u.id::text OR t.assigned_to = u.email OR LOWER(t.assigned_to) = LOWER(u.name))
+       WHERE t.id = $1`,
+      [id]
+    );
  
     if (taskResult.rowCount === 0) {
       return res.status(404).json({ message: "Task not found" });
     }
  
     const task = taskResult.rows[0];
+
+    // Non-admins can only view tasks assigned to them
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(task, req.user)) {
+      return res.status(403).json({ message: "Forbidden: Not authorized to view this task" });
+    }
  
     // Get subtasks
     const subtasksResult = await pool.query("SELECT * FROM subtasks WHERE task_id = $1", [id]);
@@ -207,9 +299,10 @@ export const updateTask = async (req, res) => {
     }
  
     const existingTask = taskCheck.rows[0];
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
  
-    // RBAC: Check if user is Admin OR assigned to this task
-    if (req.user?.role !== "admin" && existingTask.assigned_to !== req.user?.id) {
+    // RBAC: Check if user is Admin/Co-Admin OR assigned to this task
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(existingTask, req.user)) {
       return res.status(403).json({ message: "Forbidden: Not authorized to update this task" });
     }
  
@@ -261,9 +354,10 @@ export const deleteTask = async (req, res) => {
     }
  
     const existingTask = taskCheck.rows[0];
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
  
-    // RBAC: Check if user is Admin OR assigned to this task
-    if (req.user?.role !== "admin" && existingTask.assigned_to !== req.user?.id) {
+    // RBAC: Check if user is Admin/Co-Admin OR assigned to this task
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(existingTask, req.user)) {
       return res.status(403).json({ message: "Forbidden: Not authorized to delete this task" });
     }
  
@@ -289,7 +383,6 @@ export const deleteTask = async (req, res) => {
 export const updateTaskStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const { id: userId, role } = req.user; 
     const { id: taskId } = req.params;
  
     const allowedStatus = ["TODO", "IN_PROGRESS", "DONE"];
@@ -304,8 +397,9 @@ export const updateTaskStatus = async (req, res) => {
     }
  
     const task = taskResult.rows[0];
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
  
-    if (role !== "admin" && task.assigned_to !== userId) {
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(task, req.user)) {
       return res.status(403).json({
         message: "Not authorized to update task status",
       });
@@ -341,9 +435,15 @@ export const addSubtask = async (req, res) => {
     const { taskId } = req.params;
     const { title } = req.body;
  
-    const taskCheck = await pool.query("SELECT id FROM tasks WHERE id = $1", [taskId]);
+    const taskCheck = await pool.query("SELECT * FROM tasks WHERE id = $1", [taskId]);
     if (taskCheck.rowCount === 0) return res.status(404).json({ message: "Task not found" });
  
+    const task = taskCheck.rows[0];
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(task, req.user)) {
+      return res.status(403).json({ message: "Not authorized to add subtasks to this task" });
+    }
+
     const result = await pool.query(
       "INSERT INTO subtasks (task_id, title) VALUES ($1, $2) RETURNING *",
       [taskId, title]
@@ -367,6 +467,15 @@ export const updateSubtaskStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status" });
     }
  
+    const taskCheck = await pool.query("SELECT * FROM tasks WHERE id = $1", [taskId]);
+    if (taskCheck.rowCount === 0) return res.status(404).json({ message: "Task not found" });
+
+    const task = taskCheck.rows[0];
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(task, req.user)) {
+      return res.status(403).json({ message: "Not authorized to update subtasks for this task" });
+    }
+
     const result = await pool.query(
       "UPDATE subtasks SET status = $1 WHERE id = $2 AND task_id = $3 RETURNING *",
       [status, subtaskId, taskId]
@@ -388,11 +497,17 @@ export const updateSubtaskStatus = async (req, res) => {
 export const getGanttData = async (req, res) => {
   try {
     const { projectId } = req.query;
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
+
+    let query = "SELECT * FROM tasks WHERE project_id = $1 AND start_date IS NOT NULL AND end_date IS NOT NULL";
+    const params = [projectId];
+
+    if (!isAdminOrCoAdmin) {
+      params.push(String(req.user?.id), req.user?.email || "", req.user?.name || "");
+      query += ` AND (assigned_to = $2 OR LOWER(assigned_to) = LOWER($3) OR LOWER(assigned_to) = LOWER($4))`;
+    }
  
-    const result = await pool.query(
-      "SELECT * FROM tasks WHERE project_id = $1 AND start_date IS NOT NULL AND end_date IS NOT NULL",
-      [projectId]
-    );
+    const result = await pool.query(query, params);
  
     const ganttTasks = result.rows.map(task => ({
       id: task.id,
@@ -416,16 +531,22 @@ export const getUpcomingReminders = async (req, res) => {
     const now = new Date();
     const upcoming = new Date();
     upcoming.setDate(now.getDate() + 3);
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
  
-    const result = await pool.query(
-      `SELECT * FROM tasks 
+    let query = `SELECT * FROM tasks 
        WHERE status != 'DONE' 
        AND (
          (reminder_at >= $1 AND reminder_at <= $2) OR 
          (reminder_at IS NULL AND deadline >= $1 AND deadline <= $2)
-       )`,
-      [now, upcoming]
-    );
+       )`;
+    const params = [now, upcoming];
+
+    if (!isAdminOrCoAdmin) {
+      params.push(String(req.user?.id), req.user?.email || "", req.user?.name || "");
+      query += ` AND (assigned_to = $3 OR LOWER(assigned_to) = LOWER($4) OR LOWER(assigned_to) = LOWER($5))`;
+    }
+
+    const result = await pool.query(query, params);
  
     res.json(result.rows);
   } catch (err) {
@@ -440,6 +561,17 @@ export const startTask = async (req, res) => {
   try {
     const { id } = req.params;
  
+    const taskCheck = await pool.query("SELECT * FROM tasks WHERE id = $1", [id]);
+    if (taskCheck.rowCount === 0) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const task = taskCheck.rows[0];
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(task, req.user)) {
+      return res.status(403).json({ message: "Not authorized to start this task" });
+    }
+
     const depsResult = await pool.query(
       `SELECT d.status 
        FROM task_dependencies td 
@@ -478,9 +610,15 @@ export const getTaskActivity = async (req, res) => {
   try {
     const { id } = req.params;
  
-    const taskCheck = await pool.query("SELECT id FROM tasks WHERE id = $1", [id]);
+    const taskCheck = await pool.query("SELECT * FROM tasks WHERE id = $1", [id]);
     if (taskCheck.rowCount === 0) {
       return res.status(404).json({ message: "Task not found" });
+    }
+
+    const task = taskCheck.rows[0];
+    const isAdminOrCoAdmin = isUserAdminOrCoAdmin(req.user);
+    if (!isAdminOrCoAdmin && !isTaskAssignedToUser(task, req.user)) {
+      return res.status(403).json({ message: "Not authorized to view activity for this task" });
     }
  
     const result = await pool.query(

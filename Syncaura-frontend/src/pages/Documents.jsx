@@ -1,21 +1,49 @@
-import { Download, ListFilter, Plus, Search } from "lucide-react";
+import { Download, ListFilter, Plus, Search, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDocuments, createDocument } from "../redux/features/documentThunks";
+import { fetchDocuments, createDocument, updateDocument } from "../redux/features/documentThunks";
 import TableRow from "../components/Document/TableRow";
 import DocumentModal from "../components/Document/DocumentModel";
+import ViewDocumentModal from "../components/Document/ViewDocumentModal";
 import VersionHistoryDrawer from "../components/Document/DetailAboutDcument/VersionHistoryDrawer";
 import { AnimatePresence, motion } from "framer-motion";
 import DocumentFilter from "../components/Document/DocumentFilter";
+import api from "../config/axios";
+import { toast } from "react-toastify";
 
 export default function Documents() {
   const dispatch = useDispatch();
   const { documents = [], loading = false, error = null } = useSelector((state) => state.documents || {});
+  const user = useSelector((state) => state.auth.user);
+  const storedUser = (() => {
+    try {
+      const raw = localStorage.getItem("user");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const currentUser = user || storedUser;
+  const userRole = String(currentUser?.role || "").trim().toLowerCase();
+  const isAdminOrCoAdmin = userRole === "admin" || userRole === "co-admin" || userRole === "coadmin";
+  const LOCAL_STORAGE_KEY = "syncaura_uploaded_documents";
+
+  const [localDocs, setLocalDocs] = useState(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const tab = ["All Files", "Recent", "Shared with me", "Archived"];
   const [selectedTab, setSelectedTab] = useState("All Files");
   const [showModal, setShowModal] = useState(false);
+  const [editingDoc, setEditingDoc] = useState(null);
   const [currId, setCurrId] = useState(null);
+  const [viewingDoc, setViewingDoc] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const [showFilter, setShowFilter] = useState(false);
 
@@ -29,8 +57,16 @@ export default function Documents() {
   }, [dispatch]);
 
   const safeDocuments = useMemo(() => {
-    return Array.isArray(documents) ? documents : [];
-  }, [documents]);
+    const backendDocs = Array.isArray(documents) ? documents : [];
+    const combined = [...localDocs];
+    backendDocs.forEach((bDoc) => {
+      const bId = bDoc._id || bDoc.id;
+      if (!combined.some((lDoc) => (lDoc._id || lDoc.id) === bId)) {
+        combined.push(bDoc);
+      }
+    });
+    return combined;
+  }, [documents, localDocs]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -62,6 +98,7 @@ export default function Documents() {
       result = result.filter(
         (item) =>
           item.title?.toLowerCase().includes(debouncedValue) ||
+          item.name?.toLowerCase().includes(debouncedValue) ||
           item.content?.toLowerCase().includes(debouncedValue) ||
           item.type?.toLowerCase().includes(debouncedValue) ||
           item.category?.toLowerCase().includes(debouncedValue)
@@ -117,15 +154,139 @@ export default function Documents() {
   }, [safeDocuments, selectedTab, debouncedValue, appliedFilters]);
 
   useEffect(() => {
-    setSelectedDocList(filteredDocuments.slice(0, 8));
+    setSelectedDocList(filteredDocuments);
   }, [filteredDocuments]);
 
   const handleApplyFilters = (newFilters) => {
     setAppliedFilters(newFilters);
   };
 
-  const handleAddDocument = (docData) => {
-    dispatch(createDocument(docData));
+  const handleAddDocument = async (docData) => {
+    const optimisticId = `doc-${Date.now()}`;
+    const newDocItem = {
+      _id: optimisticId,
+      id: optimisticId,
+      title: docData.title || "Uploaded Document",
+      name: docData.title || "Uploaded Document",
+      type: docData.type || "DOCUMENT",
+      category: docData.category || "GENERAL",
+      content: docData.description || "",
+      description: docData.description || "",
+      status: "Active",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      attachments: docData.attachments || [],
+      file_url: docData.file_url || null,
+      file_name: docData.file_name || null,
+      versions: docData.versions || [{ version: "v1.0", date: new Date().toISOString() }],
+    };
+
+    const updatedLocal = [newDocItem, ...localDocs];
+    setLocalDocs(updatedLocal);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedLocal.slice(0, 30)));
+    } catch (e) {
+      console.warn("Storage limit notice:", e);
+    }
+
+    setShowModal(false);
+    setSelectedTab("All Files");
+
+    try {
+      await dispatch(createDocument({
+        title: docData.title,
+        content: docData.description,
+        category: docData.category,
+        type: docData.type,
+        file_url: docData.file_url,
+        file_name: docData.file_name,
+      })).unwrap();
+      dispatch(fetchDocuments());
+      toast.success("Document uploaded and saved successfully!");
+    } catch (err) {
+      console.error("Backend sync notice: ", err);
+      toast.success("Document saved to current session!");
+    }
+  };
+
+  const handleUpdateDocument = async (docData) => {
+    const targetId = editingDoc?.id || editingDoc?._id;
+    if (!targetId) return;
+
+    try {
+      await dispatch(updateDocument({
+        id: targetId,
+        payload: {
+          title: docData.title,
+          content: docData.description || docData.content,
+          category: docData.category,
+          type: docData.type,
+          status: docData.status || "Active",
+        }
+      })).unwrap();
+
+      setLocalDocs((prev) => prev.map((d) => ((d.id || d._id) === targetId ? { ...d, ...docData } : d)));
+      setEditingDoc(null);
+      setShowModal(false);
+      dispatch(fetchDocuments());
+      toast.success("Document updated successfully!");
+    } catch (err) {
+      console.error("Update document error:", err);
+      toast.error("Failed to update document");
+    }
+  };
+
+  const handleRestoreVersion = async (versionItem, refetchVersions) => {
+    if (!currId) return;
+    const confirmed = window.confirm(`Are you sure you want to restore document to version ${versionItem.version}?`);
+    if (!confirmed) return;
+
+    try {
+      const targetDoc = safeDocuments.find((d) => (d.id || d._id) === currId);
+      await dispatch(updateDocument({
+        id: currId,
+        payload: {
+          title: versionItem.title || targetDoc?.title,
+          content: versionItem.content || targetDoc?.content,
+          category: targetDoc?.category,
+          type: targetDoc?.type,
+          status: "Active",
+        }
+      })).unwrap();
+
+      refetchVersions?.();
+      dispatch(fetchDocuments());
+      toast.success(`Document restored to ${versionItem.version}!`);
+    } catch (err) {
+      console.error("Restore error:", err);
+      toast.error("Failed to restore document version");
+    }
+  };
+
+  const handleExportAll = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      toast.info("Generating reports export...");
+      const res = await api.get("/documents/export/all", { responseType: "blob" });
+      const blob = new Blob([res.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `documents_and_reports_${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("Documents and reports exported successfully!");
+    } catch (err) {
+      console.error("Export error:", err);
+      toast.error("Failed to export documents and reports");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -135,10 +296,16 @@ export default function Documents() {
           <h1 className="text-[#000000] text-xl lg:text-2xl font-semibold dark:text-[#FFFFFF]">Documents and Report</h1>
         </div>
         <div className="flex items-center justify-end">
-          <div className="flex items-center justify-center rounded-4xl border gap-2 border-[#2461E6] dark:border-[#73FBFD] px-3 sm:px-5 py-1 sm:py-2">
+          <button
+            onClick={handleExportAll}
+            disabled={isExporting}
+            className="flex items-center justify-center rounded-4xl border gap-2 border-[#2461E6] dark:border-[#73FBFD] px-3 sm:px-5 py-1 sm:py-2 hover:bg-blue-50 dark:hover:bg-cyan-950/30 transition cursor-pointer disabled:opacity-50 btn-hover"
+          >
             <Download className="text-[#2457C5] dark:text-[#73FBFD] size-4 sm:size-5" />
-            <p className="text-xs sm:text-base font-bold text-[#2457C5] dark:text-[#73FBFD]">Export All</p>
-          </div>
+            <p className="text-xs sm:text-base font-bold text-[#2457C5] dark:text-[#73FBFD]">
+              {isExporting ? "Exporting..." : "Export All"}
+            </p>
+          </button>
         </div>
       </div>
 
@@ -149,8 +316,8 @@ export default function Documents() {
               onClick={() => setSelectedTab(item)}
               key={item}
               className={`btn-hover flex items-center border justify-center py-2 w-32 ${selectedTab === item
-                  ? "bg-[#EFF6FF] dark:bg-[#344343] border-[#DBEAFE] dark:border-[#73FBFD] text-[#1D6BE3] dark:text-[#73FBFD]"
-                  : "border-[#EAECEF] text-[#989696] cursor-pointer"
+                ? "bg-[#EFF6FF] dark:bg-[#344343] border-[#DBEAFE] dark:border-[#73FBFD] text-[#1D6BE3] dark:text-[#73FBFD]"
+                : "border-[#EAECEF] text-[#989696] cursor-pointer"
                 } rounded-xl`}
             >
               <h1 className="text-sm font-semibold">{item}</h1>
@@ -161,9 +328,8 @@ export default function Documents() {
         <div className="flex items-center relative md:static justify-center md:justify-end flex-nowrap gap-5 px-2 sm:px-7 w-full sm:w-auto">
           <button
             onClick={() => setShowFilter((prev) => !prev)}
-            className={`btn-hover px-4 py-2 bg-white dark:bg-[#292828] flex items-center gap-2 border rounded-xl ${
-              showFilter || appliedFilters ? "border-[#2461E6] dark:border-[#73FBFD]" : "border-[#EAECEF] dark:border-[#575757]"
-            }`}
+            className={`btn-hover px-4 py-2 bg-white dark:bg-[#292828] flex items-center gap-2 border rounded-xl ${showFilter || appliedFilters ? "border-[#2461E6] dark:border-[#73FBFD]" : "border-[#EAECEF] dark:border-[#575757]"
+              }`}
           >
             <ListFilter className={`size-5 ${showFilter || appliedFilters ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"}`} />
             <h1 className={`text-sm ${showFilter || appliedFilters ? "text-[#2461E6] dark:text-[#73FBFD]" : "text-[#082A44] dark:text-[#B2B2B2]"} font-semibold`}>
@@ -207,42 +373,113 @@ export default function Documents() {
         </div>
 
         <div className="flex flex-col items-center justify-center w-[99.5%] gap-4 mt-5">
-          <div className="hidden md:flex items-center justify-center w-full border px-10 py-3 border-gray-200 dark:border-gray-700">
-            <div className="flex-4/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Name</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Type</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Version</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-start"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Last Modified</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-center"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Status</h1></div>
-            <div className="flex-2/13 w-full flex items-center justify-center"><h1 className="text-lg text-[#000000] dark:text-[#FFFFFF] font-semibold">Document</h1></div>
-            <div className="flex-1/13 w-full flex items-center justify-start" />
+
+          {/* Table Header */}
+          <div className="hidden md:flex items-center w-full border px-10 py-3 border-gray-200 dark:border-gray-700">
+
+            {/* Name */}
+            <div className={`${isAdminOrCoAdmin ? "w-[30%]" : "w-[35%]"} flex items-center justify-start`}>
+              <h1 className="text-lg text-black dark:text-white font-semibold">
+                Name
+              </h1>
+            </div>
+
+            {/* Type */}
+            <div className={`${isAdminOrCoAdmin ? "w-[12%]" : "w-[13%]"} flex items-center justify-start`}>
+              <h1 className="text-lg text-black dark:text-white font-semibold">
+                Type
+              </h1>
+            </div>
+
+            {/* Version */}
+            <div className={`${isAdminOrCoAdmin ? "w-[10%]" : "w-[11%]"} flex items-center justify-start`}>
+              <h1 className="text-lg text-black dark:text-white font-semibold">
+                Version
+              </h1>
+            </div>
+
+            {/* Last Modified */}
+            <div className={`${isAdminOrCoAdmin ? "w-[15%]" : "w-[15%]"} flex items-center justify-start`}>
+              <h1 className="text-lg text-black dark:text-white font-semibold">
+                Last Modified
+              </h1>
+            </div>
+
+            {/* Status */}
+            <div className={`${isAdminOrCoAdmin ? "w-[11%]" : "w-[12%]"} flex items-center justify-center`}>
+              <h1 className="text-lg text-black dark:text-white font-semibold">
+                Status
+              </h1>
+            </div>
+
+            {/* Document */}
+            <div className={`${isAdminOrCoAdmin ? "w-[14%]" : "w-[14%]"} flex items-center justify-center`}>
+              <h1 className="text-lg text-black dark:text-white font-semibold">
+                Document
+              </h1>
+            </div>
+
+            {/* Edit */}
+            {isAdminOrCoAdmin && (
+              <div className="w-[8%] flex items-center justify-center">
+                <h1 className="text-lg text-black dark:text-white font-semibold">
+                  Edit
+                </h1>
+              </div>
+            )}
+
           </div>
 
-
-          {loading && <p className="text-gray-400 text-center py-10">Loading documents...</p>}
-          {error && <p className="text-red-400 text-center py-10">{typeof error === "string" ? error : "Failed to load documents."}</p>}
-          {!loading && !error && (selectedDocList || []).length === 0 && (
-            <p className="text-gray-400 text-center py-10">No documents found.</p>
+          {/* Loading */}
+          {loading && (
+            <p className="text-gray-400 text-center py-10">
+              Loading documents...
+            </p>
           )}
 
+          {/* Error */}
+          {error && (
+            <p className="text-red-400 text-center py-10">
+              {typeof error === "string" ? error : "Failed to load documents."}
+            </p>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && (selectedDocList || []).length === 0 && (
+            <p className="text-gray-400 text-center py-10">
+              No documents found.
+            </p>
+          )}
+
+          {/* Document Rows */}
           <div className="flex flex-col items-center justify-center w-full gap-3">
+
             {(selectedDocList || []).map((item, idx) => (
               <div
-                onClick={() => setCurrId(item._id || item.id)}
+                onClick={() => setViewingDoc(item)}
                 key={item._id || item.id || idx}
-                className={`flex relative transition-all duration-300 items-center justify-between w-full bg-[#FFFFFF] dark:bg-[#000000] py-6 ${
-                  currId === (item._id || item.id)
-                    ? "bg-blue-50 dark:bg-[#1C3939]"
-                    : "hover:bg-[#d1d4db75] dark:hover:bg-gray-800 hover:scale-[1.01] cursor-pointer"
+                className={`flex relative transition-all duration-300 items-center justify-between w-full bg-[#FFFFFF] dark:bg-[#000000] py-6 ${currId === (item._id || item.id)
+                  ? "bg-blue-50 dark:bg-[#1C3939]"
+                  : "hover:bg-[#d1d4db75] dark:hover:bg-gray-800 hover:scale-[1.01] cursor-pointer"
                   }`}
               >
-                <span className={`absolute left-0 top-0 h-full w-1 bg-blue-500 dark:bg-gray-400 transition-transform duration-300 ${currId === (item._id || item.id) ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100"}`} />
+                <span
+                  className={`absolute left-0 top-0 h-full w-1 bg-blue-500 dark:bg-gray-400 transition-transform duration-300 ${currId === (item._id || item.id)
+                    ? "scale-y-100"
+                    : "scale-y-0 group-hover:scale-y-100"
+                    }`}
+                />
+
                 <TableRow
-                  name={item.title || "Untitled"}
+                  name={item.title || item.name || "Untitled"}
                   type={item.type || (item.content ? "Document" : "—")}
                   date={item.updated_at || item.updatedAt || item.created_at}
                   status={item.status || "Active"}
-                  version={item.versions?.length ? `v${item.versions.length}` : "v1"}
-                  document={item.content ? item.title : "—"}
+                  version={item.versions?.length ? `v${item.versions.length}` : "v1.0"}
+                  document={item.attachments?.[0]?.name || item.file_name || (item.content ? item.title : "View Document")}
+                  onView={() => setViewingDoc(item)}
+                  onEdit={() => setCurrId(item._id || item.id)}
+                  canEdit={isAdminOrCoAdmin}
                   docColor={
                     idx % 3 === 0
                       ? "text-[#DC2626]"
@@ -254,13 +491,17 @@ export default function Documents() {
               </div>
             ))}
 
+            {/* View All */}
             {(selectedDocList || []).length < filteredDocuments.length && (
               <div className="w-full flex items-center justify-center mt-4">
                 <button
                   onClick={() => {
                     setSelectedDocList((prev) => [
                       ...(prev || []),
-                      ...filteredDocuments.slice((prev || []).length, (prev || []).length + 8),
+                      ...filteredDocuments.slice(
+                        (prev || []).length,
+                        (prev || []).length + 8
+                      ),
                     ]);
                   }}
                   className="flex items-center justify-center text-[#C05328] text-xl hover:underline btn-hover"
@@ -269,23 +510,63 @@ export default function Documents() {
                 </button>
               </div>
             )}
+
           </div>
+
         </div>
       </div>
 
-      <button
-        onClick={() => setShowModal(true)}
-        className="fixed bottom-8 right-8 flex items-center gap-2 rounded-full bg-blue-600 dark:bg-[#73FBFD] dark:text-black transition duration-500 px-6 py-3 text-white shadow-lg hover:bg-blue-400 dark:hover:bg-[#2cc4c7] btn-hover"
-      >
-        <Plus size={18} />
-        New Report
-      </button>
+      {isAdminOrCoAdmin && (
+        <button
+          onClick={() => {
+            setEditingDoc(null);
+            setShowModal(true);
+          }}
+          className="fixed bottom-8 right-8 flex items-center gap-2 rounded-full bg-blue-600 dark:bg-[#73FBFD] dark:text-black transition duration-500 px-6 py-3 text-white shadow-lg hover:bg-blue-500 dark:hover:bg-[#2cc4c7] btn-hover font-semibold cursor-pointer z-20"
+        >
+          <Upload size={18} />
+          <span>Upload Document</span>
+        </button>
+      )}
 
       {showModal && (
-        <DocumentModal addReport={handleAddDocument} onClose={() => setShowModal(false)} />
+        <DocumentModal
+          initialData={editingDoc}
+          addReport={editingDoc ? handleUpdateDocument : handleAddDocument}
+          onClose={() => {
+            setShowModal(false);
+            setEditingDoc(null);
+          }}
+        />
       )}
       {currId && (
-        <VersionHistoryDrawer open={currId !== null} onClose={() => setCurrId(null)} />
+        <VersionHistoryDrawer
+          docId={currId}
+          document={safeDocuments.find((d) => (d.id || d._id) === currId)}
+          open={currId !== null}
+          onClose={() => setCurrId(null)}
+          onOpenEditor={(doc) => {
+            setEditingDoc(doc);
+            setShowModal(true);
+          }}
+          onViewVersion={(versionItem) => {
+            const parentDoc = safeDocuments.find((d) => (d.id || d._id) === currId);
+            setViewingDoc({
+              ...(parentDoc || {}),
+              title: versionItem.title || parentDoc?.title || "Document",
+              content: versionItem.content || parentDoc?.content,
+              description: versionItem.content || parentDoc?.description,
+              versions: [{ version: versionItem.version, date: versionItem.date }],
+            });
+          }}
+          onRestoreVersion={handleRestoreVersion}
+        />
+      )}
+      {viewingDoc && (
+        <ViewDocumentModal
+          document={viewingDoc}
+          onClose={() => setViewingDoc(null)}
+        />
       )}
     </div>
   );

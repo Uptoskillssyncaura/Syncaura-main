@@ -10,6 +10,7 @@ import reportReducer from "./slices/reportSlice";
 import noticeReducer from "./slices/noticeSlice";
 import complaintReducer from "./slices/complaintSlice";
 import taskReducer from "./slices/taskSlice";
+import chatReducer from "./slices/chatSlice";
 
 export const store = configureStore({
   reducer: {
@@ -25,5 +26,6 @@ export const store = configureStore({
     notice: noticeReducer,
     complaint: complaintReducer,
     tasks: taskReducer,
+    chat: chatReducer,
   },
 });

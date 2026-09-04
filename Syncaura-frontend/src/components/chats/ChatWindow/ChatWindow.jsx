@@ -2,12 +2,28 @@ import ChatInput from "../ChatInput";
 import ChatHeader from "../ChatHeader/ChatHeader";
 import ChatMessages from "../ChatMessage/ChatMessages";
 import GeometricBackground from "../ChatMessage/GeometricBackground";
+import { useChatSocket } from "../../../hooks/useChatSocket";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchMessages } from "../../../redux/features/chatThunks";
 
 export default function ChatWindow({ chat, onBack, setOpen, viewMode = "chat" }) {
+  const dispatch = useDispatch();
+  const { messages } = useSelector((state) => state.chat);
+  const { sendMessageText, sendTyping, emitRead } = useChatSocket(chat?.id);
+
+  useEffect(() => {
+    if (chat?.id) {
+      dispatch(fetchMessages(chat.id));
+    }
+  }, [chat?.id, dispatch]);
+
+  const channelMessages = messages[chat?.id] || [];
+
   return (
     <section
       className={
-        "relative flex-1 flex flex-col " +
+        "relative flex-1 flex flex-col min-h-0 " +
         (chat ? "flex" : "hidden md:flex")
       }
     >
@@ -16,16 +32,11 @@ export default function ChatWindow({ chat, onBack, setOpen, viewMode = "chat" })
           <ChatHeader chat={chat} setOpen={setOpen} onBack={onBack} />
 
           {/* Chat body */}
-          <div className="relative flex-1 overflow-hidden min-h-0">
-            {/* Background */}
-            <div className="absolute w-full inset-0 z-0 pointer-events-none">
-              <GeometricBackground />
-            </div>
-
+          <div className="relative flex-1 overflow-hidden min-h-0 bg-[#E0F2FE] dark:bg-[#0B141A]">
             {/* Content */}
             <div className="relative z-10 flex flex-col h-full min-h-0">
-              <ChatMessages viewMode={viewMode} currentChat={chat} />
-              {viewMode === "chat" && <ChatInput />}
+              <ChatMessages viewMode={viewMode} currentChat={chat} messages={channelMessages} emitRead={emitRead} />
+              {viewMode === "chat" && <ChatInput sendMessageText={sendMessageText} sendTyping={sendTyping} />}
             </div>
           </div>
         </>

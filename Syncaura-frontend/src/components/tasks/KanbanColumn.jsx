@@ -34,6 +34,7 @@ const KanbanColumn = ({
   onOpenTask,
   onDeleteTask,
   canDeleteTask,
+  usersList = [],
 }) => {
   const config = COLUMN_CONFIG[status];
 
@@ -77,6 +78,7 @@ const KanbanColumn = ({
               onOpen={onOpenTask}
               onDelete={onDeleteTask}
               canDelete={canDeleteTask(task)}
+              usersList={usersList}
             />
           ))
         )}

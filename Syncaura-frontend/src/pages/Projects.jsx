@@ -1,24 +1,70 @@
-import { ChevronDown, ListFilter, Plus, X, Edit3, Eye, Calendar, CheckCircle2, Flag, Tally2, Check } from "lucide-react";
+import { ChevronDown, ListFilter, Plus, X, Edit3, Eye, Calendar, CheckCircle2, Flag, Tally2, Check, Users, User, Shield } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Tab from "../components/projects/Tab";
-import ProjectCard from "../components/projects/ProjectCard";
 import { PROJECTS } from "../constant/constant";
 import CreateNewProject from "../components/projects/Model/CreateNewProject";
+import ProjectCard from "../components/projects/ProjectCard";
 import { AnimatePresence, motion } from "framer-motion";
 import ProjectFilter from "../components/projects/ProjectFilter";
 import { toast } from "react-toastify";
+import api from "../config/axios";
 
 const Projects = () => {
-  const userRole = useSelector((state) => state.auth?.user?.role);
-  const isAdmin = userRole === "admin" || userRole === "co-admin";
-  const [projectsList, setProjectsList] = useState(() => {
-    const savedProjects = localStorage.getItem("projectsList");
-    return savedProjects ? JSON.parse(savedProjects) : PROJECTS;
-  });
+  const user = useSelector((state) => state.auth?.user);
+  const userRole = (user?.role || localStorage.getItem("role") || "").toLowerCase();
+  const isAdmin = userRole === "admin" || userRole === "co-admin" || userRole === "coadmin";
+  const [projectsList, setProjectsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const normalizeStatus = (status) => {
+    if (!status) return "In Progress";
+    const s = String(status).trim().toUpperCase().replace(/[\s_-]+/g, "");
+    if (s === "COMPLETED" || s === "DONE") return "Completed";
+    if (s === "ONHOLD" || s === "HOLD") return "On Hold";
+    if (s === "NOTSTARTED") return "Not Started";
+    if (s === "PLANNING") return "Planning";
+    if (s === "BACKLOG") return "Backlog";
+    if (s === "INPROGRESS" || s === "ONGOING" || s === "ACTIVE") return "In Progress";
+    if (s === "CRITICAL") return "Critical";
+    return status;
+  };
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/projects");
+      if (Array.isArray(res.data)) {
+        const mapped = res.data.map((p) => {
+          const normStatus = normalizeStatus(p.status || p.priority);
+          return {
+            id: p.id,
+            title: p.name || p.title,
+            department: p.description || p.department || "General",
+            priority: normStatus,
+            progress: normStatus === "Completed" ? 100 : (p.progress || 0),
+            dueDate: p.created_at || new Date().toISOString(),
+            owner: p.owner || null,
+            members: Array.isArray(p.members) ? p.members : [],
+            avatars: Array.isArray(p.members) && p.members.length > 0
+              ? p.members.map(m => m.profile_pic).filter(Boolean)
+              : [],
+          };
+        });
+        setProjectsList(mapped);
+      }
+    } catch (err) {
+      console.warn("Could not fetch backend projects:", err);
+      toast.error(err.response?.data?.message || "Failed to load projects");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem("projectsList", JSON.stringify(projectsList));
-  }, [projectsList]);
+    fetchProjects();
+  }, [user?.id, userRole]);
+
   const [currTab, setCurrTab] = useState("All Projects");
   const [showModel, setShowModel] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
@@ -66,7 +112,7 @@ const Projects = () => {
   const [editFormData, setEditFormData] = useState({
     title: "",
     department: "",
-    priority: "Ongoing",
+    priority: "In Progress",
     progress: 0,
     dueDate: "",
   });
@@ -74,31 +120,57 @@ const Projects = () => {
   const tabData = [
     { title: "All Projects", count: projectsList.length },
     {
-      title: "Ongoing",
-      count: projectsList.filter((item) => item.priority === "Ongoing").length,
+      title: "In Progress",
+      count: projectsList.filter((item) => normalizeStatus(item.priority) === "In Progress").length,
     },
     {
-      title: "Completed",
-      count: projectsList.filter((item) => item.priority === "Completed").length,
+      title: "Not Started",
+      count: projectsList.filter((item) => normalizeStatus(item.priority) === "Not Started").length,
+    },
+    {
+      title: "Planning",
+      count: projectsList.filter((item) => normalizeStatus(item.priority) === "Planning").length,
     },
     {
       title: "On Hold",
-      count: projectsList.filter((item) => item.priority === "On Hold").length,
+      count: projectsList.filter((item) => normalizeStatus(item.priority) === "On Hold").length,
+    },
+    {
+      title: "Completed",
+      count: projectsList.filter((item) => normalizeStatus(item.priority) === "Completed").length,
     },
   ];
 
-  const filteredProjects =
-    currTab === "All Projects"
-      ? projectsList
-      : projectsList.filter((item) => item.priority === currTab);
+  const filteredProjects = projectsList.filter((item) => {
+    const itemStatus = normalizeStatus(item.priority);
+    if (currTab !== "All Projects") {
+      if (currTab === "In Progress" || currTab === "Ongoing") {
+        if (itemStatus !== "In Progress") return false;
+      } else if (itemStatus !== currTab) {
+        return false;
+      }
+    }
+    if (appliedFilters) {
+      if (appliedFilters.priority && appliedFilters.priority !== "All") {
+        if (item.priority !== appliedFilters.priority && itemStatus !== appliedFilters.priority) return false;
+      }
+      if (appliedFilters.date) {
+        if (!item.dueDate || !item.dueDate.startsWith(appliedFilters.date)) return false;
+      }
+      if (appliedFilters.team && appliedFilters.team !== "All Members" && appliedFilters.team !== "") {
+        if (item.department !== appliedFilters.team) return false;
+      }
+    }
+    return true;
+  });
 
   // Apply sorting algorithm
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     if (sortBy === "Name (A-Z)") {
-      return a.title.localeCompare(b.title);
+      return (a.title || "").localeCompare(b.title || "");
     }
     if (sortBy === "Name (Z-A)") {
-      return b.title.localeCompare(a.title);
+      return (b.title || "").localeCompare(a.title || "");
     }
     if (sortBy === "Progress (High to Low)") {
       return (b.progress || 0) - (a.progress || 0);
@@ -133,6 +205,28 @@ const Projects = () => {
     if (actionType === "view") {
       setSelectedProject(projectData);
       setActiveModal("view");
+      if (projectData.id && String(projectData.id).includes("-")) {
+        api
+          .get(`/projects/${projectData.id}`)
+          .then((res) => {
+            setSelectedProject((prev) => ({
+              ...prev,
+              title: res.data.name || prev?.title,
+              department: res.data.description || prev?.department,
+              priority:
+                res.data.status === "COMPLETED"
+                  ? "Completed"
+                  : res.data.status === "ON_HOLD"
+                  ? "On Hold"
+                  : res.data.status || prev?.priority,
+              owner: res.data.owner || prev?.owner,
+              members: res.data.members || prev?.members || [],
+            }));
+          })
+          .catch((err) => {
+            console.warn("Failed to fetch fresh project details:", err);
+          });
+      }
     } else if (actionType === "edit") {
       setSelectedProject(projectData);
       setEditFormData({
@@ -144,51 +238,93 @@ const Projects = () => {
       });
       setActiveModal("edit");
     } else if (actionType === "duplicate") {
-      const duplicated = {
-        ...projectData,
-        title: `${projectData.title} (Copy)`,
-        avatars: projectData.avatars || [],
-      };
-      setProjectsList((prev) => [duplicated, ...prev]);
-      toast.success(`Project "${projectData.title}" duplicated!`);
+      try {
+        const res = await api.post("/projects", {
+          name: `${projectData.title} (Copy)`,
+          description: projectData.department || "",
+          status: projectData.priority === "Completed" ? "COMPLETED" : "ACTIVE",
+        });
+        const duplicated = {
+          ...projectData,
+          id: res.data.id,
+          title: res.data.name || `${projectData.title} (Copy)`,
+          priority: res.data.status === "COMPLETED" ? "Completed" : "Ongoing",
+          dueDate: res.data.created_at || new Date().toISOString(),
+        };
+        setProjectsList((prev) => [duplicated, ...prev]);
+        toast.success(`Project "${projectData.title}" duplicated!`);
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Failed to duplicate project");
+      }
     } else if (actionType === "status") {
-      const newStatus = targetStatus || (projectData.priority === "Ongoing" ? "Completed" : "Ongoing");
-      setProjectsList((prev) =>
-        prev.map((p) =>
-          p.title === projectData.title ? { ...p, priority: newStatus } : p
-        )
-      );
-      toast.info(`Updated status for "${projectData.title}" to ${newStatus}`);
+      const newStatus = targetStatus || (projectData.priority === "Completed" ? "In Progress" : "Completed");
+      try {
+        if (projectData.id && String(projectData.id).includes("-")) {
+          await api.put(`/projects/${projectData.id}`, {
+            status: newStatus,
+          });
+        }
+        setProjectsList((prev) =>
+          prev.map((p) =>
+            p.id === projectData.id
+              ? {
+                  ...p,
+                  priority: newStatus,
+                  progress: newStatus === "Completed" ? 100 : p.progress,
+                }
+              : p
+          )
+        );
+        toast.info(`Updated status for "${projectData.title}" to ${newStatus}`);
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Failed to update status");
+      }
     } else if (actionType === "delete") {
-      setProjectsList((prev) =>
-        prev.filter((p) => p.id !== projectData.id)
-      );
-
-      toast.warn(`Deleted project "${projectData.title}"`);
+      try {
+        if (projectData.id && String(projectData.id).includes("-")) {
+          await api.delete(`/projects/${projectData.id}`);
+        }
+        setProjectsList((prev) =>
+          prev.filter((p) => p.id !== projectData.id)
+        );
+        toast.warn(`Deleted project "${projectData.title}"`);
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Failed to delete project");
+      }
     }
   };
 
-  const handleSaveEdit = (e) => {
+  const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!selectedProject) return;
 
-    setProjectsList((prev) =>
-      prev.map((p) =>
-        p.title === selectedProject.title
-          ? {
-            ...p,
-            title: editFormData.title,
-            department: editFormData.department,
-            priority: editFormData.priority,
-            progress: Number(editFormData.progress),
-            dueDate: editFormData.dueDate,
-          }
-          : p
-      )
-    );
-    toast.success(`Saved changes for "${editFormData.title}"`);
-    setActiveModal(null);
-    setSelectedProject(null);
+    try {
+      if (selectedProject.id && String(selectedProject.id).includes("-")) {
+        await api.put(`/projects/${selectedProject.id}`, {
+          name: editFormData.title,
+          description: editFormData.department,
+          status: editFormData.priority,
+        });
+      }
+      setProjectsList((prev) =>
+        prev.map((p) =>
+          p.id === selectedProject.id
+            ? {
+                ...p,
+                title: editFormData.title,
+                department: editFormData.department,
+                priority: editFormData.priority,
+                progress: editFormData.priority === "Completed" ? 100 : Number(editFormData.progress),
+                dueDate: editFormData.dueDate,
+              }
+            : p
+        )
+      );
+      toast.success(`Project "${editFormData.title}" updated successfully!`);
+      setActiveModal(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update project");
+    }
   };
 
   return (
@@ -322,35 +458,37 @@ const Projects = () => {
         </AnimatePresence>
       </div>
 
-      <div className="bg-[#FFFFFF] dark:bg-[#000000] mt-5 transition-colors duration-500">
-        <AnimatePresence mode="wait" custom={direction}>
+      {/* Projects Cards Grid */}
+      <div className="w-full px-2 xl:px-6 mt-4 pb-12">
+        {sortedProjects.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-gray-50 dark:bg-[#111214] rounded-2xl border border-gray-200 dark:border-gray-800 mx-5 text-gray-500 dark:text-gray-400">
+            <p className="text-lg font-semibold">No projects found</p>
+            <p className="text-sm mt-1">Try creating a new project or adjusting your filters</p>
+          </div>
+        ) : (
           <motion.div
-            key={currTab}
-            custom={direction}
-            initial={{ x: direction === 1 ? 300 : -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: direction === 1 ? -300 : 300, opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="px-5 py-3 flex flex-wrap items-center justify-center gap-x-14 gap-y-8"
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 px-5"
           >
-            {sortedProjects.map(
-              (
-                { id, title, department, priority, progress, dueDate, avatars }) => (
+            <AnimatePresence>
+              {sortedProjects.map((project) => (
                 <ProjectCard
-                  key={id}
-                  id={id}
-                  title={title}
-                  department={department}
-                  priority={priority}
-                  progress={progress}
-                  dueDate={dueDate}
-                  avatars={avatars}
+                  key={project.id || project.title}
+                  id={project.id}
+                  title={project.title}
+                  department={project.department}
+                  priority={project.priority}
+                  progress={project.progress}
+                  members={project.members}
+                  owner={project.owner}
+                  avatars={project.avatars}
+                  dueDate={project.dueDate}
                   onAction={handleProjectAction}
                 />
-              )
-            )}
+              ))}
+            </AnimatePresence>
           </motion.div>
-        </AnimatePresence>
+        )}
       </div>
 
       {/* Create New Project Modal */}
@@ -369,11 +507,11 @@ const Projects = () => {
               initial={{ opacity: 0, scale: 0.9, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 10 }}
-              className="bg-white dark:bg-[#1E1E1E] text-black dark:text-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative border border-gray-200 dark:border-gray-800"
+              className="bg-white dark:bg-[#1E1E1E] text-black dark:text-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative border border-gray-200 dark:border-gray-800 max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={() => setActiveModal(null)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-black dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="absolute top-4 right-4 text-gray-400 hover:text-black dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
               >
                 <X className="size-5" />
               </button>
@@ -400,6 +538,91 @@ const Projects = () => {
                   </div>
                 </div>
 
+                {/* Project Owner Section */}
+                <div className="bg-gray-50 dark:bg-[#282929] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <User className="size-4 text-blue-600 dark:text-[#73FBFD]" />
+                    <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Project Owner</label>
+                  </div>
+                  {selectedProject.owner ? (
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-full bg-blue-600 dark:bg-[#73FBFD] text-white dark:text-black font-bold text-xs flex items-center justify-center shrink-0 uppercase">
+                        {(selectedProject.owner.name || selectedProject.owner.email || "U").slice(0, 2)}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold truncate text-gray-900 dark:text-white">
+                          {selectedProject.owner.name || "Unnamed User"}
+                        </span>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                          <span className="truncate">{selectedProject.owner.email}</span>
+                          {selectedProject.owner.role && (
+                            <span className="px-1.5 py-0.2 rounded bg-gray-200 dark:bg-[#383a3d] text-[10px] uppercase font-bold text-gray-700 dark:text-gray-300">
+                              {selectedProject.owner.role}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">Not specified</p>
+                  )}
+                </div>
+
+                {/* Assigned Members Section */}
+                <div className="bg-gray-50 dark:bg-[#282929] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="size-4 text-blue-600 dark:text-[#73FBFD]" />
+                      <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                        Assigned Members
+                      </label>
+                    </div>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-[#73FBFD]">
+                      {selectedProject.members?.length || 0}
+                    </span>
+                  </div>
+
+                  {selectedProject.members && selectedProject.members.length > 0 ? (
+                    <div className="max-h-[160px] overflow-y-auto space-y-2 pr-1 divide-y divide-gray-200/40 dark:divide-gray-700/40">
+                      {selectedProject.members.map((member, idx) => {
+                        const memberName = typeof member === "object" ? (member.name || member.email) : String(member);
+                        const memberEmail = typeof member === "object" ? member.email : "";
+                        const memberRole = typeof member === "object" ? member.role : "";
+                        const initials = (memberName || "M").slice(0, 2).toUpperCase();
+
+                        return (
+                          <div key={member.id || idx} className="flex items-center gap-2.5 pt-2 first:pt-0">
+                            <div className="size-7 rounded-full bg-emerald-600/80 dark:bg-[#73FBFD]/30 text-white dark:text-[#73FBFD] font-bold text-[11px] flex items-center justify-center shrink-0">
+                              {initials}
+                            </div>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-semibold truncate text-gray-900 dark:text-gray-100">
+                                  {memberName}
+                                </span>
+                                {memberRole && (
+                                  <span className="px-1.5 py-0.2 rounded bg-gray-200 dark:bg-[#383a3d] text-[9px] uppercase font-bold text-gray-600 dark:text-gray-300">
+                                    {memberRole}
+                                  </span>
+                                )}
+                              </div>
+                              {memberEmail && (
+                                <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                  {memberEmail}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 italic py-1">
+                      No members assigned
+                    </p>
+                  )}
+                </div>
+
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="text-xs text-gray-400 font-medium uppercase tracking-wider">Progress</label>
@@ -422,7 +645,7 @@ const Projects = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setActiveModal(null)}
-                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+                  className="px-5 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -485,9 +708,11 @@ const Projects = () => {
                       onChange={(e) => setEditFormData({ ...editFormData, priority: e.target.value })}
                       className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-[#2A2A2A] border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500"
                     >
-                      <option value="Ongoing">Ongoing</option>
-                      <option value="Completed">Completed</option>
+                      <option value="Not Started">Not Started</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Planning">Planning</option>
                       <option value="On Hold">On Hold</option>
+                      <option value="Completed">Completed</option>
                       <option value="Critical">Critical</option>
                     </select>
                   </div>

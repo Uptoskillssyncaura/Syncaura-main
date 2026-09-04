@@ -32,7 +32,8 @@ const generateSampleMonthlyAttendance = (userId, targetMonth, targetYear) => {
   const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
   const today = new Date();
   const isCurrentMonth = today.getFullYear() === targetYear && (today.getMonth() + 1) === targetMonth;
-  const maxDay = isCurrentMonth ? today.getDate() : daysInMonth;
+  // Only generate mock past days (up to yesterday) so today stays unmarked until the user explicitly checks in
+  const maxDay = isCurrentMonth ? Math.max(0, today.getDate() - 1) : daysInMonth;
 
   for (let day = 1; day <= maxDay; day++) {
     const d = new Date(targetYear, targetMonth - 1, day);
@@ -166,14 +167,87 @@ export const getMyAttendance = async (req, res) => {
 };
 
 /**
+ * Helper to calculate distance between two lat/long coordinates using Haversine formula
+ */
+const getDistanceFromLatLonInMeters = (lat1, lon1, lat2, lon2) => {
+  const R = 6371e3; // Earth's radius in meters
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+/**
+ * Validate location against workplace coordinates and accuracy limit
+ */
+const validateLocation = (latitude, longitude, accuracy) => {
+  if (latitude === undefined || longitude === undefined || latitude === null || longitude === null) {
+    return {
+      valid: false,
+      message: "Location coordinates (latitude and longitude) are required to mark attendance.",
+    };
+  }
+
+  const numLat = parseFloat(latitude);
+  const numLng = parseFloat(longitude);
+  const numAcc = accuracy !== undefined && accuracy !== null ? parseFloat(accuracy) : null;
+
+  if (isNaN(numLat) || isNaN(numLng)) {
+    return {
+      valid: false,
+      message: "Invalid location coordinates provided.",
+    };
+  }
+
+  // Maximum allowed GPS accuracy threshold in meters (default 500m)
+  const maxAccuracy = parseFloat(process.env.MAX_ACCURACY_METERS) || 500;
+  if (numAcc !== null && !isNaN(numAcc) && numAcc > maxAccuracy) {
+    return {
+      valid: false,
+      message: `Location accuracy is too low (${Math.round(numAcc)}m). Please ensure GPS is enabled for accurate positioning.`,
+    };
+  }
+
+  const officeLat = parseFloat(process.env.OFFICE_LATITUDE);
+  const officeLng = parseFloat(process.env.OFFICE_LONGITUDE);
+  const officeRadius = parseFloat(process.env.OFFICE_RADIUS_METERS) || 150;
+
+  if (!isNaN(officeLat) && !isNaN(officeLng)) {
+    const distance = getDistanceFromLatLonInMeters(numLat, numLng, officeLat, officeLng);
+    if (distance > officeRadius) {
+      return {
+        valid: false,
+        message: "You are outside the workplace attendance area.",
+      };
+    }
+  }
+
+  return { valid: true };
+};
+
+/**
  * Mark daily Check-In for logged-in user
  * POST /api/attendance/check-in
  */
 export const checkIn = async (req, res) => {
   try {
     const userId = req.user.id;
-    const todayStr = new Date().toISOString().split('T')[0];
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const { latitude, longitude, accuracy } = req.body || {};
+
+    // Validate location (Tasks 1, 4, 5)
+    const locationCheck = validateLocation(latitude, longitude, accuracy);
+    if (!locationCheck.valid) {
+      return res.status(400).json({ success: false, message: locationCheck.message });
+    }
+
+    const todayStr = req.body?.date || new Date().toISOString().split('T')[0];
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
     await ensureAttendanceTableExists();
 
@@ -188,7 +262,9 @@ export const checkIn = async (req, res) => {
       `INSERT INTO attendance (user_id, date, check_in_time, status)
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (user_id, date) 
-       DO UPDATE SET check_in_time = EXCLUDED.check_in_time, status = EXCLUDED.status, updated_at = NOW()
+       DO UPDATE SET check_in_time = COALESCE(attendance.check_in_time, EXCLUDED.check_in_time),
+                     status = EXCLUDED.status,
+                     updated_at = NOW()
        RETURNING *`,
       [userId, todayStr, timeStr, status]
     );
@@ -211,8 +287,16 @@ export const checkIn = async (req, res) => {
 export const checkOut = async (req, res) => {
   try {
     const userId = req.user.id;
-    const todayStr = new Date().toISOString().split('T')[0];
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const { latitude, longitude, accuracy } = req.body || {};
+
+    // Validate location (Tasks 2, 4, 5)
+    const locationCheck = validateLocation(latitude, longitude, accuracy);
+    if (!locationCheck.valid) {
+      return res.status(400).json({ success: false, message: locationCheck.message });
+    }
+
+    const todayStr = req.body?.date || new Date().toISOString().split('T')[0];
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
     await ensureAttendanceTableExists();
 
@@ -222,13 +306,31 @@ export const checkOut = async (req, res) => {
       [userId, todayStr]
     );
 
+    if (existingRes.rows.length === 0 || !existingRes.rows[0].check_in_time) {
+      return res.status(400).json({ success: false, message: "Please check in before checking out." });
+    }
+
+    if (existingRes.rows[0].check_out_time) {
+      return res.status(400).json({ success: false, message: "You have already completed check-out for this date." });
+    }
+
     let workingHours = 8.0;
-    if (existingRes.rows.length > 0 && existingRes.rows[0].check_in_time) {
-      // Approximate hours calculation
-      const inTimeStr = existingRes.rows[0].check_in_time;
-      const now = new Date();
-      // default 8 hours or calculate if valid
-      workingHours = 8.5;
+    if (existingRes.rows[0].check_in_time) {
+      try {
+        const inStr = existingRes.rows[0].check_in_time;
+        const [timePart, meridiem] = inStr.split(' ');
+        let [h, m] = timePart.split(':').map(Number);
+        if (meridiem === 'PM' && h !== 12) h += 12;
+        if (meridiem === 'AM' && h === 12) h = 0;
+        const inMinutes = h * 60 + m;
+
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const diffHrs = Math.max(0, (currentMinutes - inMinutes) / 60);
+        workingHours = Math.round(diffHrs * 100) / 100 || 8.0;
+      } catch {
+        workingHours = 8.0;
+      }
     }
 
     const result = await pool.query(

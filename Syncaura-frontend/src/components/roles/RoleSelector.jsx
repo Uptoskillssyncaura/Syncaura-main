@@ -3,7 +3,7 @@ import React from 'react';
 const RoleSelector = ({ selectedRole, onRoleChange }) => {
   const roles = [
     { id: 'admin', label: 'Admin', sub: 'Register as an admin' },
-    { id: 'coadmin', label: 'Co-Admin', sub: 'Register as a co-admin' },
+    { id: 'co-admin', label: 'Co-Admin', sub: 'Register as a co-admin' },
     { id: 'user', label: 'User', sub: 'Register as a user' }
   ];
 

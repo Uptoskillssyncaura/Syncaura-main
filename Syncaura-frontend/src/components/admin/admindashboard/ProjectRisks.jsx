@@ -1,37 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const ProjectRisks = () => {
-
-  const data = [
-    {
-      name: "Alpha Redesign",
-      risk: "Backend integration delay",
-      owner: "John D.",
-      initials: "JD",
-      avatarColor: "bg-purple-100 text-purple-600 dark:bg-purple-600 dark:text-white",
-      severity: "High",
-      sevColor: "text-red-600 bg-red-50 border-red-100 dark:bg-transparent dark:border-red-600 dark:text-red-500"
-    },
-    {
-      name: "Mobile App v2",
-      risk: "Resource shortage in QA",
-      owner: "Sarah M.",
-      initials: "SM",
-      avatarColor: "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-white",
-      severity: "Medium",
-      sevColor: "text-yellow-600 bg-yellow-50 border-yellow-100 dark:bg-transparent dark:border-yellow-600 dark:text-yellow-500"
-    },
-    {
-      name: "Cloud Migration",
-      risk: "Minor budget variance",
-      owner: "Alex K.",
-      initials: "AK",
-      avatarColor: "bg-green-100 text-green-600 dark:bg-green-600 dark:text-white",
-      severity: "Low",
-      sevColor: "text-gray-600 bg-gray-50 border-gray-200 dark:bg-transparent dark:border-green-600 dark:text-green-500"
-    },
-  ];
+const ProjectRisks = ({ projects = [], tasks = [], loading = false }) => {
+  const data = projects.map((project) => {
+    const overdue = tasks.filter((task) => task.project_id === project.id && task.status !== "DONE" && task.deadline && new Date(task.deadline) < new Date()).length;
+    return overdue ? { name: project.name, risk: `${overdue} overdue task${overdue === 1 ? "" : "s"}`, owner: "Project team", initials: "PT", avatarColor: "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-white", severity: overdue > 2 ? "High" : "Medium", sevColor: overdue > 2 ? "text-red-600 bg-red-50 border-red-100 dark:bg-transparent dark:border-red-600 dark:text-red-500" : "text-yellow-600 bg-yellow-50 border-yellow-100 dark:bg-transparent dark:border-yellow-600 dark:text-yellow-500" } : null;
+  }).filter(Boolean);
 
   const container = {
     hidden: { opacity: 0 },
@@ -95,10 +69,12 @@ const ProjectRisks = () => {
             className="divide-y divide-gray-100 dark:divide-zinc-800/50"
           >
 
-            {data.map((item, index) => (
+            {loading && <tr><td colSpan="4" className="p-6 text-center text-gray-500">Loading risks...</td></tr>}
+            {!loading && data.length === 0 && <tr><td colSpan="4" className="p-6 text-center text-gray-500">No project risks found.</td></tr>}
+            {!loading && data.map((item) => (
 
               <motion.tr
-                key={index}
+                key={item.name}
                 variants={row}
                 whileHover={{ scale: 1.01 }}
                 className="hover:bg-gray-50/30 dark:hover:bg-zinc-800/20 transition-colors"

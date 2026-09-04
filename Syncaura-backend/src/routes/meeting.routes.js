@@ -6,7 +6,7 @@ import { auth } from "../middlewares/auth.js";
 
 const router = express.Router();
 router.post("/sync-calendar", auth, syncCalendar);
-router.post("/", auth, createMeeting);
+router.post("/", auth,createMeeting);
 router.get("/", auth, getMeetings);
 router.get("/:id", auth, getMeetingById);
 router.put("/:id", auth, updateMeeting);

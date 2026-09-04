@@ -52,36 +52,43 @@ export default function Meetings() {
   const reduxAuthToken = useSelector((state) => state.auth?.token);
 
   const handleSyncCalendar = async () => {
-    let token = localStorage.getItem("accessToken") || localStorage.getItem("token") || reduxAuthToken;
-    if (reduxAuthToken && (!localStorage.getItem("accessToken") || !localStorage.getItem("token"))) {
-      localStorage.setItem("accessToken", reduxAuthToken);
-      localStorage.setItem("token", reduxAuthToken);
-    }
+    const token =
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("token") ||
+      reduxAuthToken;
 
     if (!token) {
       toast.error("Please log in first.");
       return;
     }
 
+    // Keep token in localStorage
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("token", token);
+
     try {
       const resultAction = await dispatch(syncCalendarEvents());
+
       if (syncCalendarEvents.fulfilled.match(resultAction)) {
-        toast.success(resultAction.payload?.message || "Calendar synced successfully! 📅");
-      } else {
-        const errMsg = resultAction.payload || "";
-        if (typeof errMsg === "string" && (errMsg.includes("not connected") || errMsg.includes("400"))) {
-          const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
-          window.location.href = `${apiBase}/auth/google?token=${token}`;
-        } else {
-          toast.error(errMsg || "Sync failed. Redirecting to reconnect Google Calendar...");
-          const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
-          window.location.href = `${apiBase}/auth/google?token=${token}`;
-        }
+        toast.success(
+          resultAction.payload?.message ||
+          "Calendar synced successfully! 📅"
+        );
+        return;
       }
+
+      console.log("Calendar sync failed:", resultAction.payload);
+
+      // Start Google OAuth
+      window.location.href =
+        `/auth/google?token=${encodeURIComponent(token)}`;
+
     } catch (err) {
       console.error("Calendar sync error:", err);
-      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      window.location.href = `${apiBase}/auth/google?token=${token}`;
+
+      // Start Google OAuth
+      window.location.href =
+        `/auth/google?token=${encodeURIComponent(token)}`;
     }
   };
 
@@ -229,7 +236,7 @@ export default function Meetings() {
         <div className="flex-1 flex flex-col ">
           {/* Header */}
           <div className="w-full bg-white dark:bg-[#1a1a1a] border-b border-[#e5e7eb] dark:border-[#2c2c2c] px-4 py-2 shadow-sm">
-            
+
 
             {/* Desktop Header */}
             <div className="hidden lg:flex items-start justify-between">
@@ -376,9 +383,17 @@ export default function Meetings() {
                     }}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-start"
                   >
-                    {filteredMeetings.map((meeting) => (
-                      <MeetingCard key={meeting.id} {...meeting} />
-                    ))}
+                    {filteredMeetings.map((meeting) => {
+                      console.log("Meeting being displayed:", meeting);
+
+                      return (
+                        <MeetingCard
+                          key={meeting.id}
+                          {...meeting}
+                          googleMeetLink={meeting.googleMeetLink}
+                        />
+                      );
+                    })}
                   </motion.div>
                 </AnimatePresence>
               )}
@@ -387,8 +402,8 @@ export default function Meetings() {
         </div>
 
         {modalOpen && (
-          <ScheduleMeetingModal 
-            onClose={() => setModalOpen(false)} 
+          <ScheduleMeetingModal
+            onClose={() => setModalOpen(false)}
             onSave={handleCreateMeeting}
           />
         )}
