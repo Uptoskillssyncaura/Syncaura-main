@@ -129,10 +129,9 @@ export default function Sidebar({ open, setOpen }) {
 
   const menuItems = [
     { icon: GridIcon, label: t('sidebar_dashboard', 'Dashboard'), path: "/user-dashboard", badge: null },
-    { icon: FolderIcon, label: t('sidebar_projects', 'Projects'), path: "/projects", badge: null },
+    
     { icon: ChatIcon, label: t('sidebar_chat', 'Chat'), path: "/chat", badge: totalUnreadChats > 0 ? totalUnreadChats : null },
-    { icon: CalendarIcon, label: t('sidebar_meetings', 'Meetings'), path: "/meetings", badge: null },
-    {
+
       icon: DocumentIcon,
       label: t('sidebar_documents', 'Documents And Report'),
       path: "/documents",
