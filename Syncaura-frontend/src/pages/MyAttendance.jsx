@@ -60,7 +60,7 @@ export default function MyAttendance() {
     setLoading(true);
     try {
       const response = await api.get(
-        `/api/attendance/my-attendance?month=${selectedMonth}&year=${selectedYear}`
+        `/attendance/my-attendance?month=${selectedMonth}&year=${selectedYear}`
       );
       if (response.data && response.data.success) {
         setSummary(response.data.summary);
