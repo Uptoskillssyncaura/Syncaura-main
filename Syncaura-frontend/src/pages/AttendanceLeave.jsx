@@ -625,7 +625,7 @@ const AttendanceLeave = () => {
         <div className="flex w-full flex-3/5 md:flex-2/5 2xl:flex-3/5 items-center justify-center gap-2 ">
           <Link
             to="/my-attendance"
-            className="btn-hover px-4 py-2 bg-[#2461E6] dark:bg-[#73FBFD] text-white dark:text-black flex items-center gap-2 rounded-xl font-semibold text-sm transition-transform active:scale-95 shadow-sm whitespace-nowrap"
+            className="shrink-0 btn-hover px-4 py-2 bg-[#2461E6] dark:bg-[#73FBFD] text-white dark:text-black flex items-center gap-2 rounded-xl font-semibold text-sm transition-transform active:scale-95 shadow-sm whitespace-nowrap"
           >
             <UserCheck className="size-4" />
             <span>My Attendance</span>

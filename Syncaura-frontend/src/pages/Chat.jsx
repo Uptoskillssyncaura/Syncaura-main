@@ -26,7 +26,9 @@ export default function Chat() {
   return (
     <div
       className="
-        h-[calc(100vh-3.3rem)] 
+        h-[calc(100dvh-5rem)] 
+        sm:h-[calc(100dvh-5.6rem)] 
+        md:h-[calc(100vh-3.3rem)] 
         xl:h-[calc(100vh-4.9rem)] 
         w-full mt-1 
         flex flex-col md:flex-row 
@@ -36,7 +38,7 @@ export default function Chat() {
       "
     >
       {/* SIDEBAR */}
-      <div className="w-full md:w-[280px] lg:w-[320px] border-r border-gray-200 dark:border-gray-800 overflow-hidden h-full flex-shrink-0">
+      <div className={"w-full md:w-[280px] lg:w-[320px] border-r border-gray-200 dark:border-gray-800 overflow-hidden h-full flex-shrink-0 " + (activeChannel ? "hidden md:block" : "block")}>
         <Sidebar
           chats={channels}
           selectedChat={activeChannel}
