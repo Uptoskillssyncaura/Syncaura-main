@@ -406,7 +406,7 @@ const Tasks = () => {
           <button
             id="create-task-btn"
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#2457C5] dark:bg-[#73FBFD] text-white dark:text-black text-sm font-semibold rounded-2xl hover:bg-blue-700 dark:hover:bg-[#5af4f5] transition-colors shadow-sm btn-hover"
+            className="self-start sm:self-auto flex items-center gap-2 px-5 py-2.5 bg-[#2457C5] dark:bg-[#73FBFD] text-white dark:text-black text-sm font-semibold rounded-2xl hover:bg-blue-700 dark:hover:bg-[#5af4f5] transition-colors shadow-sm btn-hover"
           >
             <Plus className="w-4 h-4" />
             New Task
