@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS complaint_comments (
 -- Channels
 CREATE TABLE IF NOT EXISTS channels (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
   is_private BOOLEAN DEFAULT false,
   max_members INTEGER DEFAULT 5,
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,

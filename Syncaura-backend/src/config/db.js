@@ -55,6 +55,9 @@ pool.query("SELECT current_database(), current_schema()")
         ALTER TABLE document_versions ADD COLUMN IF NOT EXISTS title VARCHAR(255);
         ALTER TABLE complaints ADD COLUMN IF NOT EXISTS task_id UUID REFERENCES tasks(id) ON DELETE SET NULL;
         ALTER TABLE meetings ALTER COLUMN end_time DROP NOT NULL;
+        ALTER TABLE channels DROP CONSTRAINT IF EXISTS channels_name_key;
+        ALTER TABLE channels DROP CONSTRAINT IF EXISTS channels_name_unique;
+        ALTER TABLE channels DROP CONSTRAINT IF EXISTS unique_channel_name;
         CREATE TABLE IF NOT EXISTS project_members (
           project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
           user_id UUID REFERENCES users(id) ON DELETE CASCADE,

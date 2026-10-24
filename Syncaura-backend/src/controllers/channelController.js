@@ -75,7 +75,7 @@ export const getChannels = async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT 
-         c.id, c.is_private, c.is_public, c.max_members, c.created_by, c.created_at, c.updated_at, c.profile_pic,
+         c.id, c.is_private, c.is_public, c.max_members, c.created_by, c.created_at, c.updated_at,
          CASE 
            WHEN c.is_private AND c.max_members = 2 THEN (
              SELECT u.name 
@@ -88,6 +88,16 @@ export const getChannels = async (req, res) => {
          END as name,
          CASE 
            WHEN c.is_private AND c.max_members = 2 THEN (
+             SELECT u.profile_pic 
+             FROM channel_members cm2 
+             JOIN users u ON cm2.user_id = u.id 
+             WHERE cm2.channel_id = c.id AND cm2.user_id != $1
+             LIMIT 1
+           )
+           ELSE c.profile_pic 
+         END as profile_pic,
+         CASE 
+           WHEN c.is_private AND c.max_members = 2 THEN (
              SELECT u.role 
              FROM channel_members cm2 
              JOIN users u ON cm2.user_id = u.id 
@@ -96,6 +106,20 @@ export const getChannels = async (req, res) => {
            )
            ELSE NULL 
          END as other_user_role,
+         (
+           SELECT m.text
+           FROM messages m
+           WHERE m.channel_id = c.id
+           ORDER BY m.created_at DESC
+           LIMIT 1
+         ) as last,
+         (
+           SELECT m.created_at
+           FROM messages m
+           WHERE m.channel_id = c.id
+           ORDER BY m.created_at DESC
+           LIMIT 1
+         ) as last_message_at,
          (
            SELECT COUNT(*)
            FROM messages m
@@ -107,11 +131,40 @@ export const getChannels = async (req, res) => {
        FROM channels c 
        JOIN channel_members cm ON c.id = cm.channel_id 
        WHERE cm.user_id = $1
-       ORDER BY c.updated_at DESC`,
+       ORDER BY COALESCE(
+         (SELECT m.created_at FROM messages m WHERE m.channel_id = c.id ORDER BY m.created_at DESC LIMIT 1),
+         c.updated_at,
+         c.created_at
+       ) DESC`,
       [req.user.id]
     );
-    res.status(200).json(result.rows);
+
+    const channels = result.rows.map((row) => {
+      let time = "";
+      const rawTime = row.last_message_at || row.updated_at || row.created_at;
+      if (rawTime) {
+        const d = new Date(rawTime);
+        if (!isNaN(d.getTime())) {
+          const now = new Date();
+          const isToday = d.toDateString() === now.toDateString();
+          if (isToday) {
+            time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          } else {
+            time = d.toLocaleDateString([], { month: "short", day: "numeric" });
+          }
+        }
+      }
+      return {
+        ...row,
+        name: row.name || "Chat",
+        time,
+        last: row.last || "No messages yet",
+      };
+    });
+
+    res.status(200).json(channels);
   } catch (err) {
+    console.error("Error in getChannels:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -145,7 +198,7 @@ export const getChannelById = async (req, res) => {
 
     // Get members
     const membersResult = await pool.query(
-      "SELECT u.id, u.name, u.email FROM channel_members cm JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = $1",
+      "SELECT u.id, u.name, u.email, u.profile_pic, u.role FROM channel_members cm JOIN users u ON cm.user_id = u.id WHERE cm.channel_id = $1",
       [channel.id]
     );
     channel.members = membersResult.rows;
@@ -165,50 +218,71 @@ export const createPrivateChat = async (req, res) => {
       return res.status(400).json({ message: "Other user required" });
     }
 
+    if (userId === otherUserId) {
+      return res.status(400).json({ message: "Cannot create private chat with yourself" });
+    }
+
     // Check if private chat already exists
     const existingResult = await pool.query(
       `SELECT c.* FROM channels c
-       JOIN channel_allowed_users cau1 ON c.id = cau1.channel_id
-       JOIN channel_allowed_users cau2 ON c.id = cau2.channel_id
-       WHERE c.is_private = true AND cau1.user_id = $1 AND cau2.user_id = $2`,
+       JOIN channel_members cm1 ON c.id = cm1.channel_id AND cm1.user_id = $1
+       JOIN channel_members cm2 ON c.id = cm2.channel_id AND cm2.user_id = $2
+       WHERE c.is_private = true AND c.max_members = 2`,
       [userId, otherUserId]
     );
 
     if (existingResult.rowCount > 0) {
       const channel = existingResult.rows[0];
-      const otherUserResult = await pool.query("SELECT name, role FROM users WHERE id = $1", [otherUserId]);
+      const otherUserResult = await pool.query("SELECT name, role, profile_pic FROM users WHERE id = $1", [otherUserId]);
       channel.name = otherUserResult.rows[0]?.name || "Unknown User";
       channel.other_user_role = otherUserResult.rows[0]?.role || "user";
+      channel.profile_pic = otherUserResult.rows[0]?.profile_pic || null;
+      channel.unread = 0;
+      channel.last = "No messages yet";
+      channel.time = "";
       return res.status(200).json(channel);
     }
 
+    const uniqueChannelName = `private_${userId.slice(0, 8)}_${otherUserId.slice(0, 8)}_${Date.now()}`;
+
     const result = await pool.query(
       "INSERT INTO channels (name, is_private, is_public, max_members, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      ["private-chat", true, false, 2, userId]
+      [uniqueChannelName, true, false, 2, userId]
     );
 
     const channel = result.rows[0];
 
     // Add allowed users
-    await pool.query("INSERT INTO channel_allowed_users (channel_id, user_id) VALUES ($1, $2), ($1, $3)", [channel.id, userId, otherUserId]);
+    await pool.query(
+      "INSERT INTO channel_allowed_users (channel_id, user_id) VALUES ($1, $2), ($1, $3) ON CONFLICT DO NOTHING",
+      [channel.id, userId, otherUserId]
+    );
     
     // Add members
-    await pool.query("INSERT INTO channel_members (channel_id, user_id) VALUES ($1, $2), ($1, $3)", [channel.id, userId, otherUserId]);
+    await pool.query(
+      "INSERT INTO channel_members (channel_id, user_id) VALUES ($1, $2), ($1, $3) ON CONFLICT DO NOTHING",
+      [channel.id, userId, otherUserId]
+    );
 
-    const otherUserResult = await pool.query("SELECT name, role FROM users WHERE id = $1", [otherUserId]);
+    const otherUserResult = await pool.query("SELECT name, role, profile_pic FROM users WHERE id = $1", [otherUserId]);
     channel.name = otherUserResult.rows[0]?.name || "Unknown User";
     channel.other_user_role = otherUserResult.rows[0]?.role || "user";
+    channel.profile_pic = otherUserResult.rows[0]?.profile_pic || null;
+    channel.unread = 0;
+    channel.last = "No messages yet";
+    channel.time = "";
 
     // Notify both members of the new private chat
     const io = req.app.get("io");
     if (io) {
-      io.to(`user_${userId}`).emit("channel:new");
-      io.to(`user_${otherUserId}`).emit("channel:new");
+      io.to(`user_${userId}`).emit("channel:new", channel);
+      io.to(`user_${otherUserId}`).emit("channel:new", channel);
     }
 
     res.status(201).json(channel);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in createPrivateChat:", error);
+    res.status(500).json({ message: error.message || "Failed to create private chat" });
   }
 };
 
@@ -230,45 +304,55 @@ export const createGroupChat = async (req, res) => {
     const userId = req.user.id;
     const { name, userIds } = req.body;
 
-    if (!name || !userIds || !Array.isArray(userIds) || userIds.length === 0) {
+    if (!name || !name.trim() || !userIds || !Array.isArray(userIds) || userIds.length === 0) {
       return res.status(400).json({ message: "Group name and at least one other user are required" });
     }
 
-    await client.query('BEGIN');
+    const groupName = name.trim();
+    const allMemberIds = Array.from(new Set([userId, ...userIds.filter(Boolean)]));
+
+    await client.query("BEGIN");
 
     // Create the group channel
     const result = await client.query(
       "INSERT INTO channels (name, is_private, is_public, max_members, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [name, true, false, 50, userId]
+      [groupName, true, false, 50, userId]
     );
 
     const channel = result.rows[0];
 
-    // Build the query to insert allowed users and members
-    const allMemberIds = [userId, ...userIds];
-    
-    // Convert array of IDs to appropriate postgres parameter format
+    // Insert allowed users and members
     for (let i = 0; i < allMemberIds.length; i++) {
       const memberId = allMemberIds[i];
-      // Add to allowed users
-      await client.query("INSERT INTO channel_allowed_users (channel_id, user_id) VALUES ($1, $2)", [channel.id, memberId]);
-      // Add to members
-      await client.query("INSERT INTO channel_members (channel_id, user_id) VALUES ($1, $2)", [channel.id, memberId]);
+      await client.query(
+        "INSERT INTO channel_allowed_users (channel_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+        [channel.id, memberId]
+      );
+      await client.query(
+        "INSERT INTO channel_members (channel_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+        [channel.id, memberId]
+      );
     }
+
+    await client.query("COMMIT");
+
+    channel.unread = 0;
+    channel.last = "No messages yet";
+    channel.time = "";
 
     // Notify all members of the new group chat
     const io = req.app.get("io");
     if (io) {
       allMemberIds.forEach((id) => {
-        io.to(`user_${id}`).emit("channel:new");
+        io.to(`user_${id}`).emit("channel:new", channel);
       });
     }
 
-    await client.query('COMMIT');
     res.status(201).json(channel);
   } catch (error) {
-    await client.query('ROLLBACK');
-    res.status(500).json({ message: error.message });
+    await client.query("ROLLBACK");
+    console.error("Error in createGroupChat:", error);
+    res.status(500).json({ message: error.message || "Failed to create group chat" });
   } finally {
     client.release();
   }

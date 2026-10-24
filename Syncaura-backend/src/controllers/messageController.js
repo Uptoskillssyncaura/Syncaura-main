@@ -25,8 +25,19 @@ export const sendMessage = async (req, res ,next) => {
     }
 
     const result = await pool.query(
-      "INSERT INTO messages (channel_id, sender_id, text) VALUES ($1, $2, $3) RETURNING *",
+      `SELECT m.*, u.name as sender_name
+       FROM (
+         INSERT INTO messages (channel_id, sender_id, text, message_type)
+         VALUES ($1, $2, $3, 'text')
+         RETURNING *
+       ) m
+       JOIN users u ON m.sender_id = u.id`,
       [channelId, userId, text]
+    );
+
+    await pool.query(
+      "UPDATE channels SET updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+      [channelId]
     );
 
     res.status(201).json(result.rows[0]);
@@ -87,8 +98,19 @@ export const sendMediaMessage = async (req, res ,next) => {
     }
 
     const result = await pool.query(
-      "INSERT INTO messages (channel_id, sender_id, message_type, file_url) VALUES ($1, $2, $3, $4) RETURNING *",
-      [channelId, senderId, "file", `/uploads/chat/${req.file.filename}`]
+      `SELECT m.*, u.name as sender_name
+       FROM (
+         INSERT INTO messages (channel_id, sender_id, message_type, file_url)
+         VALUES ($1, $2, 'file', $3)
+         RETURNING *
+       ) m
+       JOIN users u ON m.sender_id = u.id`,
+      [channelId, senderId, `/uploads/chat/${req.file.filename}`]
+    );
+
+    await pool.query(
+      "UPDATE channels SET updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+      [channelId]
     );
 
     res.status(201).json(result.rows[0]);

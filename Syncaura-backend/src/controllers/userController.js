@@ -43,7 +43,7 @@ export const getUser = async (req, res, next) => {
 export const getAllUsers = async (req, res, next) => {
   try {
     const { excludeSelf } = req.query;
-    let query = `SELECT id, name, email, role FROM users WHERE is_active = true`;
+    let query = `SELECT id, name, email, role, profile_pic FROM users WHERE is_active = true`;
     const params = [];
 
     if (excludeSelf === 'true' && req.user?.id) {

@@ -45,8 +45,14 @@ const socketHandler = (io) => {
     socket.on("message:text", async ({ channelId, senderId, text }) => {
       try {
         const result = await pool.query(
-          "INSERT INTO messages (channel_id, sender_id, text, message_type) VALUES ($1, $2, $3, $4) RETURNING *",
-          [channelId, senderId, text, "text"]
+          `SELECT m.*, u.name as sender_name
+           FROM (
+             INSERT INTO messages (channel_id, sender_id, text, message_type)
+             VALUES ($1, $2, $3, 'text')
+             RETURNING *
+           ) m
+           JOIN users u ON m.sender_id = u.id`,
+          [channelId, senderId, text]
         );
         const message = result.rows[0];
         
@@ -66,8 +72,14 @@ const socketHandler = (io) => {
     socket.on("message:file", async ({ channelId, senderId, fileUrl }) => {
       try {
         const result = await pool.query(
-          "INSERT INTO messages (channel_id, sender_id, file_url, message_type) VALUES ($1, $2, $3, $4) RETURNING *",
-          [channelId, senderId, fileUrl, "file"]
+          `SELECT m.*, u.name as sender_name
+           FROM (
+             INSERT INTO messages (channel_id, sender_id, file_url, message_type)
+             VALUES ($1, $2, $3, 'file')
+             RETURNING *
+           ) m
+           JOIN users u ON m.sender_id = u.id`,
+          [channelId, senderId, fileUrl]
         );
         const message = result.rows[0];
 

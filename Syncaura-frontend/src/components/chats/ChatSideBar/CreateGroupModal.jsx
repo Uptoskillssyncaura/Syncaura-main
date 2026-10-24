@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 import { createGroupChat } from "../../../redux/features/chatThunks";
 import Avatar from "../Avatar";
 
-export default function CreateGroupModal({ onClose, usersList }) {
+export default function CreateGroupModal({ onClose, usersList = [] }) {
   const dispatch = useDispatch();
   const [groupName, setGroupName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -19,7 +20,7 @@ export default function CreateGroupModal({ onClose, usersList }) {
     const finalGroupName = groupName.trim() || "New Group";
     
     if (selectedUsers.length === 0) {
-      alert("Please select at least one user to add to the group");
+      toast.warn("Please select at least one user to add to the group");
       return;
     }
 
@@ -28,12 +29,13 @@ export default function CreateGroupModal({ onClose, usersList }) {
       .unwrap()
       .then(() => {
         setIsLoading(false);
+        toast.success("Group created successfully");
         onClose();
       })
       .catch((err) => {
         setIsLoading(false);
         console.error("Failed to create group:", err);
-        alert("Failed to create group chat.");
+        toast.error(typeof err === "string" ? err : "Failed to create group chat");
       });
   };
 

@@ -8,6 +8,7 @@ import {
   VolumeX,
   Users,
 } from "lucide-react";
+import { toast } from "react-toastify";
 import Avatar from "../Avatar";
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
@@ -39,7 +40,7 @@ export default function Sidebar({
     if (showNewChatModal || showCreateGroupModal) {
       import("../../../config/axios").then(({ default: api }) => {
         api
-          .get("/users/all")
+          .get("/users/all?excludeSelf=true")
           .then((res) => setUsersList(res.data))
           .catch(console.error);
       });
@@ -51,11 +52,12 @@ export default function Sidebar({
       .unwrap()
       .then(() => {
         setShowNewChatModal(false);
+        toast.success("Chat opened");
       })
       .catch((err) => {
         console.error("Failed to create chat:", err);
-        alert(
-          "Failed to start chat. Your session may have expired. Please refresh the page and try logging in again.",
+        toast.error(
+          typeof err === "string" ? err : "Failed to start chat. Please try again."
         );
       });
   };
@@ -124,7 +126,7 @@ export default function Sidebar({
     }
 
     const searchData = itemsToFilter.filter((item) =>
-      item.name.toLowerCase().includes(debouncedValue.toLowerCase()),
+      (item.name || "").toLowerCase().includes(debouncedValue.toLowerCase()),
     );
 
     setFilteredItems(searchData);
