@@ -1,0 +1,25 @@
+# Flowbit - robots.txt
+# https://flowbit.pages.dev
+
+User-agent: *
+Allow: /
+
+# Disallow private/authenticated app routes
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /settings
+Disallow: /profile
+Disallow: /projects
+Disallow: /tasks
+Disallow: /chat
+Disallow: /meetings
+Disallow: /documents
+Disallow: /notices
+Disallow: /complaints
+Disallow: /attendance
+Disallow: /coadmin
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://flowbit.pages.dev/sitemap.xml
+
