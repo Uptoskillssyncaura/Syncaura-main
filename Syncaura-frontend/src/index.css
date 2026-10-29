@@ -1,0 +1,295 @@
+@import "tailwindcss";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #ffffff;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  transition: font-size 0.2s ease;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  @font-face {
+    font-family: "Poppine-reg";
+    src: url("/fonts/Poppins-Light.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "Anta";
+    src: url("/fonts/Anta-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+}
+
+@layer utilities {
+  .text-stroke-white {
+    -webkit-text-stroke: 2px white; /* stroke width + color */
+    color: transparent; /* make fill transparent if you want only stroke */
+  }
+
+  .text-stroke-white-fill {
+    -webkit-text-stroke: 1px black; /* stroke around white text */
+    color: white;
+  }
+  .text-stroke-red {
+    -webkit-text-stroke: 1px #9b3e3e; /* text border */
+    color: #ffffff; /* text color */
+  }
+  .text-stroke-green {
+    -webkit-text-stroke: 1px #54784d; /* text border */
+    color: #ffffff; /* text color */
+  }
+}
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-poppins: 'Poppins', 'Plus Jakarta Sans', sans-serif;
+  --font-poppin-reg: 'Poppins', 'Plus Jakarta Sans', sans-serif;
+  --font-anta: "Anta", sans-serif;
+  /* Responsive breakpoints used across the app:
+     sm = 640px, md = 768px, lg = 1024px, xl = 1280px, 2xl = 1536px */
+  --breakpoint-xs: 370px;
+   --breakpoint-xsm: 470px;
+    --breakpoint-xssm: 500px;
+  --breakpoint-sm: 640px;
+--breakpoint-md: 768px;
+--breakpoint-lg: 1024px;
+--breakpoint-xl: 1280px;
+--breakpoint-2xl: 1536px;
+--breakpoint-page-2xl: 1650px;
+
+
+}
+
+.h1-poppin {
+  @apply text-xl;
+  font-family: var(--font-poppin-reg);
+}
+
+.h1-anta {
+  font-family: var(--font-anta);
+}
+
+.header-layout {
+  @apply grid grid-cols-16 gap-4 justify-center;
+}
+.shadow-custom {
+  @apply bg-white/25 dark:bg-white/5  rounded-full   p-3 flex items-center justify-center;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(400px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.45s ease-out both;
+}
+
+/* Backdrop fade */
+.modal-backdrop {
+  animation: modalBackdropFade 0.25s ease-out forwards;
+}
+
+@keyframes modalBackdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal zoom animation */
+.modal-animate {
+  animation: modalZoom 0.25s ease-out forwards;
+}
+
+@keyframes modalZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+.dark .date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 12s ease-in-out infinite;
+}
+
+/* Container scrollable but scrollbar hidden */
+.sidebar-chat-list {
+  overflow-y: scroll;       /* enable vertical scrolling */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+
+.sidebar-chat-list::-webkit-scrollbar {
+  display: none;            /* Chrome, Safari, Edge */
+}
+
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE & Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Custom Scrollbar for Chat */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+.dark .chat-scroll {
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
+.dark .chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+}
+
+:root {
+  --budget-chart-color: #1e88e5; /* Light mode color */
+}
+
+/* Aapka project data-theme=dark use karta hai */
+[data-theme="dark"] {
+  --budget-chart-color: #00f2ff !important; /* Dark mode neon color */
+}
+
+/* index.css */
+.dark .resource-bar-engineering {
+  background-color: #00d4ff !important;
+}
+.dark .resource-bar-design {
+  background-color: #bc13fe !important;
+}
+/* ... baaki categories ke liye bhi */
+
+@layer components {
+  .btn-hover {
+    @apply relative overflow-hidden cursor-pointer;
+    will-change: transform, filter;
+
+    transition:
+      transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 250ms ease,
+      box-shadow 250ms ease;
+  }
+
+  .btn-hover:hover {
+    transform: translateY(-3px) scale(1.03);
+    filter: brightness(0.92);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  .btn-hover:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  .btn-hover:disabled {
+    transform: none;
+    filter: none;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .btn-hover:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+/* ── Feature Showcase Image Frame — Theme Adaptive ─────────── */
+
+/* Light mode: clean white frame with a subtle colored shadow */
+.feature-img-frame {
+  background: #ffffff;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  box-shadow:
+    0 32px 90px rgba(59, 130, 246, 0.12),
+    0 0 0 1px rgba(99, 102, 241, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Dark mode: rich glowing border */
+[data-theme="dark"] .feature-img-frame {
+  background: #0d1117;
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  box-shadow:
+    0 32px 90px rgba(59, 130, 246, 0.28),
+    0 0 0 1px rgba(99, 102, 241, 0.28),
+    0 0 60px rgba(139, 92, 246, 0.12);
+}
+
+/* Light glow: softer, blueish */
+.light-glow {
+  opacity: 0.12;
+}
+
+/* Dark glow: richer */
+[data-theme="dark"] .dark-glow {
+  opacity: 0.35;
+}
