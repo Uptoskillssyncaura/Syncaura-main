@@ -1,0 +1,28 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=WebStorm
+
+###
+POST http://localhost:5000/api/messages
+Content-Type: application/json
+
+{
+  "channelId": "123",
+  "text": "Hello"
+}
+
+### Create Task
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+
+{
+"title": "Test Task 1",
+"description": "Testing task creation"
+}
+
+
+### Get All Tasks
+GET http://localhost:5000/api/tasks
+
+### Health Check
+GET http://localhost:5000/health

@@ -1,0 +1,39 @@
+{
+  "name": "syncaura-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "migrate": "node run-init.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@slack/bolt": "^4.6.0",
+    "axios": "^1.13.5",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "exceljs": "^3.4.0",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "googleapis": "^171.4.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^9.0.1",
+    "pdfkit": "^0.18.0",
+    "pg": "^8.21.0",
+    "redis": "^6.1.0",
+    "socket.io": "^4.8.3",
+    "uuid": "^14.0.0"
+  }
+}
