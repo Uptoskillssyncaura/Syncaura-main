@@ -1,0 +1,8 @@
+# Handle trailing slash redirects to exact files
+/sitemap.xml/             /sitemap.xml              301
+/robots.txt/              /robots.txt               301
+/privacy-policy.html/     /privacy-policy.html      301
+/terms-of-service.html/   /terms-of-service.html    301
+
+# SPA fallback — all other routes serve index.html
+/*    /index.html   200

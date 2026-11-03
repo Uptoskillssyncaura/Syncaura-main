@@ -1,0 +1,26 @@
+# Sitemap — correct XML content type for Google crawler
+/sitemap.xml
+  Content-Type: application/xml; charset=utf-8
+  X-Robots-Tag: noindex
+
+# Robots
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+
+# Google verification files
+/google*.html
+  Content-Type: text/html; charset=utf-8
+  X-Robots-Tag: noindex
+
+# HTML pages — security headers
+/*.html
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# All pages — security + cache headers
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+
