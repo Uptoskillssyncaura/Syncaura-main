@@ -62,7 +62,7 @@ export default function SignUpPage() {
   const { t } = useTranslation();
 
   const handleGoogleLogin = () => {
-    const apiBase = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" ? "http://localhost:5000" : "https://syncaura-main-1.onrender.com");
+    const apiBase = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" ? "http://localhost:5000" : "https://syncaura-main.onrender.com");
     window.location.href = `${apiBase}/api/auth/google?origin=${encodeURIComponent(window.location.origin)}`;
   };
 
